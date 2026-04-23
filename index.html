@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星辉实习 - AI智能岗位匹配 (PC版)</title>
+    <title>星辉实习 - AI智能岗位匹配</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -344,6 +344,97 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
+        
+        /* ========== 移动端响应式适配 ========== */
+        @media (max-width: 768px) {
+            /* 顶部导航 */
+            .header {
+                flex-direction: column;
+                padding: 15px 20px;
+                gap: 10px;
+            }
+            .header-left h1 { font-size: 22px; }
+            .header-left p { font-size: 12px; }
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+            
+            /* 主容器：改为单栏 */
+            .main-container {
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            /* 侧边栏：宽度100% */
+            .sidebar {
+                width: 100%;
+            }
+            .search-card {
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            /* 搜索框 */
+            .search-box {
+                padding: 10px 12px;
+            }
+            .search-box input { font-size: 14px; }
+            
+            /* 模式切换按钮 */
+            .mode-btn { padding: 8px; font-size: 12px; }
+            
+            /* 匹配表单 */
+            .form-input { padding: 8px 10px; font-size: 12px; }
+            .match-btn { padding: 10px; font-size: 14px; }
+            
+            /* 分类标签 */
+            .category-tabs { gap: 6px; }
+            .category-tab { padding: 6px 12px; font-size: 12px; }
+            
+            /* 结果头部 */
+            .result-header {
+                padding: 12px 15px;
+                margin-bottom: 10px;
+            }
+            .result-title { font-size: 14px; }
+            .result-header { font-size: 13px; }
+            
+            /* 岗位网格：改为单列 */
+            .job-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            /* 岗位卡片 */
+            .job-card { padding: 15px; }
+            .job-title { font-size: 15px; }
+            .job-company { font-size: 13px; margin-bottom: 8px; }
+            .job-tag { font-size: 11px; padding: 3px 8px; }
+            
+            /* 弹窗 */
+            .modal-content {
+                margin: 10px;
+                padding: 20px 15px;
+                max-height: 90vh;
+            }
+            .modal-title { font-size: 18px; }
+            .modal-section-title { font-size: 14px; }
+            .modal-section-content { font-size: 13px; }
+            
+            /* 海报按钮 */
+            .poster-btn { padding: 12px; font-size: 14px; }
+        }
+        
+        /* 超小屏幕（iPhone 5/SE等） */
+        @media (max-width: 375px) {
+            .header-left h1 { font-size: 18px; }
+            .header-right { flex-wrap: wrap; justify-content: center; }
+            .stat-item { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
@@ -351,7 +442,7 @@
     <div class="header">
         <div class="header-left">
             <h1>🌟 星辉实习</h1>
-            <p>AI智能岗位匹配平台 (PC版)</p>
+            <p>AI智能岗位匹配平台</p>
         </div>
         <div class="header-right">
             <div class="stat-item" id="statTotal">📊 加载中...</div>
@@ -870,7 +961,7 @@
             const ctx = canvas.getContext('2d');
             
             const width = 750;
-            const height = 1000;
+            const height = 2400;
             canvas.width = width;
             canvas.height = height;
             
@@ -957,10 +1048,35 @@
             ctx.fill();
         }
         
+        // 多行文本绘制函数
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            if (!text) return y;
+            const chars = text.split('');
+            let line = '';
+            let currentY = y;
+            
+            for (let i = 0; i < chars.length; i++) {
+                const testLine = line + chars[i];
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                
+                if (testWidth > maxWidth && i > 0) {
+                    ctx.fillText(line, x, currentY);
+                    line = chars[i];
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, currentY);
+            return currentY + lineHeight;
+        }
+        
         // 绘制海报内容
         function drawPosterContent(ctx, width, height, job, style) {
             const centerX = width / 2;
             
+            // 标题区
             ctx.fillStyle = style.textColor;
             ctx.font = 'bold 36px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'center';
@@ -976,54 +1092,146 @@
             ctx.font = 'bold 48px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.fillText(job.position || '未知岗位', centerX, 220);
             
-            ctx.font = '28px PingFang SC, Microsoft YaHei, sans-serif';
+            // 信息区
+            ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'left';
             
-            const infoY = 320;
-            const lineHeight = 60;
-            let currentY = infoY;
+            let currentY = 320;
+            const lineHeight = 50;
+            const maxWidth = width - 160; // 左右各留80px边距
             
+            // 行业
             if (job.industry) {
                 ctx.fillStyle = style.accentColor;
-                ctx.fillText('行业：' + job.industry, 80, currentY);
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('行业', 80, currentY);
                 ctx.fillStyle = style.textColor;
-                currentY += lineHeight;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.industry, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
             }
             
+            // 类别
             if (job.category) {
-                ctx.fillText('类型：' + job.category, 80, currentY);
-                currentY += lineHeight;
-            }
-            
-            if (job.location) {
-                ctx.fillText('地点：' + job.location, 80, currentY);
-                currentY += lineHeight;
-            }
-            
-            if (job.duration) {
-                ctx.fillText('时间：' + job.duration, 80, currentY);
-                currentY += lineHeight;
-            }
-            
-            const bottomY = 650;
-            ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
-            
-            if (job.duty) {
                 ctx.fillStyle = style.accentColor;
-                ctx.fillText('岗位职责：', 80, bottomY);
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('类别', 80, currentY);
                 ctx.fillStyle = style.textColor;
-                const dutyText = job.duty.substring(0, 50) + (job.duty.length > 50 ? '...' : '');
-                ctx.fillText(dutyText, 80, bottomY + 35);
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.category, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
             }
             
+            // 项目类型
+            if (job.project_type) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('项目类型', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.project_type, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            // 地点
+            if (job.location) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('地点', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.location, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            // 实习时间
+            if (job.duration) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('实习时间', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.duration, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            // 福利待遇
+            if (job.benefits) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('福利待遇', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.benefits, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            // 任职要求
             if (job.requirements) {
                 ctx.fillStyle = style.accentColor;
-                ctx.fillText('任职要求：', 80, bottomY + 100);
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('任职要求', 80, currentY);
                 ctx.fillStyle = style.textColor;
-                const reqText = job.requirements.substring(0, 50) + (job.requirements.length > 50 ? '...' : '');
-                ctx.fillText(reqText, 80, bottomY + 135);
+                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.requirements, 160, currentY, maxWidth, lineHeight - 10);
+                currentY += 15;
             }
             
+            // 岗位职责
+            if (job.duty) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('岗位职责', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.duty, 160, currentY, maxWidth, lineHeight - 10);
+                currentY += 15;
+            }
+            
+            // 职位描述
+            if (job.jd) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('职位描述', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '23px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.jd, 160, currentY, maxWidth, lineHeight - 12);
+                currentY += 15;
+            }
+            
+            // 价格信息
+            if (job.price_1_2) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('1-2个月价格', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.price_1_2 + '元', 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            if (job.price_3) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('第3个月价格', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.price_3, 160, currentY, maxWidth, lineHeight);
+                currentY += 10;
+            }
+            
+            // 备注
+            if (job.remarks) {
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText('备注', 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + job.remarks, 160, currentY, maxWidth, lineHeight - 10);
+                currentY += 15;
+            }
+            
+            // 底部标识
             ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
