@@ -1,0 +1,14 @@
+# 忽略备份文件和历史版本
+index_backup.html
+index_mobile*.html
+index_pc.html
+
+# 忽略Python脚本（不需要部署）
+*.py
+*.js
+
+# 忽略工作文件
+.workbuddy/
+
+# 忽略Mac系统文件
+.DS_Store
