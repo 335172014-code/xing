@@ -1176,15 +1176,6 @@
             // 职位描述（多行内容）
             drawContentSection('职位描述', job.jd, 22);
             
-            // 价格信息
-            if (job.price_1_2) {
-                drawInfoRow('1-2个月价格', job.price_1_2 + '元');
-            }
-            
-            if (job.price_3) {
-                drawInfoRow('第3个月价格', job.price_3);
-            }
-            
             // 备注
             if (job.remarks) {
                 drawContentSection('备注', job.remarks, 24);
