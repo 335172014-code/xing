@@ -1058,28 +1058,41 @@
             ctx.fill();
         }
         
-        // 多行文本绘制函数
+        // 多行文本绘制函数（修复版）
         function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
             if (!text) return y;
-            const chars = text.split('');
-            let line = '';
+            // 处理原始文本中的换行符
+            const lines = text.split('\n');
             let currentY = y;
             
-            for (let i = 0; i < chars.length; i++) {
-                const testLine = line + chars[i];
-                const metrics = ctx.measureText(testLine);
-                const testWidth = metrics.width;
-                
-                if (testWidth > maxWidth && i > 0) {
-                    ctx.fillText(line, x, currentY);
-                    line = chars[i];
-                    currentY += lineHeight;
-                } else {
-                    line = testLine;
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                const lineText = lines[lineIndex];
+                if (!lineText.trim()) {
+                    currentY += lineHeight * 0.5; // 空行占一半行高
+                    continue;
                 }
+                
+                const chars = lineText.split('');
+                let line = '';
+                
+                for (let i = 0; i < chars.length; i++) {
+                    const testLine = line + chars[i];
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    
+                    if (testWidth > maxWidth && i > 0) {
+                        ctx.fillText(line, x, currentY);
+                        line = chars[i];
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, currentY);
+                currentY += lineHeight;
             }
-            ctx.fillText(line, x, currentY);
-            return currentY + lineHeight;
+            
+            return currentY; // 返回最终Y坐标
         }
         
         // 绘制海报内容
@@ -1107,138 +1120,74 @@
             ctx.textAlign = 'left';
             
             let currentY = 320;
-            const lineHeight = 50;
-            const maxWidth = width - 160; // 左右各留80px边距
+            const lineHeight = 55; // 增加行高
+            const sectionGap = 25; // 字段之间的间距
+            const maxWidth = width - 180; // 左右各留90px边距
+            
+            // 绘制带标签的信息行
+            function drawInfoRow(label, value) {
+                if (!value) return;
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 28px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText(label, 80, currentY);
+                ctx.fillStyle = style.textColor;
+                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, '：' + value, 180, currentY, maxWidth, lineHeight);
+                currentY += sectionGap;
+            }
+            
+            // 绘制多行内容区（带标题）
+            function drawContentSection(label, value, fontSize) {
+                if (!value) return;
+                ctx.fillStyle = style.accentColor;
+                ctx.font = 'bold 28px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.fillText(label, 80, currentY);
+                currentY += lineHeight;
+                ctx.fillStyle = style.textColor;
+                ctx.font = fontSize + 'px PingFang SC, Microsoft YaHei, sans-serif';
+                currentY = wrapText(ctx, value, 100, currentY, maxWidth, lineHeight);
+                currentY += sectionGap;
+            }
             
             // 行业
-            if (job.industry) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('行业', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.industry, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('行业', job.industry);
             
             // 类别
-            if (job.category) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('类别', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.category, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('类别', job.category);
             
             // 项目类型
-            if (job.project_type) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('项目类型', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.project_type, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('项目类型', job.project_type);
             
             // 地点
-            if (job.location) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('地点', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.location, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('地点', job.location);
             
             // 实习时间
-            if (job.duration) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('实习时间', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.duration, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('实习时间', job.duration);
             
             // 福利待遇
-            if (job.benefits) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('福利待遇', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.benefits, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
-            }
+            drawInfoRow('福利待遇', job.benefits);
             
-            // 任职要求
-            if (job.requirements) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('任职要求', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.requirements, 160, currentY, maxWidth, lineHeight - 10);
-                currentY += 15;
-            }
+            // 任职要求（多行内容）
+            drawContentSection('任职要求', job.requirements, 24);
             
-            // 岗位职责
-            if (job.duty) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('岗位职责', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.duty, 160, currentY, maxWidth, lineHeight - 10);
-                currentY += 15;
-            }
+            // 岗位职责（多行内容）
+            drawContentSection('岗位职责', job.duty, 24);
             
-            // 职位描述
-            if (job.jd) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('职位描述', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '23px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.jd, 160, currentY, maxWidth, lineHeight - 12);
-                currentY += 15;
-            }
+            // 职位描述（多行内容）
+            drawContentSection('职位描述', job.jd, 22);
             
             // 价格信息
             if (job.price_1_2) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('1-2个月价格', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.price_1_2 + '元', 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
+                drawInfoRow('1-2个月价格', job.price_1_2 + '元');
             }
             
             if (job.price_3) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('第3个月价格', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '26px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.price_3, 160, currentY, maxWidth, lineHeight);
-                currentY += 10;
+                drawInfoRow('第3个月价格', job.price_3);
             }
             
             // 备注
             if (job.remarks) {
-                ctx.fillStyle = style.accentColor;
-                ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.fillText('备注', 80, currentY);
-                ctx.fillStyle = style.textColor;
-                ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
-                currentY = wrapText(ctx, '：' + job.remarks, 160, currentY, maxWidth, lineHeight - 10);
-                currentY += 15;
+                drawContentSection('备注', job.remarks, 24);
             }
             
             // 底部标识
