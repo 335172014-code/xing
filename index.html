@@ -948,12 +948,18 @@
         });
         
         // ========== 海报生成功能 ==========
+        let _isGeneratingPoster = false;
         
         // 生成岗位海报
         function generatePoster() {
+            // 防止重复点击
+            if (_isGeneratingPoster) return;
+            _isGeneratingPoster = true;
+            
             const job = currentDetailJob;
             if (!job) {
                 alert('无法获取岗位数据');
+                _isGeneratingPoster = false;
                 return;
             }
             
@@ -961,9 +967,12 @@
             const ctx = canvas.getContext('2d');
             
             const width = 750;
-            const height = 2400;
+            const height = 2200;
             canvas.width = width;
             canvas.height = height;
+            
+            // 设置默认字体（解决乱码问题）
+            ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
             
             const style = getPosterStyle(job);
             
@@ -972,6 +981,7 @@
             drawPosterContent(ctx, width, height, job, style);
             
             showPosterPreview(canvas);
+            _isGeneratingPoster = false;
         }
         
         // 根据岗位属性获取设计风格
