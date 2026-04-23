@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星辉实习 - AI智能岗位匹配</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #f5f5f5; min-height: 100vh; padding-bottom: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px 16px 60px; color: white; }
+        .header h1 { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .stats { display: flex; gap: 10px; margin-top: 16px; }
+        .stat-item { background: rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 8px; font-size: 13px; }
+        .search-area { margin-top: -40px; padding: 0 16px; position: relative; z-index: 10; }
+        .search-box { background: white; border-radius: 12px 12px 0 0; padding: 14px 16px; display: flex; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .search-icon { font-size: 18px; margin-right: 10px; }
+        .search-box input { flex: 1; border: none; outline: none; font-size: 15px; color: #333; }
+        .mode-switch { background: white; padding: 0 16px 12px; display: flex; gap: 8px; border-bottom: 1px solid #f0f0f0; }
+        .mode-btn { flex: 1; padding: 10px 12px; border: 2px solid #e0e0e0; background: white; color: #666; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.3s; }
+        .mode-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
+        .match-form { display: none; background: white; padding: 16px; border-bottom: 1px solid #f0f0f0; }
+        .match-form.show { display: block; }
+        .form-group { margin-bottom: 12px; }
+        .form-label { display: block; font-size: 14px; color: #333; margin-bottom: 6px; font-weight: 500; }
+        .form-input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; }
+        .form-input:focus { border-color: #667eea; }
+        .match-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .category-tabs { display: flex; gap: 8px; padding: 12px 16px; background: white; overflow-x: auto; border-bottom: 1px solid #f0f0f0; }
+        .category-tab { padding: 8px 16px; background: #f5f5f5; border: none; border-radius: 20px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; transition: all 0.3s; }
+        .category-tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .job-list { padding: 16px; }
+        .result-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; }
+        .job-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; }
+        .job-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .job-title { font-size: 16px; font-weight: bold; color: #333; flex: 1; margin-right: 8px; }
+        .job-category-badge { background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; }
+        .job-company { font-size: 14px; color: #667eea; margin-bottom: 10px; font-weight: 500; }
+        .job-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+        .job-tag { background: #f5f5f5; padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #666; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .empty { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; }
+        .modal-overlay.show { display: block; }
+        .modal-content { background: white; margin: 20px; border-radius: 16px; padding: 24px; max-width: 600px; margin: 40px auto; max-height: 80vh; overflow-y: auto; }
+        .modal-close { float: right; font-size: 28px; cursor: pointer; color: #999; line-height: 1; }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-right: 40px; color: #333; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title { font-size: 14px; font-weight: bold; color: #667eea; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px solid #f0f0f0; }
+        .modal-section-content { font-size: 14px; color: #666; line-height: 1.8; white-space: pre-wrap; }
+        
+        /* 海报按钮样式 */
+        .poster-btn {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .poster-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .poster-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 海报预览弹窗 */
+        .poster-preview-content {
+            max-width: 600px;
+            text-align: center;
+        }
+        .poster-preview-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌟 星辉实习</h1>
+        <p>AI智能岗位匹配平台</p>
+        <div class="stats">
+            <div class="stat-item" id="statTotal">📊 加载中...</div>
+            <div class="stat-item" id="statCompany">🏢 --</div>
+            <div class="stat-item" id="statIndustry">🎯 --</div>
+        </div>
+    </div>
+    
+    <div class="search-area">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="输入需求，如：深圳 计算机 或 深圳计算机实习">
+        </div>
+        
+        <div class="mode-switch">
+            <button class="mode-btn active" data-mode="search">🔍 AI搜索</button>
+            <button class="mode-btn" data-mode="match">🎯 精准匹配</button>
+        </div>
+        
+        <div class="match-form" id="matchForm">
+            <div class="form-group">
+                <label class="form-label">专业方向</label>
+                <input type="text" class="form-input" id="majorInput" placeholder="如：计算机科学、金融学">
+            </div>
+            <div class="form-group">
+                <label class="form-label">技能特长</label>
+                <input type="text" class="form-input" id="skillsInput" placeholder="如：Python、数据分析、Excel">
+            </div>
+            <div class="form-group">
+                <label class="form-label">期望行业</label>
+                <input type="text" class="form-input" id="industryInput" placeholder="如：互联网、金融、教育">
+            </div>
+            <div class="form-group">
+                <label class="form-label">期望城市（选填）</label>
+                <input type="text" class="form-input" id="cityInput" placeholder="如：北京、上海、深圳">
+            </div>
+            <button class="match-btn" onclick="startMatch()">开始匹配</button>
+        </div>
+    </div>
+    
+    <div class="category-tabs" id="categoryTabs">
+        <button class="category-tab active" data-category="all">全部</button>
+        <button class="category-tab" data-category="实地实习">实地实习</button>
+        <button class="category-tab" data-category="远程实习">远程实习</button>
+        <button class="category-tab" data-category="科研实习">科研实习</button>
+        <button class="category-tab" data-category="美国实习">美国实习</button>
+    </div>
+    
+    <div class="job-list">
+        <div class="result-title" id="resultTitle">推荐岗位</div>
+        <div id="jobList"></div>
+        <div class="loading" id="loading">加载中...</div>
+        <div class="empty" id="empty" style="display:none;">
+            <div class="empty-icon">😔</div>
+            <p>没有找到匹配的岗位</p>
+        </div>
+    </div>
+    
+    <!-- 海报预览弹窗 -->
+    <div class="modal-overlay" id="posterPreviewModal">
+        <div class="modal-content poster-preview-content">
+            <span class="modal-close" onclick="closePosterPreview()">&times;</span>
+            <div class="modal-title">岗位海报预览</div>
+            <div id="posterPreviewBody" style="text-align: center; padding: 20px;"></div>
+            <div style="text-align: center; padding: 20px;">
+                <button class="poster-btn" onclick="downloadPoster()">📥 下载海报</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="jobModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-title" id="modalTitle"></div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script>
+        let allJobs = [];
+        let filteredJobs = [];
+        let currentCategory = 'all';
+        let currentDetailJob = null; // 当前查看的岗位详情
+        let currentMode = 'search';
+        
+        // 智能词典
+        const smartDict = {
+            '计算机': ['计算机', '软件', '编程', '开发', 'IT', '互联网', '前端', '后端', '算法'],
+            '金融': ['金融', '经济学', '经济', '银行', '证券', '投资', '理财'],
+            '会计': ['会计', '财务', '审计', '税务', 'ACCA', 'CPA'],
+            '管理': ['管理', '工商管理', '行政管理', '人力资源'],
+            '法律': ['法律', '法学', '律师', '法务', '合规'],
+            '医学': ['医学', '临床', '药学', '中医', '护理'],
+            '教育': ['教育', '师范', '教学', '培训', '教研'],
+            '设计': ['设计', '平面', 'UI', 'UX', '视觉', '艺术'],
+            '传媒': ['传媒', '新闻', '传播', '广告', '新媒体'],
+            '数学': ['数学', '统计', '数据分析', '量化', '精算']
+        };
+        
+        // AI智能搜索 - 支持自然语言理解
+        function aiSmartSearch(query) {
+            query = query.toLowerCase();
+            let searchTerms = [];
+            let cityFilters = [];
+            let companyFilters = [];
+            
+            // 保存原始查询（用于同义词展开判断）
+            const originalQuery = query;
+            
+            // 1. 定义城市关键词（按长度降序排列，避免短名被长名包含）
+            const cityKeywords = ['北京', '上海', '广州', '深圳', '杭州', '成都', '南京', '武汉', 
+                                   '西安', '重庆', '天津', '苏州', '长沙', '郑州', '青岛', '东莞', 
+                                   '宁波', '厦门', '福州', '无锡', '合肥', '大连', '济南', '佛山', '香港', '澳门'];
+            
+            // 2. 定义组织/公司名称（按长度降序排列）
+            const orgKeywords = ['中国科学院', '中科院', '清华大学', '清华', '北京大学', '北大', 
+                                   '复旦大学', '复旦', '上海交通大学', '上交', '浙江大学', '浙大', 
+                                   '中国科学技术大学', '中科大', '南京大学', '南大', '武汉大学', '华中科技大学', '华科',
+                                   '中山大学', '中大', '哈尔滨工业大学', '哈工大', '西安交通大学', '西交'];
+            
+            // 3. 第一步：从查询中提取所有城市（无论有无空格）
+            let remainingQuery = query;
+            
+            for (const city of cityKeywords) {
+                if (remainingQuery.includes(city.toLowerCase())) {
+                    cityFilters.push(city);
+                    // 从剩余查询中移除这个城市名
+                    remainingQuery = remainingQuery.replace(city.toLowerCase(), ' ');
+                }
+            }
+            
+            // 4. 第二步：从剩余查询中提取所有组织/公司
+            for (const org of orgKeywords) {
+                if (remainingQuery.includes(org.toLowerCase())) {
+                    companyFilters.push(org);
+                    // 从剩余查询中移除这个组织名
+                    remainingQuery = remainingQuery.replace(org.toLowerCase(), ' ');
+                }
+            }
+            
+            // 5. 第三步：清理剩余查询，提取搜索词
+            remainingQuery = remainingQuery
+                .replace(/[的吗呢吧啊呀]/g, ' ')
+                .replace(/有|在|相关|岗位|职位|工作|实习|招聘|吗|呢|吧|啊/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            // 6. 将剩余查询作为搜索词
+            //    如果用户用了空格分隔，按空格分割；否则整体作为一个搜索词
+            if (remainingQuery.length > 0) {
+                searchTerms = remainingQuery.split(/\s+/).filter(t => t.length >= 1);
+            }
+            
+            // 7. 同义词展开（仅当用户明确说了"相关"或"类似"时才展开）
+            let expandedTerms = [];
+            for (const term of searchTerms) {
+                expandedTerms.push(term);
+                // 只有当用户明确需要时才展开
+                if (originalQuery.includes('相关') || originalQuery.includes('类似')) {
+                    for (const [major, synonyms] of Object.entries(smartDict)) {
+                        if (synonyms.some(s => term.includes(s.toLowerCase()))) {
+                            expandedTerms.push(...synonyms);
+                            break;
+                        }
+                    }
+                }
+            }
+            searchTerms = expandedTerms;
+            
+            // 去重
+            searchTerms = [...new Set(searchTerms)];
+            cityFilters = [...new Set(cityFilters)];
+            companyFilters = [...new Set(companyFilters)];
+            
+            return { searchTerms, cityFilters, companyFilters };
+        }
+        
+        // 模糊匹配
+        function fuzzyMatch(text, keywords) {
+            if (!text || !keywords || keywords.length === 0) return false;
+            text = text.toLowerCase();
+            for (const keyword of keywords) {
+                if (keyword && text.includes(keyword.toLowerCase())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // 加载数据
+        async function loadData() {
+            try {
+                const response = await fetch('jobs_data.json');
+                allJobs = await response.json();
+                
+                const companies = [...new Set(allJobs.map(j => j.company).filter(c => c && c !== '未知公司'))];
+                const industries = [...new Set(allJobs.map(j => j.industry).filter(i => i))];
+                
+                document.getElementById('statTotal').textContent = `📊 共${allJobs.length}个岗位`;
+                document.getElementById('statCompany').textContent = `🏢 ${companies.length}家公司`;
+                document.getElementById('statIndustry').textContent = `🎯 ${industries.length}个行业`;
+                
+                filterJobs();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+        
+        // 筛选岗位
+        function filterJobs() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            
+            if (!keyword) {
+                filteredJobs = allJobs.filter(job => {
+                    if (currentCategory !== 'all' && job.category !== currentCategory) return false;
+                    return true;
+                });
+                document.getElementById('resultTitle').textContent = `全部岗位 (${filteredJobs.length})`;
+            } else {
+                const { searchTerms, cityFilters, companyFilters } = aiSmartSearch(keyword);
+                
+                filteredJobs = allJobs.filter(job => {
+                    if (currentCategory !== 'all' && job.category !== currentCategory) return false;
+                    
+                    // 城市过滤（支持多个）
+                    if (cityFilters.length > 0 && job.location) {
+                        const matchCity = cityFilters.some(city => job.location.includes(city));
+                        if (!matchCity) return false;
+                    }
+                    
+                    // 公司过滤（支持多个）
+                    if (companyFilters.length > 0 && job.company) {
+                        const matchCompany = companyFilters.some(org => job.company.includes(org));
+                        if (!matchCompany) return false;
+                    }
+                    
+                    // 关键词搜索
+                    const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`;
+                    return fuzzyMatch(searchText, searchTerms);
+                });
+                
+                // 显示搜索词（调试信息）
+                let debugInfo = `搜索结果 (${filteredJobs.length})`;
+                if (searchTerms.length > 0) debugInfo += ` | 关键词: ${searchTerms.slice(0, 3).join(', ')}`;
+                if (cityFilters.length > 0) debugInfo += ` | 城市: ${cityFilters.join(', ')}`;
+                if (companyFilters.length > 0) debugInfo += ` | 公司: ${companyFilters.join(', ')}`;
+                document.getElementById('resultTitle').textContent = debugInfo;
+            }
+            
+            displayJobs();
+        }
+        
+        // 显示岗位列表
+        function displayJobs() {
+            const jobList = document.getElementById('jobList');
+            const loading = document.getElementById('loading');
+            const empty = document.getElementById('empty');
+            const resultTitle = document.getElementById('resultTitle');
+            
+            loading.style.display = 'none';
+            
+            if (filteredJobs.length === 0) {
+                empty.style.display = 'block';
+                jobList.innerHTML = '';
+                resultTitle.textContent = '搜索结果 (0)';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            resultTitle.textContent = `搜索结果 (${filteredJobs.length})`;
+            
+            jobList.innerHTML = '';
+            for (let i = 0; i < filteredJobs.length; i++) {
+                const job = filteredJobs[i];
+                const div = document.createElement('div');
+                div.className = 'job-card';
+                div.onclick = (function(idx) {
+                    return function() { showJobDetail(idx); };
+                })(i);
+                
+                div.innerHTML = `
+                    <div class="job-title-row">
+                        <div class="job-title">${job.position || '未知岗位'}</div>
+                        <div class="job-category-badge">${job.category || ''}</div>
+                    </div>
+                    <div class="job-company">🏢 ${job.company || '未知公司'}</div>
+                    <div class="job-tags">
+                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                        ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
+                    </div>
+                `;
+                
+                jobList.appendChild(div);
+            }
+        }
+        
+        // 显示岗位详情 - 显示所有字段（除价格）
+        function showJobDetail(index) {
+            const job = filteredJobs[index];
+            if (!job) {
+                alert('无法加载岗位详情，请重试。index=' + index + ', filteredJobs长度=' + filteredJobs.length);
+                return;
+            }
+            
+            // 调试信息
+            console.log('显示岗位详情:', job);
+            
+            // 设置标题
+            document.getElementById('modalTitle').textContent = job.position || '未知岗位';
+            
+            // 定义要显示的字段（排除价格相关字段和sheet_name）
+            const fieldConfig = [
+                { key: 'company', title: '🏢 公司名称' },
+                { key: 'category', title: '📋 项目类型' },
+                { key: 'industry', title: '🎯 所属行业' },
+                { key: 'position', title: '📌 岗位名称' },
+                { key: 'project_type', title: '📌 项目性质' },
+                { key: 'duration', title: '⏰ 项目时间' },
+                { key: 'location', title: '📍 工作地点' },
+                { key: 'requirements', title: '📝 入职要求' },
+                { key: 'duty', title: '💼 岗位职责' },
+                { key: 'benefits', title: '🎁 项目收获' },
+                { key: 'jd', title: '📄 职位详情（JD）' },
+                { key: 'sheet_name', title: '📊 数据来源' }
+            ];
+            
+            let bodyHTML = '';
+            let hasContent = false;
+            
+            fieldConfig.forEach(field => {
+                const value = job[field.key];
+                if (value && String(value).trim()) {
+                    hasContent = true;
+                    // 保留换行符，使内容更易读
+                    const formattedValue = String(value).replace(/\n/g, '<br>');
+                    bodyHTML += `<div class="modal-section">
+                        <div class="modal-section-title">${field.title}</div>
+                        <div class="modal-section-content">${formattedValue}</div>
+                    </div>`;
+                }
+            });
+            
+            if (!hasContent) {
+                bodyHTML = '<div class="modal-section-content">暂无详细信息<br>请检查数据文件</div>';
+            }
+            
+            // 添加生成海报按钮
+            bodyHTML += '<button class="poster-btn" onclick="generatePoster()">🎨 生成岗位海报</button>';
+            
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            currentDetailJob = job; // 存储当前岗位数据
+            document.getElementById('jobModal').classList.add('show');
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('jobModal').classList.remove('show');
+        }
+        
+        // ========== 海报生成功能 ==========
+        
+        // 生成岗位海报
+        function generatePoster() {
+            const job = currentDetailJob;
+            if (!job) {
+                alert('无法获取岗位数据');
+                return;
+            }
+            
+            // 创建Canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置Canvas尺寸（海报比例 3:4）
+            const width = 750;
+            const height = 1000;
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 根据岗位属性选择设计风格
+            const style = getPosterStyle(job);
+            
+            // 绘制背景
+            drawPosterBackground(ctx, width, height, style);
+            
+            // 绘制装饰元素
+            drawPosterDecoration(ctx, width, height, style);
+            
+            // 绘制内容
+            drawPosterContent(ctx, width, height, job, style);
+            
+            // 显示海报预览
+            showPosterPreview(canvas);
+        }
+        
+        // 根据岗位属性获取设计风格
+        function getPosterStyle(job) {
+            const company = (job.company || '').toLowerCase();
+            const industry = (job.industry || '').toLowerCase();
+            const category = (job.category || '').toLowerCase();
+            const position = (job.position || '').toLowerCase();
+            
+            // 关键词定义
+            const techKeywords = ['计算机', '互联网', '编程', '开发', 'it', '软件', '算法', '前端', '后端', '程序员', '码农', 'tech', 'technology', '互联网', '网络'];
+            const financeKeywords = ['金融', '经济', '银行', '证券', '投资', '理财', 'finance', 'banking', 'investment', '财政'];
+            const academicKeywords = ['中科院', '中国科学院', '大学', '科研', '研究所', '学院', '学术', 'academic', 'research', '研究院'];
+            
+            // 检查是否匹配某类
+            const allText = company + ' ' + industry + ' ' + category + ' ' + position;
+            
+            // 科技类
+            if (techKeywords.some(kw => allText.includes(kw))) {
+                return {
+                    name: '科技风',
+                    bgGradient: ['#667eea', '#764ba2'],
+                    primaryColor: '#667eea',
+                    accentColor: '#a8b4ff',
+                    textColor: '#ffffff'
+                };
+            }
+            
+            // 金融类
+            if (financeKeywords.some(kw => allText.includes(kw))) {
+                return {
+                    name: '金融风',
+                    bgGradient: ['#1a1a2e', '#16213e'],
+                    primaryColor: '#ffd700',
+                    accentColor: '#ffed4e',
+                    textColor: '#ffffff'
+                };
+            }
+            
+            // 学术类
+            if (academicKeywords.some(kw => allText.includes(kw))) {
+                return {
+                    name: '学术风',
+                    bgGradient: ['#0f4c3a', '#1a6d52'],
+                    primaryColor: '#4caf50',
+                    accentColor: '#a5d6a7',
+                    textColor: '#ffffff'
+                };
+            }
+            
+            // 默认风格
+            return {
+                name: '通用风',
+                bgGradient: ['#667eea', '#764ba2'],
+                primaryColor: '#667eea',
+                accentColor: '#a8b4ff',
+                textColor: '#ffffff'
+            };
+        }
+        
+        // 绘制海报背景
+        function drawPosterBackground(ctx, width, height, style) {
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, style.bgGradient[0]);
+            gradient.addColorStop(1, style.bgGradient[1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        // 绘制装饰元素
+        function drawPosterDecoration(ctx, width, height, style) {
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            
+            // 左上角大圆
+            ctx.beginPath();
+            ctx.arc(-100, -100, 300, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 右下角大圆
+            ctx.beginPath();
+            ctx.arc(width + 100, height + 100, 300, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 绘制海报内容
+        function drawPosterContent(ctx, width, height, job, style) {
+            const centerX = width / 2;
+            
+            // 1. 顶部：公司名
+            ctx.fillStyle = style.textColor;
+            ctx.font = 'bold 36px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(job.company || '未知公司', centerX, 120);
+            
+            // 装饰线
+            ctx.strokeStyle = style.accentColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 100, 140);
+            ctx.lineTo(centerX + 100, 140);
+            ctx.stroke();
+            
+            // 2. 岗位名
+            ctx.font = 'bold 48px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.fillText(job.position || '未知岗位', centerX, 220);
+            
+            // 3. 中间信息区
+            ctx.font = '28px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'left';
+            
+            const infoY = 320;
+            const lineHeight = 60;
+            let currentY = infoY;
+            
+            if (job.industry) {
+                ctx.fillStyle = style.accentColor;
+                ctx.fillText('行业：' + job.industry, 80, currentY);
+                ctx.fillStyle = style.textColor;
+                currentY += lineHeight;
+            }
+            
+            if (job.category) {
+                ctx.fillText('类型：' + job.category, 80, currentY);
+                currentY += lineHeight;
+            }
+            
+            if (job.location) {
+                ctx.fillText('地点：' + job.location, 80, currentY);
+                currentY += lineHeight;
+            }
+            
+            if (job.duration) {
+                ctx.fillText('时间：' + job.duration, 80, currentY);
+                currentY += lineHeight;
+            }
+            
+            // 4. 底部：职责/要求（精简）
+            const bottomY = 650;
+            ctx.font = '24px PingFang SC, Microsoft YaHei, sans-serif';
+            
+            if (job.duty) {
+                ctx.fillStyle = style.accentColor;
+                ctx.fillText('岗位职责：', 80, bottomY);
+                ctx.fillStyle = style.textColor;
+                const dutyText = job.duty.substring(0, 50) + (job.duty.length > 50 ? '...' : '');
+                ctx.fillText(dutyText, 80, bottomY + 35);
+            }
+            
+            if (job.requirements) {
+                ctx.fillStyle = style.accentColor;
+                ctx.fillText('任职要求：', 80, bottomY + 100);
+                ctx.fillStyle = style.textColor;
+                const reqText = job.requirements.substring(0, 50) + (job.requirements.length > 50 ? '...' : '');
+                ctx.fillText(reqText, 80, bottomY + 135);
+            }
+            
+            // 5. 底部水印
+            ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText('星辉实习 · 智能岗位匹配', centerX, height - 50);
+        }
+        
+        // 显示海报预览
+        function showPosterPreview(canvas) {
+            const previewModal = document.getElementById('posterPreviewModal');
+            const posterImg = canvas.toDataURL('image/png');
+            document.getElementById('posterPreviewBody').innerHTML = 
+                '<img src="' + posterImg + '" style="max-width:100%;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">';
+            window._posterCanvas = canvas;
+            previewModal.classList.add('show');
+        }
+        
+        // 关闭海报预览
+        function closePosterPreview() {
+            document.getElementById('posterPreviewModal').classList.remove('show');
+        }
+        
+        // 下载海报
+        function downloadPoster() {
+            const canvas = window._posterCanvas;
+            if (!canvas) {
+                alert('海报数据丢失，请重新生成');
+                return;
+            }
+            const job = currentDetailJob;
+            const fileName = (job ? job.position || '岗位海报' : '岗位海报') + '.png';
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 智能匹配
+        function startMatch() {
+            const major = document.getElementById('majorInput').value.trim();
+            const skills = document.getElementById('skillsInput').value.trim();
+            const industry = document.getElementById('industryInput').value.trim();
+            const city = document.getElementById('cityInput').value.trim();
+            
+            if (!major && !skills && !industry) {
+                alert('请至少填写一项信息');
+                return;
+            }
+            
+            filteredJobs = allJobs.map(job => {
+                let score = 0;
+                const searchText = `${job.position} ${job.industry} ${job.duty} ${job.requirements} ${job.company}`;
+                
+                // 城市匹配
+                if (city && job.location && job.location.includes(city)) {
+                    score += 1000;
+                } else if (city && job.category === '实地实习') {
+                    score -= 500;
+                }
+                
+                // 专业匹配
+                if (major) {
+                    let majorTerms = [major];
+                    for (const [key, synonyms] of Object.entries(smartDict)) {
+                        if (synonyms.some(s => major.toLowerCase().includes(s.toLowerCase()))) {
+                            majorTerms = synonyms;
+                            break;
+                        }
+                    }
+                    if (fuzzyMatch(searchText, majorTerms)) score += 200;
+                }
+                
+                // 技能匹配
+                if (skills) {
+                    const skillList = skills.split(/[\s,，、]+/);
+                    for (const skill of skillList) {
+                        if (skill.trim() && fuzzyMatch(searchText, [skill.trim()])) {
+                            score += 100;
+                        }
+                    }
+                }
+                
+                // 行业匹配
+                if (industry) {
+                    let industryTerms = [industry];
+                    for (const [key, synonyms] of Object.entries(smartDict)) {
+                        if (synonyms.some(s => industry.toLowerCase().includes(s.toLowerCase()))) {
+                            industryTerms = synonyms;
+                            break;
+                        }
+                    }
+                    if (fuzzyMatch(searchText, industryTerms)) score += 200;
+                }
+                
+                return { ...job, matchScore: score };
+            }).filter(job => job.matchScore > 0).sort((a, b) => b.matchScore - a.matchScore);
+            
+            displayMatchResults();
+        }
+        
+        // 显示匹配结果
+        function displayMatchResults() {
+            const jobList = document.getElementById('jobList');
+            const resultTitle = document.getElementById('resultTitle');
+            
+            resultTitle.textContent = `匹配结果 (${filteredJobs.length})`;
+            jobList.innerHTML = '';
+            
+            for (let i = 0; i < filteredJobs.length; i++) {
+                const job = filteredJobs[i];
+                const div = document.createElement('div');
+                div.className = 'job-card';
+                div.onclick = (function(idx) {
+                    return function() { showJobDetail(idx); };
+                })(i);
+                
+                div.innerHTML = `
+                    <div class="job-title-row">
+                        <div class="job-title">${job.position || '未知岗位'}</div>
+                        <div style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:bold;">匹配度 ${job.matchScore}</div>
+                    </div>
+                    <div class="job-company">🏢 ${job.company || '未知公司'}</div>
+                    <div class="job-tags">
+                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                        ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
+                    </div>
+                `;
+                
+                jobList.appendChild(div);
+            }
+        }
+        
+        // 事件监听
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (currentMode === 'search') {
+                setTimeout(filterJobs, 300);
+            }
+        });
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                
+                const matchForm = document.getElementById('matchForm');
+                if (currentMode === 'match') {
+                    matchForm.classList.add('show');
+                } else {
+                    matchForm.classList.remove('show');
+                    filterJobs();
+                }
+            });
+        });
+        
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentCategory = tab.dataset.category;
+                filterJobs();
+            });
+        });
+        
+        document.getElementById('jobModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('jobModal')) {
+                closeModal();
+            }
+        });
+        
+        loadData();
+    </script>
+</body>
+</html>
