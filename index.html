@@ -178,11 +178,18 @@
             margin-bottom: 4px;
         }
         
-        /* 岗位列表 - 网格布局 */
+        /* 岗位列表 - 响应式网格布局 */
         .job-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            grid-template-columns: 1fr; /* 移动端默认单栏 */
             gap: 16px; 
+        }
+        
+        /* PC端双栏 */
+        @media (min-width: 768px) {
+            .job-grid {
+                grid-template-columns: repeat(2, 1fr); /* PC端双栏 */
+            }
         }
         .job-card { 
             background: white; 
@@ -564,31 +571,24 @@
             '机械': ['机械', '机械工程', 'Mechanical', '自动化', '机电'],
             '电子': ['电子', '电气', 'EE', '电子工程', '电路', '芯片', '半导体'],
             '材料': ['材料', '材料科学', 'Materials', '纳米材料', '高分子'],
-            '环境': ['环境', '环境工程', 'Environmental', '环保', '生态学']
+            '环境': ['环境', '环境工程', 'Environmental', '环保', '生态学'],
+            // 🔥 新增：数据科学相关
+            '数据': ['数据', '大数据', '数据科学', '数据分析', '数据挖掘', '数据可视化', 'Data', 'Data Science', 'Big Data'],
+            'AI': ['AI', '人工智能', '机器学习', '深度学习', 'NLP', 'CV', 'Artificial Intelligence', 'Machine Learning']
         };
         
-        // AI智能搜索 - 支持自然语言理解（修复版）
+        // AI智能搜索 - 支持自然语言理解（优化版v2）
         function aiSmartSearch(query) {
             query = query.toLowerCase();
             let searchTerms = [];
             let cityFilters = [];
-            let companyFilters = [];
             
-            // 保存原始查询（用于同义词展开判断）
-            const originalQuery = query;
-            
-            // 1. 定义城市关键词（按长度降序排列，避免短名被长名包含）
+            // 1. 定义城市关键词
             const cityKeywords = ['北京', '上海', '广州', '深圳', '杭州', '成都', '南京', '武汉', 
                                    '西安', '重庆', '天津', '苏州', '长沙', '郑州', '青岛', '东莞', 
                                    '宁波', '厦门', '福州', '无锡', '合肥', '大连', '济南', '佛山', '香港', '澳门'];
             
-            // 2. 定义组织/公司名称（按长度降序排列）
-            const orgKeywords = ['中国科学院', '中科院', '清华大学', '清华', '北京大学', '北大', 
-                                   '复旦大学', '复旦', '上海交通大学', '上交', '浙江大学', '浙大', 
-                                   '中国科学技术大学', '中科大', '南京大学', '南大', '武汉大学', '华中科技大学', '华科',
-                                   '中山大学', '中大', '哈尔滨工业大学', '哈工大', '西安交通大学', '西交'];
-            
-            // 3. 第一步：从查询中提取所有城市（无论有无空格）
+            // 2. 第一步：从查询中提取所有城市
             let remainingQuery = query;
             
             for (const city of cityKeywords) {
@@ -599,39 +599,42 @@
                 }
             }
             
-            // 4. 第二步：从剩余查询中提取所有组织/公司
-            for (const org of orgKeywords) {
-                if (remainingQuery.includes(org.toLowerCase())) {
-                    companyFilters.push(org);
-                    // 从剩余查询中移除这个组织名
-                    remainingQuery = remainingQuery.replace(org.toLowerCase(), ' ');
-                }
+            // 3. 第二步：移除用户背景信息（学校、年级等）
+            //    这些信息是用户描述自己，不是搜索条件
+            const userBackgroundPatterns = [
+                /西交利物浦/g,
+                /[\u4e00-\u9fa5]+大学/g,  // 所有XX大学
+                /大[一二三四五六]|研[一二三]/g,  // 大一至大六、研一至研三
+                /本科|硕士|博士|phd|mba/g,
+                /我.*就读|我就读|我是.*学生/g
+            ];
+            
+            for (const pattern of userBackgroundPatterns) {
+                remainingQuery = remainingQuery.replace(pattern, ' ');
             }
             
-            // 5. 第三步：清理剩余查询，提取搜索词
+            // 4. 第三步：清理剩余查询，提取搜索词
             remainingQuery = remainingQuery
                 .replace(/[的吗呢吧啊呀]/g, ' ')
-                .replace(/有|在|相关|岗位|职位|工作|实习|招聘|吗|呢|吧|啊/g, ' ')
+                .replace(/有|在|相关|岗位|职位|工作|实习|招聘|吗|呢|吧|啊|的|是|我想找|请问|有没有/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
             
-            // 6. 将剩余查询作为搜索词
-            //    如果用户用了空格分隔，按空格分割；否则整体作为一个搜索词
+            // 5. 将剩余查询作为搜索词
             if (remainingQuery.length > 0) {
                 searchTerms = remainingQuery.split(/\s+/).filter(t => t.length >= 1);
             }
             
-            // 7. 同义词展开（仅当用户明确说了"相关"或"类似"时才展开）
+            // 6. 自动展开同义词
             let expandedTerms = [];
             for (const term of searchTerms) {
                 expandedTerms.push(term);
-                // 只有当用户明确需要时才展开
-                if (originalQuery.includes('相关') || originalQuery.includes('类似')) {
-                    for (const [major, synonyms] of Object.entries(smartDict)) {
-                        if (synonyms.some(s => term.includes(s.toLowerCase()))) {
-                            expandedTerms.push(...synonyms);
-                            break;
-                        }
+                
+                // 遍历 smartDict，查找匹配的同义词
+                for (const [major, synonyms] of Object.entries(smartDict)) {
+                    if (synonyms.some(s => term.includes(s.toLowerCase()) || s.toLowerCase().includes(term))) {
+                        expandedTerms.push(...synonyms.map(s => s.toLowerCase()));
+                        break;
                     }
                 }
             }
@@ -640,11 +643,10 @@
             // 去重
             searchTerms = [...new Set(searchTerms)];
             cityFilters = [...new Set(cityFilters)];
-            companyFilters = [...new Set(companyFilters)];
             
-            console.log('AI搜索解析:', { searchTerms, cityFilters, companyFilters });
+            console.log('AI搜索解析:', { searchTerms, cityFilters });
             
-            return { searchTerms, cityFilters, companyFilters };
+            return { searchTerms, cityFilters };
         }
         
         // 模糊匹配
@@ -691,9 +693,10 @@
                 document.getElementById('resultTitle').textContent = `全部岗位 (${filteredJobs.length})`;
                 document.getElementById('resultDesc').textContent = '显示所有可用岗位';
             } else {
-                const { searchTerms, cityFilters, companyFilters } = aiSmartSearch(keyword);
+                const { searchTerms, cityFilters } = aiSmartSearch(keyword);
                 
-                filteredJobs = allJobs.filter(job => {
+                // 第一步：尝试严格过滤（城市+关键词）
+                let strictResults = allJobs.filter(job => {
                     if (currentCategory !== 'all' && job.category !== currentCategory) return false;
                     
                     // 城市过滤（支持多个）
@@ -702,24 +705,62 @@
                         if (!matchCity) return false;
                     }
                     
-                    // 公司过滤（支持多个）
-                    if (companyFilters.length > 0 && job.company) {
-                        const matchCompany = companyFilters.some(org => job.company.includes(org));
-                        if (!matchCompany) return false;
-                    }
-                    
                     // 关键词搜索
                     const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`;
                     return fuzzyMatch(searchText, searchTerms);
                 });
                 
+                // 第二步：如果严格过滤结果为空，去掉城市过滤
+                if (strictResults.length === 0 && cityFilters.length > 0) {
+                    console.log('严格过滤无结果，尝试去掉城市过滤');
+                    strictResults = allJobs.filter(job => {
+                        if (currentCategory !== 'all' && job.category !== currentCategory) return false;
+                        
+                        // 只保留关键词搜索
+                        const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`;
+                        return fuzzyMatch(searchText, searchTerms);
+                    });
+                }
+                
+                filteredJobs = strictResults;
+                
+                // 🔥 新增：按匹配度排序
+                if (searchTerms.length > 0) {
+                    filteredJobs = filteredJobs.map(job => {
+                        const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`.toLowerCase();
+                        
+                        // 计算匹配的关键词数量
+                        let matchCount = 0;
+                        let totalScore = 0;
+                        
+                        searchTerms.forEach(term => {
+                            if (searchText.includes(term.toLowerCase())) {
+                                matchCount++;
+                                // 给予不同位置的匹配不同权重
+                                if (job.position && job.position.toLowerCase().includes(term.toLowerCase())) totalScore += 10;
+                                if (job.industry && job.industry.toLowerCase().includes(term.toLowerCase())) totalScore += 5;
+                                if (job.company && job.company.toLowerCase().includes(term.toLowerCase())) totalScore += 3;
+                            }
+                        });
+                        
+                        return { ...job, matchCount, totalScore };
+                    }).sort((a, b) => {
+                        // 首先按匹配的关键词数量排序
+                        if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount;
+                        // 然后按匹配得分排序
+                        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+                        // 最后优先显示实地实习
+                        if (a.category === '实地实习' && b.category !== '实地实习') return -1;
+                        if (b.category === '实地实习' && a.category !== '实地实习') return 1;
+                        return 0;
+                    }).slice(0, 10).map(({ matchCount, totalScore, ...job }) => job);  // 只显示最匹配的Top 10
+                }
                 // 显示搜索词（调试信息）
-                let debugInfo = `搜索结果 (${filteredJobs.length})`;
+                let debugInfo = `最匹配的10个岗位`;
                 if (searchTerms.length > 0) debugInfo += ` | 关键词: ${searchTerms.slice(0, 5).join(', ')}`;
                 if (cityFilters.length > 0) debugInfo += ` | 城市: ${cityFilters.join(', ')}`;
-                if (companyFilters.length > 0) debugInfo += ` | 公司: ${companyFilters.join(', ')}`;
                 document.getElementById('resultTitle').textContent = debugInfo;
-                document.getElementById('resultDesc').textContent = `找到 ${filteredJobs.length} 个匹配岗位`;
+                document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位，显示最匹配的10个`;
             }
             
             displayJobs();
