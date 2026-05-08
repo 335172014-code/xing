@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星辉实习 - AI智能岗位匹配</title>
+    <title>实习智能匹配平台 - AI智能岗位匹配</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -260,6 +260,86 @@
         }
         .empty-icon { font-size: 64px; margin-bottom: 16px; }
         
+        /* 首选推荐卡片 */
+        .top-recommendation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .top-rec-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .top-rec-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .top-rec-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .top-rec-desc {
+            opacity: 0.95;
+            margin-bottom: 12px;
+        }
+        .top-rec-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        /* 可复制岗位总结 */
+        .copyable-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        #summaryText {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: monospace;
+            background: #f9f9f9;
+        }
+        
         /* 弹窗 */
         .modal-overlay { 
             display: none; 
@@ -448,7 +528,7 @@
     <!-- 顶部导航 -->
     <div class="header">
         <div class="header-left">
-            <h1>🌟 星辉实习</h1>
+            <h1>🌟 实习智能匹配平台</h1>
             <p>AI智能岗位匹配平台</p>
         </div>
         <div class="header-right">
@@ -512,6 +592,21 @@
             <div class="result-header">
                 <div class="result-title" id="resultTitle">正在加载岗位...</div>
                 <div id="resultDesc">请使用搜索或筛选功能查找岗位</div>
+            </div>
+            
+            <!-- 首选推荐卡片 -->
+            <div id="topRecommendation" class="top-recommendation" style="display:none;">
+                <div class="top-rec-title">🌟 首选推荐</div>
+                <div id="topRecContent"></div>
+            </div>
+            
+            <!-- 可复制岗位总结 -->
+            <div id="copyableSummary" class="copyable-summary" style="display:none;">
+                <div class="summary-header">
+                    <span>📋 岗位总结（可直接复制）</span>
+                    <button class="copy-btn" onclick="copySummary()">📋 复制</button>
+                </div>
+                <textarea id="summaryText" readonly></textarea>
             </div>
             
             <div id="loading" class="loading">⏳ 正在加载岗位数据...</div>
@@ -771,16 +866,28 @@
             const jobList = document.getElementById('jobList');
             const loading = document.getElementById('loading');
             const empty = document.getElementById('empty');
+            const topRec = document.getElementById('topRecommendation');
+            const copySummary = document.getElementById('copyableSummary');
             
             loading.style.display = 'none';
             
             if (filteredJobs.length === 0) {
                 empty.style.display = 'block';
                 jobList.innerHTML = '';
+                topRec.style.display = 'none';
+                copySummary.style.display = 'none';
                 return;
             }
             
             empty.style.display = 'none';
+            
+            // 生成首选推荐（第一个岗位，最匹配的）
+            generateTopRecommendation(filteredJobs[0]);
+            topRec.style.display = 'block';
+            
+            // 生成可复制的岗位总结
+            generateCopyableSummary(filteredJobs);
+            copySummary.style.display = 'block';
             
             jobList.innerHTML = '';
             for (let i = 0; i < filteredJobs.length; i++) {
@@ -791,6 +898,24 @@
                     return function() { showJobDetail(idx); };
                 })(i);
                 
+                // 根据是否实地实习调整展示信息
+                let infoTags = '';
+                if (job.category === '实地实习') {
+                    // 实地实习：展示 base地点、公司、方向
+                    infoTags = `
+                        ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
+                        <span class="job-tag">🏢 ${job.company || '未知公司'}</span>
+                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                    `;
+                } else {
+                    // 非实地实习：展示 公司、方向
+                    infoTags = `
+                        <span class="job-tag">🏢 ${job.company || '未知公司'}</span>
+                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                    `;
+                }
+                
                 div.innerHTML = `
                     <div class="job-title-row">
                         <div class="job-title">${job.position || '未知岗位'}</div>
@@ -798,14 +923,75 @@
                     </div>
                     <div class="job-company">🏢 ${job.company || '未知公司'}</div>
                     <div class="job-tags">
-                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
-                        ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
-                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                        ${infoTags}
                     </div>
                 `;
                 
                 jobList.appendChild(div);
             }
+        }
+        
+        // 生成首选推荐
+        function generateTopRecommendation(job) {
+            const container = document.getElementById('topRecContent');
+            
+            // 生成推荐描述
+            let desc = '';
+            if (job.company && job.location) {
+                desc = `这是位于${job.location}的${job.company}`;
+            }
+            if (job.industry) {
+                desc += `，专注于${job.industry}领域`;
+            }
+            if (job.duty && job.duty.length > 0) {
+                desc += `。${job.duty.substring(0, 50)}...`;
+            }
+            desc += '。';
+            
+            // 生成详细信息
+            let info = '';
+            if (job.location) info += `📍 ${job.location} `;
+            if (job.duration) info += `⏰ ${job.duration} `;
+            if (job.industry) info += `🎯 ${job.industry}`;
+            
+            container.innerHTML = `
+                <div class="top-rec-name">${job.position || '未知岗位'}</div>
+                <div class="top-rec-desc">${desc}</div>
+                <div class="top-rec-info">${info}</div>
+            `;
+        }
+        
+        // 生成可复制的岗位总结
+        function generateCopyableSummary(jobs) {
+            const textarea = document.getElementById('summaryText');
+            let summary = '';
+            
+            jobs.forEach((job, index) => {
+                // 第一行：时长 + 薪资（如果有）
+                let firstLine = '';
+                if (job.duration) firstLine += job.duration;
+                if (job.salary) firstLine += `  ${job.salary}`;
+                if (firstLine) summary += firstLine + '\n';
+                
+                // 第二行：地点 + 公司：岗位（实地实习）
+                // 或者：公司：岗位（非实地实习）
+                let secondLine = '';
+                if (job.category === '实地实习' && job.location) {
+                    secondLine += `${job.location}  `;
+                }
+                secondLine += `${job.company || '未知公司'}：${job.position || '未知岗位'}`;
+                summary += secondLine + '\n\n';
+            });
+            
+            textarea.value = summary;
+        }
+        
+        // 复制总结到剪贴板
+        function copySummary() {
+            const textarea = document.getElementById('summaryText');
+            textarea.select();
+            document.execCommand('copy');
+            alert('✅ 岗位总结已复制到剪贴板！');
         }
         
         // 显示岗位详情 - 显示所有字段（除价格）
@@ -1221,7 +1407,7 @@
             ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillText('星辉实习 · 智能岗位匹配', centerX, height - 50);
+            ctx.fillText('实习智能匹配平台 · 智能岗位匹配', centerX, height - 50);
         }
         
         // 显示海报预览
