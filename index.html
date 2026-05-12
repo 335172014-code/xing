@@ -778,7 +778,20 @@
         
         // 筛选岗位
         function filterJobs() {
-            const keyword = document.getElementById('searchInput').value.trim();
+            let keyword = document.getElementById('searchInput').value.trim();
+            
+            // 🔥 新增：检测 "pta" -> 自动切换到"远程实习"分类
+            const lowerKeyword = keyword.toLowerCase();
+            if (lowerKeyword.includes('pta')) {
+                currentCategory = '远程实习';
+                // 更新分类标签的UI状态
+                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                const remoteTag = document.querySelector('.filter-tag[data-category="远程实习"]');
+                if (remoteTag) remoteTag.classList.add('active');
+                
+                // 从搜索词中移除"pta"，避免匹配到岗位字段
+                keyword = keyword.replace(/pta/gi, '').trim();
+            }
             
             if (!keyword) {
                 filteredJobs = allJobs.filter(job => {
