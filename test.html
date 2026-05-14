@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+</head>
+<body>
+    <h1>测试页面</h1>
+    <div id="test"></div>
+    <script>
+        console.log('Script loaded');
+        document.getElementById('test').innerHTML = 'JavaScript is working!';
+        
+        // 测试新功能
+        function testNewFeatures() {
+            console.log('Testing new features...');
+            alert('新功能测试中...');
+        }
+        
+        // 页面加载后自动测试
+        window.onload = function() {
+            testNewFeatures();
+        };
+    </script>
+</body>
+</html>

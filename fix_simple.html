@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 - 实习智能匹配平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; padding: 20px; }
+        .test-btn { 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>功能测试页面</h1>
+    <button class="test-btn" onclick="testAlert()">测试 Alert</button>
+    <button class="test-btn" onclick="testFunction()">测试函数</button>
+    
+    <script>
+        console.log('Script loaded successfully');
+        
+        function testAlert() {
+            alert('✅ JavaScript 正常运行！');
+        }
+        
+        function testFunction() {
+            alert('✅ 函数调用成功！');
+        }
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            console.log('Page fully loaded');
+            alert('✅ 页面加载完成，JavaScript 正常执行！');
+        });
+    </script>
+</body>
+</html>
