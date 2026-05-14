@@ -804,6 +804,7 @@
                 const { searchTerms, cityFilters } = aiSmartSearch(keyword);
                 
                 // 第一步：尝试严格过滤（城市+关键词）
+                console.log('DEBUG: 开始过滤', { cityFilters, searchTerms, totalJobs: allJobs.length });
                 let strictResults = allJobs.filter(job => {
                     if (currentCategory !== 'all' && job.category !== currentCategory) return false;
                     
@@ -811,9 +812,14 @@
                     if (cityFilters.length > 0) {
                         // 如果指定了目标城市，要求岗位必须有地点且匹配目标城市
                         // 无地点的岗位（如远程实习）如果不明确属于目标城市，则不显示
-                        if (!job.location) return false;
+                        if (!job.location) {
+                            console.log('DEBUG: 过滤掉无地点岗位', job.company, job.position, 'location:', JSON.stringify(job.location));
+                            return false;
+                        }
                         const matchCity = cityFilters.some(city => job.location.includes(city));
-                        if (!matchCity) return false;
+                        if (!matchCity) {
+                            return false;
+                        }
                     }
                     
                     // 关键词搜索
@@ -821,10 +827,13 @@
                     return fuzzyMatch(searchText, searchTerms);
                 });
                 
+                console.log('DEBUG: 城市过滤后结果数:', strictResults.length);
+                
                 // 🔥 修改：严格按城市过滤，如果指定了城市就不回退到无城市过滤
                 filteredJobs = strictResults;
                 
                 // 按匹配度排序
+                console.log('DEBUG: 排序前结果数:', filteredJobs.length);
                 if (searchTerms.length > 0) {
                     filteredJobs = filteredJobs.map(job => {
                         const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`.toLowerCase();
@@ -855,6 +864,7 @@
                         return 0;
                     }).map(({ matchCount, totalScore, ...job }) => job);  // 显示所有匹配结果
                 }
+                console.log('DEBUG: 最终显示结果数:', filteredJobs.length);
                 // 显示搜索词（调试信息）
                 let debugInfo = `最匹配的岗位`;
                 if (searchTerms.length > 0) debugInfo += ` | 关键词: ${searchTerms.slice(0, 5).join(', ')}`;
