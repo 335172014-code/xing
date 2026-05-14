@@ -808,7 +808,10 @@
                     if (currentCategory !== 'all' && job.category !== currentCategory) return false;
                     
                     // 城市过滤（支持多个）
-                    if (cityFilters.length > 0 && job.location) {
+                    if (cityFilters.length > 0) {
+                        // 如果指定了目标城市，要求岗位必须有地点且匹配目标城市
+                        // 无地点的岗位（如远程实习）如果不明确属于目标城市，则不显示
+                        if (!job.location) return false;
                         const matchCity = cityFilters.some(city => job.location.includes(city));
                         if (!matchCity) return false;
                     }
