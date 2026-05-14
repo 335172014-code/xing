@@ -818,21 +818,10 @@
                     return fuzzyMatch(searchText, searchTerms);
                 });
                 
-                // 第二步：如果严格过滤结果为空，去掉城市过滤
-                if (strictResults.length === 0 && cityFilters.length > 0) {
-                    console.log('严格过滤无结果，尝试去掉城市过滤');
-                    strictResults = allJobs.filter(job => {
-                        if (currentCategory !== 'all' && job.category !== currentCategory) return false;
-                        
-                        // 只保留关键词搜索
-                        const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`;
-                        return fuzzyMatch(searchText, searchTerms);
-                    });
-                }
-                
+                // 🔥 修改：严格按城市过滤，如果指定了城市就不回退到无城市过滤
                 filteredJobs = strictResults;
                 
-                // 🔥 新增：按匹配度排序
+                // 按匹配度排序
                 if (searchTerms.length > 0) {
                     filteredJobs = filteredJobs.map(job => {
                         const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`.toLowerCase();
@@ -861,14 +850,14 @@
                         if (a.category === '实地实习' && b.category !== '实地实习') return -1;
                         if (b.category === '实地实习' && a.category !== '实地实习') return 1;
                         return 0;
-                    }).slice(0, 10).map(({ matchCount, totalScore, ...job }) => job);  // 只显示最匹配的Top 10
+                    }).map(({ matchCount, totalScore, ...job }) => job);  // 显示所有匹配结果
                 }
                 // 显示搜索词（调试信息）
-                let debugInfo = `最匹配的10个岗位`;
+                let debugInfo = `最匹配的岗位`;
                 if (searchTerms.length > 0) debugInfo += ` | 关键词: ${searchTerms.slice(0, 5).join(', ')}`;
                 if (cityFilters.length > 0) debugInfo += ` | 城市: ${cityFilters.join(', ')}`;
                 document.getElementById('resultTitle').textContent = debugInfo;
-                document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位，显示最匹配的10个`;
+                document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位`;
             }
             
             displayJobs();
