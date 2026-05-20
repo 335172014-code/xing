@@ -1534,30 +1534,23 @@
             drawDivider(ctx, width, currentY);
             currentY += 40;
             
-            // 10. 岗位职责（重点区块，半透明背景）
-            const dutyCardY = currentY - 15;
-            const dutyCardX = margin - 15;
-            const dutyCardWidth = maxTextWidth + 30;
-            
-            ctx.fillStyle = 'rgba(255,255,255,0.06)';
-            roundRect(ctx, dutyCardX, dutyCardY, dutyCardWidth, height - currentY - 60, 12);
-            ctx.fill();
-            
-            // 岗位职责标签
+            // 10. 岗位职责标签（不使用卡片背景，避免留白）
             ctx.fillStyle = '#ffd700';
             ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('📋 岗位职责', margin, currentY + 15);
+            ctx.fillText('📋 岗位职责', margin, currentY + 5);
             
-            currentY += 50;
+            const dutyStartY = currentY + 10;
+            currentY += 45;
             
             // 11. 岗位职责内容
+            let dutyEndY = currentY;
             if (job.duty) {
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
                 ctx.font = '21px PingFang SC, Microsoft YaHei, sans-serif';
                 
                 const allDutyItems = job.duty.split(/[\n•]/).filter(item => item.trim());
-                const maxItems = Math.min(allDutyItems.length, 6); // 固定最多6条
+                const maxItems = Math.min(allDutyItems.length, 6);
                 const dutyItems = allDutyItems.slice(0, maxItems);
                 
                 dutyItems.forEach(item => {
@@ -1575,6 +1568,38 @@
                     ctx.fillText(trimmed, margin + 25, currentY);
                     currentY += 42;
                 });
+                dutyEndY = currentY;
+            }
+            
+            // 如果职责区域下方还有大量空白，添加装饰性内容填充
+            const minDutyEndY = height - 120; // 至少留120px给底部标识
+            if (dutyEndY < minDutyEndY) {
+                // 绘制渐变填充区域，让视觉上更饱满
+                const fillGradient = ctx.createLinearGradient(0, dutyEndY, 0, minDutyEndY);
+                fillGradient.addColorStop(0, 'rgba(255,215,0,0.03)');
+                fillGradient.addColorStop(1, 'rgba(255,215,0,0.08)');
+                ctx.fillStyle = fillGradient;
+                ctx.fillRect(margin - 15, dutyEndY, maxTextWidth + 30, minDutyEndY - dutyEndY);
+                
+                // 添加底部虚线装饰
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([8, 8]);
+                ctx.beginPath();
+                ctx.moveTo(margin, minDutyEndY - 30);
+                ctx.lineTo(width - margin, minDutyEndY - 30);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // 右侧装饰线
+                ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(width - margin + 10, dutyEndY);
+                ctx.lineTo(width - margin + 10, minDutyEndY - 30);
+                ctx.stroke();
+                
+                currentY = minDutyEndY - 30;
             }
             
             // 12. 底部标识
