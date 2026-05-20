@@ -1497,214 +1497,279 @@
             return currentY;
         }
         
-        // 新海报绘制主函数（全新专业布局 - 动态高度）
+        // ========== 参考图风格海报绘制 ==========
+        // 绘制红色圆角标签（参考图风格）
+        function drawRedLabel(ctx, text, x, y, fontSize) {
+            fontSize = fontSize || 26;
+            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+            const metrics = ctx.measureText(text);
+            const paddingX = 20;
+            const paddingY = 10;
+            const labelWidth = metrics.width + paddingX * 2;
+            const labelHeight = fontSize + paddingY * 2;
+            const cornerRadius = 6;
+
+            // 绘制圆角矩形背景
+            ctx.beginPath();
+            ctx.moveTo(x + cornerRadius, y);
+            ctx.lineTo(x + labelWidth - cornerRadius, y);
+            ctx.quadraticCurveTo(x + labelWidth, y, x + labelWidth, y + cornerRadius);
+            ctx.lineTo(x + labelWidth, y + labelHeight - cornerRadius);
+            ctx.quadraticCurveTo(x + labelWidth, y + labelHeight, x + labelWidth - cornerRadius, y + labelHeight);
+            ctx.lineTo(x + cornerRadius, y + labelHeight);
+            ctx.quadraticCurveTo(x, y + labelHeight, x, y + labelHeight - cornerRadius);
+            ctx.lineTo(x, y + cornerRadius);
+            ctx.quadraticCurveTo(x, y, x + cornerRadius, y);
+            ctx.closePath();
+
+            // 红色填充
+            ctx.fillStyle = '#e53935';
+            ctx.fill();
+
+            // 白色文字
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText(text, x + paddingX, y + labelHeight - paddingY - 2);
+
+            return labelHeight + 8; // 返回标签高度+间距
+        }
+
+        // 绘制金色高亮条（参考图：半透明黑色背景+金色文字）
+        function drawGoldBar(ctx, text, width, y, fontSize) {
+            fontSize = fontSize || 36;
+            const barHeight = fontSize + 28;
+            const barY = y - barHeight / 2;
+
+            // 半透明黑色背景条（两端渐隐）
+            const barGradient = ctx.createLinearGradient(0, barY + barHeight/2, width, barY + barHeight/2);
+            barGradient.addColorStop(0, 'rgba(0,0,0,0)');
+            barGradient.addColorStop(0.1, 'rgba(0,0,0,0.6)');
+            barGradient.addColorStop(0.9, 'rgba(0,0,0,0.6)');
+            barGradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = barGradient;
+            ctx.fillRect(0, barY, width, barHeight);
+
+            // 金色文字
+            ctx.fillStyle = '#ffd700';
+            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(text, width / 2, y + fontSize / 3);
+            ctx.textAlign = 'left';
+
+            return barHeight + 20;
+        }
+
+        // 绘制白色分割线（参考图风格）
+        function drawWhiteDivider(ctx, width, y, margin) {
+            margin = margin || 50;
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, y);
+            ctx.lineTo(width - margin, y);
+            ctx.stroke();
+        }
+
+        // 新海报绘制主函数（参考图风格 - 动态高度）
         function drawNewPoster(ctx, width, job) {
             const centerX = width / 2;
-            const margin = 50;
+            const margin = 45;
             const maxTextWidth = width - margin * 2;
-            const moduleGap = 32;      // 模块间距
-            const cardPadding = 24;    // 卡片内边距
-            
+            const sectionGap = 28;   // 区块间距
+
             // ========== 第一遍：计算所有内容高度 ==========
-            let calcY = 160; // 顶部信息栏后起始位置
-            
-            // 3. 公司名高度
-            ctx.font = 'bold 48px PingFang SC, Microsoft YaHei, sans-serif';
+            let calcY = 120; // 从顶部信息栏后开始
+
+            // 1. 公司名（超大字）
+            ctx.font = 'bold 56px "PingFang SC", "Microsoft YaHei", sans-serif';
             const companyName = job.company || '未知公司';
             const companyLines = calcWrapLines(ctx, companyName, maxTextWidth);
-            calcY += companyLines * 58 + 30; // 行高58 + 下划线
-            
-            // 4. 岗位名高度
-            ctx.font = 'bold 36px PingFang SC, Microsoft YaHei, sans-serif';
+            calcY += companyLines * 68 + sectionGap;
+
+            // 2. 岗位名（大字）
+            ctx.font = 'bold 42px "PingFang SC", "Microsoft YaHei", sans-serif';
             const positionName = job.position || '未知岗位';
             const positionLines = calcWrapLines(ctx, positionName, maxTextWidth);
-            calcY += positionLines * 44 + moduleGap;
-            
-            // 5. 公司介绍卡片
-            if (job.jd) {
-                calcY += cardPadding + 80 + cardPadding + moduleGap;
+            calcY += positionLines * 52 + sectionGap;
+
+            // 3. 公司介绍
+            const introText = job.jd || job.company_intro || '';
+            if (introText) {
+                ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+                const introLines = calcWrapLines(ctx, introText.substring(0, 200), maxTextWidth);
+                calcY += introLines * 34 + sectionGap;
             }
-            
-            // 6. 实习收获区块
-            calcY += 40 + 140 + moduleGap; // 标题+4行*35
-            
-            // 7. 实习周期
-            calcY += 65 + moduleGap;
-            
-            // 8. 适合专业
-            if (job.industry || job.requirements) {
-                calcY += 40 + moduleGap;
-            }
-            
-            // 9. 分割线
-            calcY += 20 + moduleGap;
-            
-            // 10-11. 岗位职责
+
+            // 4. 适合专业（红色标签+内容）
+            calcY += 42 + sectionGap; // 标签高度
+            const majorText = job.industry || job.requirements || '相关专业';
+            ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+            const majorLines = calcWrapLines(ctx, majorText, maxTextWidth);
+            calcY += majorLines * 36 + sectionGap;
+
+            // 5. 实习收获（红色标签+列表）
+            calcY += 42 + sectionGap; // 标签高度
+            const benefits = job.benefits || '名企导师推荐信\n100%实习背调支持 + 实习证明\n1v1 职业规划咨询 & 简历精修\n积累相关工作经验 & 岗位技能 & 人脉资源';
+            const benefitLines = benefits.split(/\n/).filter(l => l.trim());
+            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+            benefitLines.forEach(() => {
+                calcY += 36;
+            });
+            calcY += sectionGap;
+
+            // 6. 实习周期（金色高亮条）
+            calcY += 65 + sectionGap;
+
+            // 7. 分割线
+            calcY += 20 + sectionGap;
+
+            // 8. 岗位职责（红色标签+项目符号列表）
+            calcY += 42 + 10; // 标签+间距
             const dutyContent = job.duty || job.jd || '';
-            calcY += 40; // 标题
             if (dutyContent) {
-                ctx.font = '21px PingFang SC, Microsoft YaHei, sans-serif';
+                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
                 const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
-                const dutyItems = allDutyItems.slice(0, 6);
+                const dutyItems = allDutyItems.slice(0, 8);
                 dutyItems.forEach(item => {
-                    const lines = calcWrapLines(ctx, item.trim(), maxTextWidth - 30);
-                    calcY += Math.max(lines * 32, 32) + 10;
+                    const lines = calcWrapLines(ctx, item.trim(), maxTextWidth - 40);
+                    calcY += Math.max(lines * 32, 32) + 12;
                 });
             }
-            
-            // 底部留白
-            calcY += 80;
-            
-            const height = Math.max(calcY, 1200); // 最小高度1200
-            
+
+            // 底部留白+二维码区域
+            calcY += 120;
+
+            const height = Math.max(calcY, 1100); // 最小高度
+
             // ========== 第二遍：正式绘制 ==========
             // 1. 绘制城市建筑背景
             drawCityBackground(ctx, width, height);
-            
-            // 2. 顶部信息栏
-            const headerY = 30;
-            const headerHeight = 70;
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(0, headerY, width, headerHeight);
-            
+
+            // 2. 顶部信息栏（参考图：左右分布）
+            const headerY = 35;
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 22px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('\ud83d\udccd ' + (job.location || '线上/远程'), margin, headerY + 45);
+            ctx.fillText('实习地点', margin, headerY);
             ctx.textAlign = 'right';
-            ctx.fillText('\ud83c\udff7\ufe0f ' + (job.category || '人事'), width - margin, headerY + 45);
-            
-            let currentY = headerY + headerHeight + 50;
-            
-            // 3. 公司名（智能换行）
+            ctx.fillText('实习形式', width - margin, headerY);
+
+            ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(job.location || '线上/远程', margin, headerY + 32);
+            ctx.textAlign = 'right';
+            ctx.fillText(job.category || '人事', width - margin, headerY + 32);
+
+            let currentY = headerY + 85;
+
+            // 3. 公司名（超大白色居中）
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            currentY = drawSmartText(ctx, companyName, centerX, currentY, maxTextWidth, 58, 48, 'bold');
-            
-            // 公司名下划线
-            currentY += 10;
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(centerX - 120, currentY);
-            ctx.lineTo(centerX + 120, currentY);
-            ctx.stroke();
-            currentY += 30;
-            
-            // 4. 岗位名（智能换行）
-            currentY = drawSmartText(ctx, positionName, centerX, currentY, maxTextWidth, 44, 36, 'bold');
-            currentY += moduleGap;
-            
-            // 5. 公司介绍（卡片式布局）
-            if (job.jd) {
-                const introText = job.jd.substring(0, 120) + (job.jd.length > 120 ? '...' : '');
-                const introLines = calcWrapLines(ctx, introText, maxTextWidth);
-                const cardHeight = cardPadding + introLines * 32 + cardPadding;
-                
-                // 卡片背景
-                ctx.fillStyle = 'rgba(255,255,255,0.06)';
-                roundRect(ctx, margin - cardPadding, currentY - cardPadding, maxTextWidth + cardPadding * 2, cardHeight, 16);
-                ctx.fill();
-                
-                // 文字
-                ctx.fillStyle = 'rgba(255,255,255,0.85)';
-                ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.textAlign = 'left';
-                currentY = wrapText(ctx, introText, margin, currentY, maxTextWidth, 32);
-                currentY += moduleGap;
-            }
-            
-            // 6. 实习收获区块（紧凑卡片）
-            const benefits = job.benefits || '名企导师推荐信\n100%实习背调支持\n职业规划咨询 & 简历精修\n积累工作经验 & 人脉资源';
-            const benefitLines = benefits.split(/[\n]/).filter(l => l.trim()).slice(0, 4);
-            const benefitsHeight = 45 + benefitLines.length * 34 + 30;
-            
-            // 渐变背景卡片
-            const benefitsCardY = currentY - 15;
-            const benefitsGradient = ctx.createLinearGradient(margin, benefitsCardY, margin + maxTextWidth, benefitsCardY);
-            benefitsGradient.addColorStop(0, 'rgba(255,71,87,0.22)');
-            benefitsGradient.addColorStop(1, 'rgba(255,71,87,0.08)');
-            ctx.fillStyle = benefitsGradient;
-            roundRect(ctx, margin - 20, benefitsCardY, maxTextWidth + 40, benefitsHeight, 16);
-            ctx.fill();
-            
-            // 标签
-            ctx.fillStyle = '#ff6b7a';
-            ctx.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('\u2728 实习收获', margin, currentY);
-            
-            currentY += 40;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
-            
-            benefitLines.forEach(line => {
-                ctx.fillText('\u2022 ' + line.trim(), margin, currentY);
-                currentY += 34;
-            });
-            
-            currentY += moduleGap;
-            
-            // 7. 实习周期高亮条
-            const durationText = job.duration ? '\u23f0 实习周期：' + job.duration : '\u23f0 实习周期：2-3个月';
-            drawHighlightBar(ctx, durationText, width, currentY);
-            currentY += 65;
-            
-            // 8. 适合专业
-            if (job.industry || job.requirements) {
-                currentY += 10;
+            currentY = drawSmartText(ctx, companyName, centerX, currentY, maxTextWidth, 68, 56, 'bold');
+            currentY += sectionGap;
+
+            // 4. 岗位名（白色居中）
+            currentY = drawSmartText(ctx, positionName, centerX, currentY, maxTextWidth, 52, 42, 'bold');
+            currentY += sectionGap + 10;
+
+            // 5. 公司介绍（白色小字，左对齐）
+            if (introText) {
                 ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('\ud83c\udf93 适合专业：' + (job.industry || '相关专业'), centerX, currentY);
-                currentY += 45;
+                ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.textAlign = 'left';
+                const displayIntro = introText.substring(0, 180) + (introText.length > 180 ? '...' : '');
+                currentY = wrapText(ctx, displayIntro, margin, currentY, maxTextWidth, 34);
+                currentY += sectionGap;
             }
-            
+
+            // 6. 适合专业（红色标签+白色内容）
+            currentY += drawRedLabel(ctx, '适合专业', margin, currentY, 26);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            currentY = wrapText(ctx, majorText, centerX, currentY, maxTextWidth, 36);
+            currentY += sectionGap;
+
+            // 7. 实习收获（红色标签+白色列表）
+            currentY += drawRedLabel(ctx, '实习收获', margin, currentY, 26);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            benefitLines.forEach(line => {
+                ctx.fillText(line.trim(), centerX, currentY);
+                currentY += 36;
+            });
+            currentY += sectionGap;
+
+            // 8. 实习周期（金色高亮条）
+            const durationText = job.duration ? '实习周期：' + job.duration : '实习周期：2-3个月';
+            drawGoldBar(ctx, durationText, width, currentY, 36);
+            currentY += 65;
+
             // 9. 分割线
-            drawDivider(ctx, width, currentY);
-            currentY += moduleGap;
-            
-            // 10. 岗位职责标签
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('\ud83d\udccb 岗位职责', margin, currentY);
-            currentY += 40;
-            
-            // 11. 岗位职责内容（使用wrapText支持自动换行）
+            drawWhiteDivider(ctx, width, currentY, margin);
+            currentY += sectionGap;
+
+            // 10. 岗位职责（红色标签+项目符号列表）
+            currentY += drawRedLabel(ctx, '岗位职责', margin, currentY, 26);
+            currentY += 10;
+
             if (dutyContent) {
-                ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                ctx.font = '20px PingFang SC, Microsoft YaHei, sans-serif';
-                
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.textAlign = 'left';
+
                 const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
-                const maxItems = Math.min(allDutyItems.length, 6);
+                const maxItems = Math.min(allDutyItems.length, 8);
                 const dutyItems = allDutyItems.slice(0, maxItems);
-                
+
                 dutyItems.forEach(item => {
                     const trimmed = item.trim();
                     if (!trimmed) return;
-                    
-                    // 项目符号
-                    ctx.fillStyle = '#ffd700';
+
+                    // 项目符号（白色圆点）
+                    ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(margin + 6, currentY - 6, 4, 0, Math.PI * 2);
+                    ctx.arc(margin + 8, currentY - 7, 5, 0, Math.PI * 2);
                     ctx.fill();
-                    
+
                     // 文字（支持自动换行）
-                    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                    currentY = wrapText(ctx, trimmed, margin + 22, currentY, maxTextWidth - 30, 30);
-                    currentY += 10;
+                    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                    currentY = wrapText(ctx, trimmed, margin + 28, currentY, maxTextWidth - 40, 32);
+                    currentY += 12;
                 });
             }
-            
-            currentY += 20;
-            
-            // 12. 底部标识
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.font = '16px PingFang SC, Microsoft YaHei, sans-serif';
+
+            currentY += 30;
+
+            // 11. 底部二维码占位区域（参考图右下角有二维码）
+            const qrSize = 90;
+            const qrX = width - margin - qrSize;
+            const qrY = height - qrSize - 30;
+
+            // 二维码白色背景框
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            roundRect(ctx, qrX - 5, qrY - 5, qrSize + 10, qrSize + 10, 8);
+            ctx.fill();
+
+            // 二维码占位图案
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(qrX + 10, qrY + 10, qrSize - 20, qrSize - 20);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillRect(qrX + 20, qrY + 20, qrSize - 40, qrSize - 40);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillRect(qrX + 30, qrY + 30, qrSize - 60, qrSize - 60);
+
+            // 底部提示文字
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '14px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('实习智能匹配平台 \u00b7 智能岗位匹配', centerX, height - 25);
-            
+            ctx.fillText('扫码查看更多资料', qrX + qrSize / 2, qrY + qrSize + 18);
+
+            // 左下角平台标识
+            ctx.textAlign = 'left';
+            ctx.fillText('实习智能匹配平台', margin, height - 25);
+
             return height;
         }
         
