@@ -1020,8 +1020,10 @@
             if (job.industry) {
                 desc += `，专注于${job.industry}领域`;
             }
-            if (job.duty && job.duty.length > 0) {
-                desc += `。${job.duty.substring(0, 50)}...`;
+            // 🔥 修复：duty为空时，尝试用jd作为描述
+            const descContent = job.duty || job.jd || '';
+            if (descContent && descContent.length > 0) {
+                desc += `。${descContent.substring(0, 50)}...`;
             }
             desc += '。';
             
@@ -1603,6 +1605,9 @@
             
             // 10. 岗位职责标签（不使用卡片背景，避免留白）
             ctx.fillStyle = '#ffd700';
+            // 🔥 修复：当duty为空时，尝试用jd作为岗位职责显示
+            const dutyContent = job.duty || job.jd || '';
+            
             ctx.font = 'bold 26px PingFang SC, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('📋 岗位职责', margin, currentY + 5);
@@ -1612,11 +1617,11 @@
             
             // 11. 岗位职责内容
             let dutyEndY = currentY;
-            if (job.duty) {
+            if (dutyContent) {
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
                 ctx.font = '21px PingFang SC, Microsoft YaHei, sans-serif';
                 
-                const allDutyItems = job.duty.split(/[\n•]/).filter(item => item.trim());
+                const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
                 const maxItems = Math.min(allDutyItems.length, 6);
                 const dutyItems = allDutyItems.slice(0, maxItems);
                 
