@@ -583,11 +583,10 @@
                 
                 <div class="category-tabs" id="categoryTabs">
                     <button class="category-tab active" data-category="all">全部</button>
-                    <button class="category-tab" data-category="实地实习">实地实习</button>
-                    <button class="category-tab" data-category="远程实习">远程实习</button>
-                    <button class="category-tab" data-category="科研实习">科研实习</button>
-                    <button class="category-tab" data-category="港澳实习">港澳实习</button>
-                    <button class="category-tab" data-category="求职辅导">求职辅导</button>
+                    <button class="category-tab" data-category="实地">实地</button>
+                    <button class="category-tab" data-category="远程">远程</button>
+                    <button class="category-tab" data-category="PTA">PTA</button>
+                    <button class="category-tab" data-category="美国">美国</button>
                 </div>
             </div>
         </div>
@@ -652,6 +651,56 @@
         let currentCategory = 'all';
         let currentDetailJob = null;
         let currentMode = 'search';
+        
+        // 获取岗位显示类型（实地/远程/PTA/美国）
+        // 根据sheet_name和category判断
+        function getJobType(job) {
+            const sheetName = job.sheet_name || '';
+            const category = job.category || '';
+            const projectType = job.project_type || '';
+            
+            // 美国实习
+            if (sheetName.includes('美国') || category === '美国实习') {
+                return '美国';
+            }
+            
+            // 实地实习
+            if (sheetName.includes('实地人事') || projectType === '实地') {
+                return '实地';
+            }
+            
+            // 远程实习（人事）
+            if (sheetName.includes('远程人事') || projectType === '远程') {
+                return '远程';
+            }
+            
+            // PTA（科研类：北大、清华、中科院等）
+            if (category === '科研实习' || 
+                sheetName.includes('科研') || 
+                sheetName.includes('中科院') ||
+                sheetName.includes('清华') ||
+                sheetName.includes('北大')) {
+                return 'PTA';
+            }
+            
+            // 默认根据category判断
+            if (category.includes('实地')) return '实地';
+            if (category.includes('远程')) return '远程';
+            
+            return '其他';
+        }
+        
+        // 获取岗位类型徽章样式
+        function getJobTypeBadge(type) {
+            const styles = {
+                '实地': { bg: '#e8f5e9', color: '#2e7d32' },
+                '远程': { bg: '#e3f2fd', color: '#1976d2' },
+                'PTA': { bg: '#fff3e0', color: '#e65100' },
+                '美国': { bg: '#fce4ec', color: '#c2185b' },
+                '其他': { bg: '#f5f5f5', color: '#666' }
+            };
+            return styles[type] || styles['其他'];
+        }
         
         // 智能词典
         const smartDict = {
@@ -800,7 +849,7 @@
             
             if (!keyword) {
                 filteredJobs = allJobs.filter(job => {
-                    if (currentCategory !== 'all' && job.category !== currentCategory) return false;
+                    if (currentCategory !== 'all' && getJobType(job) !== currentCategory) return false;
                     return true;
                 });
                 document.getElementById('resultTitle').textContent = `全部岗位 (${filteredJobs.length})`;
@@ -810,7 +859,7 @@
                 
                 // 第一步：尝试严格过滤（城市+关键词）
                 let strictResults = allJobs.filter(job => {
-                    if (currentCategory !== 'all' && job.category !== currentCategory) return false;
+                    if (currentCategory !== 'all' && getJobType(job) !== currentCategory) return false;
                     
                     // 城市过滤（支持多个）
                     if (cityFilters.length > 0) {
@@ -854,9 +903,11 @@
                         if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount;
                         // 然后按匹配得分排序
                         if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-                        // 最后优先显示实地实习
-                        if (a.category === '实地实习' && b.category !== '实地实习') return -1;
-                        if (b.category === '实地实习' && a.category !== '实地实习') return 1;
+                        // 最后优先显示实地 > PTA > 远程 > 美国
+                        const typeOrder = { '实地': 1, 'PTA': 2, '远程': 3, '美国': 4, '其他': 5 };
+                        const typeA = typeOrder[getJobType(a)] || 5;
+                        const typeB = typeOrder[getJobType(b)] || 5;
+                        if (typeA !== typeB) return typeA - typeB;
                         return 0;
                     }).map(({ matchCount, totalScore, ...job }) => job);  // 显示所有匹配结果
                 }
@@ -908,19 +959,30 @@
                     return function() { showJobDetail(idx); };
                 })(i);
                 
-                // 根据是否实地实习调整展示信息
+                // 获取岗位类型和样式
+                const jobType = getJobType(job);
+                const badgeStyle = getJobTypeBadge(jobType);
+                
+                // 根据类型调整展示信息
                 let infoTags = '';
-                if (job.category === '实地实习') {
-                    // 实地实习：展示 base地点、公司、方向
+                if (jobType === '实地') {
+                    // 实地：展示地点、公司、方向
                     infoTags = `
                         ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
-                        <span class="job-tag">🏢 ${job.company || '未知公司'}</span>
                         ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                    `;
+                } else if (jobType === 'PTA') {
+                    // PTA：展示学校、方向
+                    infoTags = `
+                        ${job.company ? `<span class="job-tag">🏛️ ${job.company}</span>` : ''}
+                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
                     `;
                 } else {
-                    // 非实地实习：展示 公司、方向
+                    // 远程/美国：展示公司、方向
                     infoTags = `
-                        <span class="job-tag">🏢 ${job.company || '未知公司'}</span>
+                        ${job.company ? `<span class="job-tag">🏢 ${job.company}</span>` : ''}
                         ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
                         ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
                     `;
@@ -929,7 +991,7 @@
                 div.innerHTML = `
                     <div class="job-title-row">
                         <div class="job-title">${job.position || '未知岗位'}</div>
-                        <div class="job-category-badge">${job.category || ''}</div>
+                        <div class="job-category-badge" style="background: ${badgeStyle.bg}; color: ${badgeStyle.color};">${jobType}</div>
                     </div>
                     <div class="job-company">🏢 ${job.company || '未知公司'}</div>
                     <div class="job-tags">
