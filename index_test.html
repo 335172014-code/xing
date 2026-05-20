@@ -653,28 +653,19 @@
         let currentMode = 'search';
         
         // 获取岗位显示类型（实地/远程/PTA/美国）
-        // 根据sheet_name和category判断
+        // 根据sheet_name和category判断（注意：PTA判断必须优先于projectType判断）
         function getJobType(job) {
             const sheetName = job.sheet_name || '';
             const category = job.category || '';
             const projectType = job.project_type || '';
             
-            // 美国实习
+            // 1. 美国实习
             if (sheetName.includes('美国') || category === '美国实习') {
                 return '美国';
             }
             
-            // 实地实习
-            if (sheetName.includes('实地人事') || projectType === '实地') {
-                return '实地';
-            }
-            
-            // 远程实习（人事）
-            if (sheetName.includes('远程人事') || projectType === '远程') {
-                return '远程';
-            }
-            
-            // PTA（科研类：北大、清华、中科院等）
+            // 2. PTA（科研类：北大、清华、中科院等）- 必须优先判断
+            //    因为科研实习的projectType常为"实地"或"远程"，会干扰判断
             if (category === '科研实习' || 
                 sheetName.includes('科研') || 
                 sheetName.includes('中科院') ||
@@ -683,7 +674,17 @@
                 return 'PTA';
             }
             
-            // 默认根据category判断
+            // 3. 实地实习
+            if (sheetName.includes('实地人事') || projectType === '实地') {
+                return '实地';
+            }
+            
+            // 4. 远程实习（人事）
+            if (sheetName.includes('远程人事') || projectType === '远程') {
+                return '远程';
+            }
+            
+            // 5. 默认根据category判断
             if (category.includes('实地')) return '实地';
             if (category.includes('远程')) return '远程';
             
@@ -834,14 +835,14 @@
         function filterJobs() {
             let keyword = document.getElementById('searchInput').value.trim();
             
-            // 🔥 新增：检测 "pta" -> 自动切换到"远程实习"分类
+            // 🔥 检测 "pta" -> 自动切换到 PTA 分类
             const lowerKeyword = keyword.toLowerCase();
             if (lowerKeyword.includes('pta')) {
-                currentCategory = '远程实习';
+                currentCategory = 'PTA';
                 // 更新分类标签的UI状态
-                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
-                const remoteTag = document.querySelector('.filter-tag[data-category="远程实习"]');
-                if (remoteTag) remoteTag.classList.add('active');
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                const ptaTag = document.querySelector('.category-tab[data-category="PTA"]');
+                if (ptaTag) ptaTag.classList.add('active');
                 
                 // 从搜索词中移除"pta"，避免匹配到岗位字段
                 keyword = keyword.replace(/pta/gi, '').trim();
