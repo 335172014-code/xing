@@ -1268,18 +1268,26 @@
                 return;
             }
             
+            const width = 750;
+            
+            // 先创建一个临时canvas计算高度
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = width;
+            tempCanvas.height = 3000; // 足够大
+            tempCtx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
+            
+            const finalHeight = drawNewPoster(tempCtx, width, job);
+            
+            // 创建正式canvas，设置正确尺寸
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
-            const width = 750;
-            // 高度先设为足够大，绘制完成后裁剪
             canvas.width = width;
-            
-            // 设置默认字体（解决乱码问题）
+            canvas.height = finalHeight;
             ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
             
-            const finalHeight = drawNewPoster(ctx, width, job);
-            canvas.height = finalHeight;
+            // 正式绘制
+            drawNewPoster(ctx, width, job);
             
             showPosterPreview(canvas);
             _isGeneratingPoster = false;
@@ -1740,8 +1748,8 @@
                 ctx.font = fontWeight + ' ' + fontSize + 'px PingFang SC, Microsoft YaHei, sans-serif';
             }
             
-            // 使用wrapText绘制
-            return wrapText(ctx, text, x - maxWidth / 2, y, maxWidth, lineHeight);
+            // 使用wrapText绘制（传入左边界x，wrapText内部处理居中）
+            return wrapText(ctx, text, x, y, maxWidth, lineHeight);
         }
         
         // 圆角矩形辅助函数
