@@ -1293,65 +1293,118 @@
             _isGeneratingPoster = false;
         }
         
-        // 绘制纯净深色背景（消除视觉噪声，提升文字可读性）
-        function drawCleanBackground(ctx, width, height) {
-            // 深色基底色 - 使用更沉稳的深蓝黑色
-            ctx.fillStyle = '#0a1628';
-            ctx.fillRect(0, 0, width, height);
-
-            // 微妙的底部城市剪影（极低透明度，不干扰文字）
-            ctx.fillStyle = 'rgba(8, 18, 35, 0.6)';
-            const buildings = [
-                { x: -30, w: 120, h: 350 },
-                { x: 80, w: 60, h: 500 },
-                { x: 130, w: 100, h: 280 },
-                { x: 220, w: 70, h: 450 },
-                { x: 280, w: 110, h: 600 },
-                { x: 380, w: 80, h: 380 },
-                { x: 450, w: 65, h: 520 },
-                { x: 510, w: 90, h: 320 },
-                { x: 590, w: 70, h: 480 },
-                { x: 650, w: 80, h: 300 },
-                { x: 720, w: 50, h: 400 }
+        // 绘制城市照片风格背景（参考图2：真实城市天际线+暗角遮罩）
+        function drawCityPhotoBackground(ctx, width, height) {
+            // 绘制城市建筑剪影（模拟真实城市天际线照片感）
+            // 使用多层建筑创造景深效果
+            
+            // 远景建筑（更淡、更小）
+            ctx.fillStyle = '#1a2744';
+            const farBuildings = [
+                { x: 0, w: 80, h: 200 },
+                { x: 70, w: 60, h: 280 },
+                { x: 120, w: 100, h: 180 },
+                { x: 210, w: 50, h: 320 },
+                { x: 250, w: 80, h: 250 },
+                { x: 320, w: 70, h: 350 },
+                { x: 380, w: 90, h: 200 },
+                { x: 460, w: 60, h: 300 },
+                { x: 510, w: 80, h: 220 },
+                { x: 580, w: 70, h: 280 },
+                { x: 640, w: 100, h: 190 },
+                { x: 720, w: 60, h: 240 }
             ];
-
-            buildings.forEach(b => {
+            farBuildings.forEach(b => {
                 ctx.fillRect(b.x, height - b.h, b.w, b.h);
             });
 
-            // 顶部暗角（确保标题可读）
-            const topVignette = ctx.createLinearGradient(0, 0, 0, height * 0.35);
-            topVignette.addColorStop(0, 'rgba(5, 10, 20, 0.85)');
-            topVignette.addColorStop(1, 'rgba(5, 10, 20, 0)');
+            // 中景建筑（带窗户细节，模拟真实照片）
+            ctx.fillStyle = '#0f1d33';
+            const midBuildings = [
+                { x: -20, w: 100, h: 400 },
+                { x: 70, w: 80, h: 550 },
+                { x: 140, w: 60, h: 350 },
+                { x: 190, w: 90, h: 480 },
+                { x: 270, w: 70, h: 600 },
+                { x: 330, w: 100, h: 420 },
+                { x: 420, w: 80, h: 520 },
+                { x: 490, w: 70, h: 380 },
+                { x: 550, w: 90, h: 500 },
+                { x: 630, w: 80, h: 450 },
+                { x: 700, w: 70, h: 580 }
+            ];
+            midBuildings.forEach(b => {
+                ctx.fillRect(b.x, height - b.h, b.w, b.h);
+            });
+
+            // 窗户细节（模拟真实建筑窗户反光）
+            ctx.fillStyle = 'rgba(255, 220, 150, 0.15)';
+            midBuildings.forEach(b => {
+                if (b.h > 300) {
+                    // 每栋建筑绘制几扇窗户
+                    for (let wy = height - b.h + 40; wy < height - 40; wy += 50) {
+                        for (let wx = b.x + 10; wx < b.x + b.w - 10; wx += 25) {
+                            if (Math.random() > 0.3) {
+                                ctx.fillRect(wx, wy, 12, 18);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 近景建筑（最深色，形成前景层次）
+            ctx.fillStyle = '#080f1f';
+            const nearBuildings = [
+                { x: -30, w: 120, h: 300 },
+                { x: 80, w: 90, h: 450 },
+                { x: 160, w: 110, h: 350 },
+                { x: 260, w: 80, h: 500 },
+                { x: 330, w: 100, h: 400 },
+                { x: 420, w: 90, h: 550 },
+                { x: 500, w: 80, h: 380 },
+                { x: 570, w: 100, h: 480 },
+                { x: 660, w: 90, h: 320 },
+                { x: 740, w: 50, h: 420 }
+            ];
+            nearBuildings.forEach(b => {
+                ctx.fillRect(b.x, height - b.h, b.w, b.h);
+            });
+
+            // 顶部强暗角（确保标题绝对可读）
+            const topVignette = ctx.createLinearGradient(0, 0, 0, height * 0.45);
+            topVignette.addColorStop(0, 'rgba(5, 10, 20, 0.92)');
+            topVignette.addColorStop(0.6, 'rgba(5, 10, 20, 0.7)');
+            topVignette.addColorStop(1, 'rgba(5, 10, 20, 0.2)');
             ctx.fillStyle = topVignette;
-            ctx.fillRect(0, 0, width, height * 0.35);
+            ctx.fillRect(0, 0, width, height * 0.45);
 
-            // 底部暗角（确保底部信息可读）
-            const bottomVignette = ctx.createLinearGradient(0, height * 0.75, 0, height);
-            bottomVignette.addColorStop(0, 'rgba(5, 10, 20, 0)');
-            bottomVignette.addColorStop(1, 'rgba(5, 10, 20, 0.9)');
+            // 底部强暗角（确保底部信息可读）
+            const bottomVignette = ctx.createLinearGradient(0, height * 0.65, 0, height);
+            bottomVignette.addColorStop(0, 'rgba(5, 10, 20, 0.3)');
+            bottomVignette.addColorStop(0.4, 'rgba(5, 10, 20, 0.75)');
+            bottomVignette.addColorStop(1, 'rgba(5, 10, 20, 0.95)');
             ctx.fillStyle = bottomVignette;
-            ctx.fillRect(0, height * 0.75, width, height * 0.25);
+            ctx.fillRect(0, height * 0.65, width, height * 0.35);
 
-            // 整体遮罩 - 增强文字对比度
+            // 整体暗色遮罩（统一色调，增强文字对比）
             const overlay = ctx.createLinearGradient(0, 0, 0, height);
-            overlay.addColorStop(0, 'rgba(8, 16, 32, 0.7)');
-            overlay.addColorStop(0.4, 'rgba(8, 16, 32, 0.4)');
-            overlay.addColorStop(0.8, 'rgba(8, 16, 32, 0.5)');
-            overlay.addColorStop(1, 'rgba(8, 16, 32, 0.85)');
+            overlay.addColorStop(0, 'rgba(8, 16, 32, 0.6)');
+            overlay.addColorStop(0.3, 'rgba(8, 16, 32, 0.3)');
+            overlay.addColorStop(0.7, 'rgba(8, 16, 32, 0.4)');
+            overlay.addColorStop(1, 'rgba(8, 16, 32, 0.8)');
             ctx.fillStyle = overlay;
             ctx.fillRect(0, 0, width, height);
         }
         
-        // 绘制红色标签（参考图风格：圆角+阴影+渐变）
+        // 绘制红色标签（参考图2风格：居中红色圆角标签）
         function drawRedTag(ctx, text, x, y) {
-            ctx.font = 'bold 28px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
             const metrics = ctx.measureText(text);
             const padding = 24;
             const tagWidth = metrics.width + padding * 2;
             const tagHeight = 48;
             const cornerRadius = 6;
-            const tagX = x;
+            const tagX = x - tagWidth / 2; // 居中
             const tagY = y - tagHeight + 12;
             
             // 绘制圆角矩形路径
@@ -1370,50 +1423,50 @@
             // 红色渐变背景
             const tagGradient = ctx.createLinearGradient(tagX, tagY, tagX, tagY + tagHeight);
             tagGradient.addColorStop(0, '#ff4757');
-            tagGradient.addColorStop(1, '#e53935');
+            tagGradient.addColorStop(1, '#c62828');
             ctx.fillStyle = tagGradient;
             ctx.fill();
             
             // 文字
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText(text, tagX + tagWidth / 2, y + 2);
+            ctx.fillText(text, x, y + 2);
             ctx.textAlign = 'left';
             
             return tagWidth;
         }
         
-        // 绘制高亮条（参考图风格：两端渐隐的半透明条）
+        // 绘制高亮条（参考图2风格：宽半透明条+粗体金色字）
         function drawHighlightBar(ctx, text, width, y) {
-            const barHeight = 72;
+            const barHeight = 80;
             const barY = y - barHeight / 2 - 8;
             
-            // 主背景条（两端渐隐）
+            // 主背景条（两端渐隐，更宽）
             const barGradient = ctx.createLinearGradient(0, barY + barHeight/2, width, barY + barHeight/2);
             barGradient.addColorStop(0, 'rgba(0,0,0,0)');
-            barGradient.addColorStop(0.15, 'rgba(0,0,0,0.55)');
-            barGradient.addColorStop(0.85, 'rgba(0,0,0,0.55)');
+            barGradient.addColorStop(0.08, 'rgba(0,0,0,0.6)');
+            barGradient.addColorStop(0.92, 'rgba(0,0,0,0.6)');
             barGradient.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = barGradient;
             ctx.fillRect(0, barY, width, barHeight);
             
-            // 文字（金色）
+            // 文字（金色，更大更粗）
             ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 38px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(text, width / 2, y + 2);
+            ctx.fillText(text, width / 2, y + 4);
             ctx.textAlign = 'left';
             
             return barHeight;
         }
         
-        // 绘制白色分割线
+        // 绘制白色分割线（参考图2粗线风格）
         function drawDivider(ctx, width, y) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(60, y);
-            ctx.lineTo(width - 60, y);
+            ctx.moveTo(50, y);
+            ctx.lineTo(width - 50, y);
             ctx.stroke();
         }
         
@@ -1452,7 +1505,7 @@
                     let drawX = x;
                     if (isCenter) {
                         const wordWidth = ctx.measureText(word).width;
-                        drawX = x + (maxWidth - wordWidth) / 2;
+                        drawX = x - wordWidth / 2; // 居中对齐时x是中心点
                     }
                     ctx.fillText(word, drawX, currentY);
                     currentY += lineHeight;
@@ -1462,7 +1515,7 @@
             return currentY;
         }
         
-        // 绘制项目符号列表
+        // 绘制项目符号列表（参考图2风格：圆点+左对齐文字）
         function drawBulletList(ctx, text, x, y, maxWidth, lineHeight) {
             if (!text) return y;
             const items = text.split(/[\n•]/).filter(item => item.trim());
@@ -1472,43 +1525,51 @@
                 const trimmed = item.trim();
                 if (!trimmed) return;
                 
-                // 绘制项目符号
+                // 绘制项目符号（白色圆点）
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.arc(x + 8, currentY - 8, 5, 0, Math.PI * 2);
+                ctx.arc(x + 8, currentY - 8, 4, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // 绘制文字
-                currentY = wrapText(ctx, trimmed, x + 30, currentY, maxWidth - 30, lineHeight);
-                currentY += lineHeight * 0.5;
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                currentY = wrapText(ctx, trimmed, x + 28, currentY, maxWidth - 30, lineHeight);
+                currentY += lineHeight * 0.4;
             });
             
             return currentY;
         }
         
         // ========== 参考图风格海报绘制 ==========
-        // 绘制红色圆角标签（优化：更紧凑，更好的视觉层次）
-        function drawRedLabel(ctx, text, x, y, fontSize) {
+        // 绘制红色圆角标签（参考图2风格：居中红色标签）
+        function drawRedLabel(ctx, text, x, y, fontSize, align) {
             fontSize = fontSize || 24;
+            align = align || 'left';
             ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
             const metrics = ctx.measureText(text);
-            const paddingX = 16;
-            const paddingY = 8;
+            const paddingX = 18;
+            const paddingY = 10;
             const labelWidth = metrics.width + paddingX * 2;
             const labelHeight = fontSize + paddingY * 2;
-            const cornerRadius = 4;
+            const cornerRadius = 6;
+
+            // 根据对齐方式计算标签位置
+            let labelX = x;
+            if (align === 'center') {
+                labelX = x - labelWidth / 2;
+            }
 
             // 绘制圆角矩形背景
             ctx.beginPath();
-            ctx.moveTo(x + cornerRadius, y);
-            ctx.lineTo(x + labelWidth - cornerRadius, y);
-            ctx.quadraticCurveTo(x + labelWidth, y, x + labelWidth, y + cornerRadius);
-            ctx.lineTo(x + labelWidth, y + labelHeight - cornerRadius);
-            ctx.quadraticCurveTo(x + labelWidth, y + labelHeight, x + labelWidth - cornerRadius, y + labelHeight);
-            ctx.lineTo(x + cornerRadius, y + labelHeight);
-            ctx.quadraticCurveTo(x, y + labelHeight, x, y + labelHeight - cornerRadius);
-            ctx.lineTo(x, y + cornerRadius);
-            ctx.quadraticCurveTo(x, y, x + cornerRadius, y);
+            ctx.moveTo(labelX + cornerRadius, y);
+            ctx.lineTo(labelX + labelWidth - cornerRadius, y);
+            ctx.quadraticCurveTo(labelX + labelWidth, y, labelX + labelWidth, y + cornerRadius);
+            ctx.lineTo(labelX + labelWidth, y + labelHeight - cornerRadius);
+            ctx.quadraticCurveTo(labelX + labelWidth, y + labelHeight, labelX + labelWidth - cornerRadius, y + labelHeight);
+            ctx.lineTo(labelX + cornerRadius, y + labelHeight);
+            ctx.quadraticCurveTo(labelX, y + labelHeight, labelX, y + labelHeight - cornerRadius);
+            ctx.lineTo(labelX, y + cornerRadius);
+            ctx.quadraticCurveTo(labelX, y, labelX + cornerRadius, y);
             ctx.closePath();
 
             // 红色填充 - 使用更沉稳的红色
@@ -1517,103 +1578,113 @@
 
             // 白色文字
             ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, labelX + labelWidth / 2, y + labelHeight - paddingY - 2);
             ctx.textAlign = 'left';
-            ctx.fillText(text, x + paddingX, y + labelHeight - paddingY - 2);
 
             return labelHeight + 12; // 返回标签高度+下方间距
         }
 
-        // 绘制金色高亮条（优化：更精致的两端渐隐效果）
+        // 绘制金色高亮条（参考图2风格：更宽的半透明条+粗体金色字）
         function drawGoldBar(ctx, text, width, y, fontSize) {
-            fontSize = fontSize || 32;
-            const barHeight = fontSize + 24;
+            fontSize = fontSize || 36;
+            const barHeight = fontSize + 32;
             const barY = y - barHeight / 2;
 
-            // 半透明黑色背景条（两端渐隐）
+            // 半透明黑色背景条（两端渐隐，更宽更明显）
             const barGradient = ctx.createLinearGradient(0, barY + barHeight/2, width, barY + barHeight/2);
             barGradient.addColorStop(0, 'rgba(0,0,0,0)');
-            barGradient.addColorStop(0.08, 'rgba(0,0,0,0.55)');
-            barGradient.addColorStop(0.92, 'rgba(0,0,0,0.55)');
+            barGradient.addColorStop(0.05, 'rgba(0,0,0,0.6)');
+            barGradient.addColorStop(0.95, 'rgba(0,0,0,0.6)');
             barGradient.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = barGradient;
             ctx.fillRect(0, barY, width, barHeight);
 
-            // 金色文字 - 使用更柔和的金色
-            ctx.fillStyle = '#f0c040';
+            // 金色文字 - 使用更亮的金色
+            ctx.fillStyle = '#ffd700';
             ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText(text, width / 2, y + fontSize / 3);
             ctx.textAlign = 'left';
 
-            return barHeight + 16;
+            return barHeight + 20;
         }
 
-        // 绘制白色分割线（参考图风格）
+        // 绘制白色分割线（参考图2风格：粗白线+上下留白）
         function drawWhiteDivider(ctx, width, y, margin) {
             margin = margin || 50;
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 2;
+            // 主白线（更粗更明显）
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(margin, y);
             ctx.lineTo(width - margin, y);
             ctx.stroke();
+            
+            // 上方细线（增加层次感）
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(margin + 30, y - 8);
+            ctx.lineTo(width - margin - 30, y - 8);
+            ctx.stroke();
         }
 
-        // 新海报绘制主函数（参考图风格 - 动态高度）
+        // 新海报绘制主函数（参考图2风格 - 居中对齐+城市背景+二维码）
         function drawNewPoster(ctx, width, job) {
             const centerX = width / 2;
-            const margin = 45;
+            const margin = 50;
             const maxTextWidth = width - margin * 2;
-            const sectionGap = 28;   // 区块间距
+            const sectionGap = 32;   // 区块间距
 
             // ========== 第一遍：计算所有内容高度 ==========
             let calcY = 120; // 从顶部信息栏后开始
 
             // 1. 公司名（超大字）
-            ctx.font = 'bold 56px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.font = 'bold 52px "PingFang SC", "Microsoft YaHei", sans-serif';
             const companyName = job.company || '未知公司';
             const companyLines = calcWrapLines(ctx, companyName, maxTextWidth);
-            calcY += companyLines * 68 + sectionGap;
+            calcY += companyLines * 66 + sectionGap;
 
             // 2. 岗位名（大字）
-            ctx.font = 'bold 42px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
             const positionName = job.position || '未知岗位';
             const positionLines = calcWrapLines(ctx, positionName, maxTextWidth);
-            calcY += positionLines * 52 + sectionGap;
+            calcY += positionLines * 58 + sectionGap;
 
-            // 3. 公司介绍
+            // 3. 公司介绍（居中）
             const introText = job.jd || job.company_intro || '';
             if (introText) {
                 ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
                 const introLines = calcWrapLines(ctx, introText.substring(0, 200), maxTextWidth);
-                calcY += introLines * 34 + sectionGap;
+                calcY += introLines * 36 + sectionGap;
             }
 
-            // 4. 适合专业（红色标签+内容）
-            calcY += 42 + sectionGap; // 标签高度
+            // 4. 适合专业（红色标签+居中内容）
+            calcY += 46 + sectionGap; // 标签高度
             const majorText = job.industry || job.requirements || '相关专业';
             ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
             const majorLines = calcWrapLines(ctx, majorText, maxTextWidth);
-            calcY += majorLines * 36 + sectionGap;
+            calcY += majorLines * 38 + sectionGap;
 
-            // 5. 实习收获（红色标签+列表）
-            calcY += 42 + sectionGap; // 标签高度
+            // 5. 实习收获（红色标签+居中列表）
+            calcY += 46 + sectionGap; // 标签高度
             const benefits = job.benefits || '名企导师推荐信\n100%实习背调支持 + 实习证明\n1v1 职业规划咨询 & 简历精修\n积累相关工作经验 & 岗位技能 & 人脉资源';
             const benefitLines = benefits.split(/\n/).filter(l => l.trim());
             ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
             benefitLines.forEach(() => {
-                calcY += 36;
+                calcY += 38;
             });
             calcY += sectionGap;
 
             // 6. 实习周期（金色高亮条）
-            calcY += 65 + sectionGap;
+            calcY += 75 + sectionGap;
 
             // 7. 分割线
-            calcY += 20 + sectionGap;
+            calcY += 30 + sectionGap;
 
             // 8. 岗位职责（红色标签+项目符号列表）
-            calcY += 42 + 10; // 标签+间距
+            calcY += 46 + 15; // 标签+间距
             const dutyContent = job.duty || job.jd || '';
             if (dutyContent) {
                 ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -1621,21 +1692,21 @@
                 const dutyItems = allDutyItems.slice(0, 8);
                 dutyItems.forEach(item => {
                     const lines = calcWrapLines(ctx, item.trim(), maxTextWidth - 40);
-                    calcY += Math.max(lines * 32, 32) + 12;
+                    calcY += Math.max(lines * 34, 34) + 14;
                 });
             }
 
-            // 底部留白+二维码区域
-            calcY += 120;
+            // 底部留白+二维码区域（参考图2有二维码）
+            calcY += 160;
 
-            const height = Math.max(calcY, 1100); // 最小高度
+            const height = Math.max(calcY, 1200); // 最小高度
 
             // ========== 第二遍：正式绘制 ==========
-            // 1. 绘制纯净背景
-            drawCleanBackground(ctx, width, height);
+            // 1. 绘制城市照片风格背景
+            drawCityPhotoBackground(ctx, width, height);
 
-            // 2. 顶部信息栏（参考图：左右分布）
-            const headerY = 35;
+            // 2. 顶部信息栏（参考图2：左右分布）
+            const headerY = 40;
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'left';
@@ -1645,80 +1716,70 @@
 
             ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText(job.location || '线上/远程', margin, headerY + 32);
+            ctx.fillText(job.location || '线上/远程', margin, headerY + 34);
             ctx.textAlign = 'right';
-            ctx.fillText(job.category || '人事', width - margin, headerY + 32);
+            ctx.fillText(job.category || '人事', width - margin, headerY + 34);
 
-            let currentY = headerY + 85;
+            let currentY = headerY + 95;
 
-            // 3. 公司名（超大白色居中，带金色下划线装饰）
+            // 3. 公司名（超大白色居中，参考图2风格）
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            currentY = drawSmartText(ctx, companyName, centerX, currentY, maxTextWidth, 64, 52, 'bold');
-
-            // 公司名下金色装饰线
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-            ctx.lineWidth = 2;
-            const lineWidth = Math.min(maxTextWidth * 0.4, 200);
-            ctx.beginPath();
-            ctx.moveTo(centerX - lineWidth / 2, currentY + 5);
-            ctx.lineTo(centerX + lineWidth / 2, currentY + 5);
-            ctx.stroke();
-            currentY += sectionGap + 8;
+            currentY = drawSmartText(ctx, companyName, centerX, currentY, maxTextWidth, 62, 50, 'bold');
+            currentY += sectionGap;
 
             // 4. 岗位名（白色居中，稍小字号）
-            currentY = drawSmartText(ctx, positionName, centerX, currentY, maxTextWidth, 46, 36, 'bold');
+            currentY = drawSmartText(ctx, positionName, centerX, currentY, maxTextWidth, 48, 36, 'bold');
             currentY += sectionGap + 10;
 
-            // 5. 公司介绍（白色小字，左对齐）
+            // 5. 公司介绍（白色小字，居中）
             if (introText) {
-                ctx.fillStyle = 'rgba(255,255,255,0.85)';
-                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
-                ctx.textAlign = 'left';
-                // 过滤掉与岗位职责重复的内容
-                const displayIntro = introText.substring(0, 160) + (introText.length > 160 ? '...' : '');
-                currentY = wrapText(ctx, displayIntro, margin, currentY, maxTextWidth, 32);
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.textAlign = 'center';
+                const displayIntro = introText.substring(0, 180) + (introText.length > 180 ? '...' : '');
+                currentY = wrapText(ctx, displayIntro, centerX, currentY, maxTextWidth, 36);
                 currentY += sectionGap;
             }
 
-            // 6. 适合专业（红色标签+白色内容，左对齐更自然）
-            currentY += drawRedLabel(ctx, '适合专业', margin, currentY, 24);
+            // 6. 适合专业（红色标签居中+白色内容居中）
+            currentY += drawRedLabel(ctx, '适合专业', centerX, currentY, 26, 'center');
             ctx.fillStyle = '#ffffff';
-            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'left';
-            currentY = wrapText(ctx, majorText, margin + 10, currentY, maxTextWidth - 20, 34);
+            ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            currentY = wrapText(ctx, majorText, centerX, currentY, maxTextWidth, 38);
             currentY += sectionGap;
 
-            // 7. 实习收获（红色标签+白色列表，左对齐）
-            currentY += drawRedLabel(ctx, '实习收获', margin, currentY, 24);
+            // 7. 实习收获（红色标签居中+白色列表居中）
+            currentY += drawRedLabel(ctx, '实习收获', centerX, currentY, 26, 'center');
             ctx.fillStyle = '#ffffff';
-            ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'left';
+            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
             benefitLines.forEach(line => {
-                ctx.fillText('• ' + line.trim(), margin + 10, currentY);
-                currentY += 34;
+                ctx.fillText(line.trim(), centerX, currentY);
+                currentY += 38;
             });
             currentY += sectionGap;
 
             // 8. 实习周期（金色高亮条）
             const durationText = job.duration ? '实习周期：' + job.duration : '实习周期：2-3个月';
-            drawGoldBar(ctx, durationText, width, currentY, 36);
-            currentY += 65;
+            drawGoldBar(ctx, durationText, width, currentY, 38);
+            currentY += 75;
 
-            // 9. 分割线
+            // 9. 分割线（粗白线）
             drawWhiteDivider(ctx, width, currentY, margin);
-            currentY += sectionGap;
+            currentY += sectionGap + 10;
 
-            // 10. 岗位职责（红色标签+项目符号列表）
-            currentY += drawRedLabel(ctx, '岗位职责', margin, currentY, 24);
-            currentY += 15;
+            // 10. 岗位职责（红色标签居中+项目符号列表）
+            currentY += drawRedLabel(ctx, '岗位职责', centerX, currentY, 26, 'center');
+            currentY += 18;
 
             if (dutyContent) {
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
                 ctx.textAlign = 'left';
 
-                // 智能过滤：去除与标题/公司名重复的内容，去除纯数字前缀
+                // 智能过滤：去除与标题/公司名重复的内容
                 const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
                 const maxItems = Math.min(allDutyItems.length, 6);
                 let dutyItems = allDutyItems.slice(0, maxItems);
@@ -1728,10 +1789,8 @@
                 const positionNameLower = (job.position || '').toLowerCase();
                 dutyItems = dutyItems.filter(item => {
                     const itemLower = item.trim().toLowerCase();
-                    // 如果内容只是公司名+岗位名的组合，过滤掉
                     if (itemLower === (companyNameLower + ' ' + positionNameLower).trim()) return false;
                     if (itemLower === (positionNameLower).trim()) return false;
-                    // 如果内容只是重复的公司名，过滤掉
                     if (itemLower === companyNameLower) return false;
                     return true;
                 });
@@ -1743,38 +1802,78 @@
                     // 项目符号（白色圆点）
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(margin + 8, currentY - 7, 4, 0, Math.PI * 2);
+                    ctx.arc(margin + 12, currentY - 7, 4, 0, Math.PI * 2);
                     ctx.fill();
 
                     // 文字（支持自动换行）
                     ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                    currentY = wrapText(ctx, trimmed, margin + 26, currentY, maxTextWidth - 40, 30);
-                    currentY += 14;
+                    currentY = wrapText(ctx, trimmed, margin + 30, currentY, maxTextWidth - 40, 32);
+                    currentY += 16;
                 });
             }
 
-            currentY += 30;
+            currentY += 40;
 
-            // 11. 底部信息栏（简洁专业）
-            const footerY = height - 50;
+            // 11. 底部信息栏（参考图2风格：分割线+平台标识+二维码区域）
+            const footerY = height - 130;
 
             // 底部装饰线
-            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(margin, footerY);
             ctx.lineTo(width - margin, footerY);
             ctx.stroke();
 
             // 左下角平台标识
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.font = '14px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '15px "PingFang SC", "Microsoft YaHei", sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('实习智能匹配平台', margin, height - 20);
+            ctx.fillText('实习智能匹配平台', margin, footerY + 30);
 
-            // 右下角联系方式提示
+            // 右下角引导语
             ctx.textAlign = 'right';
-            ctx.fillText('了解更多实习机会', width - margin, height - 20);
+            ctx.fillText('了解更多实习机会', width - margin, footerY + 30);
+
+            // 二维码占位框（参考图2右下角）
+            const qrSize = 90;
+            const qrX = width - margin - qrSize;
+            const qrY = footerY + 45;
+            
+            // 二维码白色背景
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            roundRect(ctx, qrX, qrY, qrSize, qrSize, 6);
+            ctx.fill();
+            
+            // 二维码内部图案（模拟）
+            ctx.fillStyle = '#333';
+            const cellSize = 8;
+            const qrMargin = 8;
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (Math.random() > 0.4) {
+                        ctx.fillRect(qrX + qrMargin + col * cellSize, qrY + qrMargin + row * cellSize, cellSize - 1, cellSize - 1);
+                    }
+                }
+            }
+            // 二维码定位角
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            // 左上
+            ctx.strokeRect(qrX + qrMargin, qrY + qrMargin, 20, 20);
+            ctx.fillRect(qrX + qrMargin + 4, qrY + qrMargin + 4, 12, 12);
+            // 右上
+            ctx.strokeRect(qrX + qrSize - qrMargin - 20, qrY + qrMargin, 20, 20);
+            ctx.fillRect(qrX + qrSize - qrMargin - 16, qrY + qrMargin + 4, 12, 12);
+            // 左下
+            ctx.strokeRect(qrX + qrMargin, qrY + qrSize - qrMargin - 20, 20, 20);
+            ctx.fillRect(qrX + qrMargin + 4, qrY + qrSize - qrMargin - 16, 12, 12);
+
+            // 二维码下方文字
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '12px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('扫码查看更多资料', qrX + qrSize / 2, qrY + qrSize + 18);
 
             return height;
         }
@@ -1799,27 +1898,28 @@
             return lineCount;
         }
         
-        // 智能文本绘制（自动缩放+换行）
+        // 智能文本绘制（自动缩放+换行，居中模式）
         function drawSmartText(ctx, text, x, y, maxWidth, lineHeight, fontSize, fontWeight) {
             ctx.textAlign = 'center';
             
             // 尝试最大字体
-            ctx.font = fontWeight + ' ' + fontSize + 'px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.font = fontWeight + ' ' + fontSize + 'px "PingFang SC", "Microsoft YaHei", sans-serif';
             const lines = calcWrapLines(ctx, text, maxWidth);
             
             // 如果一行能放下，直接绘制
             if (lines === 1) {
                 ctx.fillText(text, x, y);
-                return y;
+                return y + lineHeight * 0.8;
             }
             
             // 如果太多行，缩小字体再试
-            if (lines > 2 && fontSize > 28) {
-                fontSize = Math.max(28, fontSize - 8);
-                ctx.font = fontWeight + ' ' + fontSize + 'px PingFang SC, Microsoft YaHei, sans-serif';
+            if (lines > 2 && fontSize > 32) {
+                fontSize = Math.max(32, fontSize - 8);
+                lineHeight = Math.max(lineHeight - 10, lineHeight * 0.85);
+                ctx.font = fontWeight + ' ' + fontSize + 'px "PingFang SC", "Microsoft YaHei", sans-serif';
             }
             
-            // 使用wrapText绘制（传入左边界x，wrapText内部处理居中）
+            // 使用wrapText绘制（居中模式）
             return wrapText(ctx, text, x, y, maxWidth, lineHeight);
         }
         

@@ -1,0 +1,313 @@
+行业,公司,公司网址,公司介绍,岗位名称,岗位JD,实习形式,公司地点,"结算价
+（人民币）",是否有转正机会,是否有薪资,岗位海报,,,,,,,,,
+
+
+IT,Soon Capital,http://sooncapital.com.au/,"Soon Capital是澳大利亚本土科技平台，为澳大利亚各大行业提供技术解决方案。已经成功实施了多个科技创新项目包括Web3.0和金融科技概念和技术落地应用。
+CEO介绍：
+-拥有12年以上的IT互联网开发经验，其中7年以上专注于算法工程架构设计与开发;
+-曾先后服务于一线互联网软件公司，多次主导推荐系统、算法平台系统以及业务服务系统的设计与实现; 
+-专长于智能后端系统的设计与开发，尤其是在基于机器学习的推荐系统、算法平台系统和业务服务系统的构建与优化方面，均从0到1完成 ;
+-热衷于人工智能特别是大模型技术的探索与实践，积极应用于多个创新产品开发中，并持续跟踪前沿技术动态; 
+-擅长架构设计与开发，具备扎实的编码能力，同时拥有一定的管理经验，能够协调资源并推动项目高效落地。 ","Backend Engineer/Machine Learning Engineer 后端开发/机器学习
+
+","后端开发/机器学习(Backend Engineer/Machine Learning Engineer )
+岗位职责 
+1. 后端接口开发与维护： 
+使用 FastAPI 设计与实现高性能 API 接口，完成数据交互、请求验证与接口文档编写。 
+2. 数据库与持久化设计： 
+负责 MySQL 数据建模、索引优化、数据备份与权限管理，实现聊天记录与求职者信息的结构 
+化存储与查询。 
+3. 容器化与集群部署： 
+参与使用 Docker / Docker Compose 搭建后端服务与数据库集群，实现服务隔离、依赖管理与 
+基础编排。 
+4. LLM 与知识库集成： 
+支持大语言模型的调用、上下文管理与知识库检索增强（RAG），协助实现模型切换与参数动 
+态调优。 
+5. 系统性能与安全： 
+参与 日志结构化、限流与鉴权机制、健康检查与性能监控 的开发与优化，保障系统稳定与安 
+全。 
+6. CI/CD 与运维支持： 
+协助构建自动化测试与部署流水线（Jenkins/GitLab CI/CD），支持灰度发布与版本回滚策略。 
+7. 技术文档与协作： 
+编写工程文档、API 说明与开发记录，参与产品需求澄清、任务拆解及团队例会。 
+任职要求： 
+1. 计算机科学、软件工程、人工智能或相关专业本科/研究生在读；具备扎实的编程基础。 
+2. 熟悉 Python 后端开发框架（FastAPI / Flask / Django），理解 RESTful API 设计原则。 
+3. 掌握 SQL/MySQL 数据库操作，了解事务、索引、性能优化与数据建模。 
+4. 具备基础的 Linux / Shell 操作能力，可在服务器环境下进行部署与调试。 
+5. 对 AI 应用开发，自然语言处理（NLP）或大语言模型（LLM） 有兴趣者优先。",线上,墨尔本,22000,否,否,,,,,,,,,
+IT,Mango Tech Group,https://www.mangotechgroup.com.au/,"Mango Tech Group是澳洲谷歌和微软指定合作伙伴，曾参与过澳洲国防部系统、 维多利亚州立图书馆管理系统、澳洲板球协会系统等多个知名项目。
+-公司成立以来，在IT技术支持、ERP/CRM系统开发，品牌营销等多个方面为客户提供了高质量的解决方案，在业内被称作"最值得信任的合作商"",Graphic Designer 平面设计,"平面设计师 / 视觉设计师 (Graphic Designer)
+岗位职责： 
+1. 负责公司品牌、产品、活动等相关视觉设计工作，包括但不限于精美海报、宣传图、KV、 
+社媒素材等； 
+2. 能根据需求输出视频创意方案，完成视频拍摄构思及剪辑制作； 
+3. 协助策划团队完成市场活动、线上推广、社群传播等的视觉支持； 
+4. 持续优化品牌视觉风格，提高设计质量和用户视觉体验； 
+5. 具备一定的美术功底和创意表现力，能独立完成从构思到成品输出的全过程。 
+任职要求： 
+1. 熟练掌握 Photoshop、Illustrator、Figma、Canva 等常用平面设计软件； 
+2. 熟练使用 Premiere、After Effects、CapCut 等视频剪辑工具，有基础的视频剪辑和包装能力； 
+3. 有良好的审美能力和设计感，对构图、字体、色彩敏感； 
+4. 工作细致高效，具备良好的沟通能力和团队协作能力； 
+5. 有社交媒体或 Web3 行业相关设计经验者优先； 
+6. 请附带个人作品集（包括海报及视频剪辑案例）。",线下,墨尔本,22000,是,否,,,,,,,,,
+,,,Market Analyst 市场分析,"市场分析（Market Analyst）
+岗位名称： 
+Market Analyst 
+岗位职责： 
+1.收集并分析游戏行业数据、用户行为数据 
+2.研究目标用户画像、关键词、社群渠道等 
+3.评估市场活动效果，输出策略优化建议 
+4.协助团队制定获客和曝光策略（如 KOL、论坛投放等） 
+5.支持团队完成每周数据报告或竞品研究 
+要求： 
+1.本科或研究生在读，专业不限，数据科学、市场营销、统计、商业分析优先 
+2.熟练使用 Excel、Google Sheets，掌握基本的数据分析工具 
+3.对游戏行业和社群文化感兴趣，熟悉 Twitter、Discord、Reddit 等社交平台 
+4.有良好的逻辑思维和信息整理能力",线下,墨尔本,22000,是,否,,,,,,,,,
+IT,LinkPOS,https://www.linkpos.com.au/,LinkPOS是一家总部位于悉尼的 IT 公司，为酒店和零售商提供智能服务和解决方案（设备、软件、应用程序和系统的组合），改变零售业在日常生活中的交易方式。致力于创建一个平台，为任何小型企业提供流畅易用的 O2O 服务。跟悉尼大学建立了深度合作，项目负责人悉尼大学博士毕业。,Frontend Engineer 前端开发,"前端开发 （Frontend Engineer）
+岗位职责： 
+1.与 UX 设计师及产品负责人协作，开发下一代网页/移动应用，专注于卓越的客户端体验，构 
+建高效的前端抽象层和系统架构  
+2.参与设计与代码审查 
+3.与后端系统进行交互 
+4.与团队成员合作，建立前端开发的最佳实践与方法论 
+任职要求： 
+1.计算机科学、软件工程或相关专业本科/硕士学历 
+2. 精通 JavaScript 
+3. 熟悉前端框架，如 React、AngularJs 或 Vue 
+4. 熟练掌握 HTML5、CSS3，了解 UI 框架（如 Bootstrap 或 MaterialUI） 
+5. 有 React Native、Flutter 或其他移动端开发经验者优先 
+加分项： 
+1. 具备微信开放平台开发经验者优先 
+2. 熟悉 CI/CD 流程 
+3. 具备 Web 应用性能测试经验 
+4. 有敏捷开发经验",线下,悉尼,22000,否,否,,,,,,,,,
+,,,Backend Development 后端开发,"后端开发（Backend Development） 
+岗位职责： 
+1.与前端团队协作并提供 API 接口 
+2.构建高效的后端系统与抽象层
+3.参与系统设计与代码审查 
+任职要求： 
+1.计算机科学、软件工程或相关专业本科/硕士学历 
+2.熟悉 Java 编程 
+3.熟悉 SQL 及数据库环境 
+4.具备 Linux 基础知识者优先",线下,悉尼,22000,否,否,,,,,,,,,
+,,,IT Support IT工程师,"IT 支持工程师（IT Support） 
+岗位职责： 
+1.为用户提供技术支持 
+2.根据优先级进行问题排查与上报 
+3.安装硬件及软件系统 
+4.指导用户解决基础 IT 问题 
+5.排查并定位硬件或软件故障原因 
+6.进行网络管理与维护 
+7.监控组织内 IT 设备与计算机系统性能 
+任职要求： 
+1.计算机科学、信息技术或相关专业本科学历 
+2.熟悉 Windows,Android,iOS、Mac 等系统 
+3.具备流利的英文沟通能力 
+4.自备交通工具者优先",线下,悉尼,22000,否,否,,,,,,,,,
+IT,EIZ Technology,https://eiz.com.au/index,EIZ Technology是一家领先的科技公司，专注于商业和供应链物流。致力于帮助各种规模的品牌通过我们的先进解决方案简化物流运营，解决复杂任务，如同亚马逊、阿里巴巴、Temu 和 Shein 等行业巨头一样。通过提供一整套 SaaS、API 和基于云的解决方案，EIZ 赋能企业创建个性化的电子商务履行系统。团队由电子商务供应链各阶段的专家组成，拥有丰富的经验，确保企业能够提高运营效率并增加盈利能力。,Business Data Analysis 商业数据分析,"商业数据分析（Business Data Analysis）
+岗位职责 
+1.参与业务需求沟通，梳理物流追踪与承运商绩效的核心指标体系（KPI）。 
+2.基于现有数据进行基础分析与可视化，输出周/月度简要报告。 
+3.使用 Excel / MySQL 整理与查询数据，支持业务决策与日常运营。 
+4.使用 Power BI 或 JavaScript 搭建基础仪表盘与交互报表。 
+5.协助完善数据口径与文档，推动数据质量与报表可用性提升。 
+要求 
+1.熟练使用 Excel，掌握 MySQL。 
+2.了解 Power BI 或 JavaScript 可视化（会其一即可）。 
+3.良好的沟通与文档能力，结果导向，具备基本的数据敏感度。 
+4.本科及以上，IT/统计/计算机/商业分析等相关背景优先",线下,墨尔本,22000,否,否,,,,,,,,,
+IT,Peak Tech,https://www.peaktec.com.au/about-us/,Peak Tech于2014年在澳大利亚悉尼正式成立，属于澳大利亚城市网络。9年来，为500多家企业提供网站设计开发、Google SEO/SEM搜索优化、网站服务器托管、IT技术支持、平面设计，品牌推广等专业服务。,Web Development 网页开发,"网页开发（Web Development）
+岗位职责：
+1.负责企业网站及定制化Web应用的前端与后端开发，确保代码质量，性能及可维护性。
+2.配合设计团队完成界面交互实现，优化用户体验，并确保跨浏览器、跨设备兼容性。
+3.协助进行网站性能优化、SEO基础技术适配，提升网站搜索排名与访问效率。
+4.与服务器托管及运维团队协作，部署，维护网站，保障稳定运行与安全更新。
+5.参与客户需求沟通，提供技术解决方案，并支持后续功能迭代与技术支持。
+岗位要求：
+1. 本科以上，计算机、设计相关专业或具备相关培训经历者优先，欢迎应届毕业生及转行人士申请。
+2. 熟悉HTML5、CSS3、JavaScript，了解至少一种主流前端框架（如Vue/React），有实际项目或学习作品者可加分。
+3. 能熟练使用常见开发工具（如VS Code、Git）、设计协作工具（如Figma）及项目管理工具。
+4. 具备良好的学习能力和团队沟通意识，对网站开发、用户体验或SEO有基础了解或浓厚兴趣。",线下,悉尼,22000,否,否,,,,,,,,,
+,,,Digital Marketing 数字营销,"数字营销（Digital Marketing）
+岗位职责：
+1. 负责公司数字营销相关业务执行，包括网站推广、线上营销方案落地、搜索引擎优化（SEO/SEM）辅助执行与效果跟进。
+2. 协助客户进行线上品牌推广、营销活动策划与执行，提升客户品牌曝光与营销转化效果。
+3. 负责营销数据统计、效果分析与复盘，输出数据报告，为优化营销策略提供依据。
+4. 对接客户需求，沟通营销方案、执行进度与效果反馈，维护良好客户合作关系。
+5. 配合团队完成平面设计、网站运营、IT 服务等配套业务的营销支持与推广工作。
+岗位要求：
+1.本科及以上学历，市场营销、广告、新媒体、电子商务、数字媒体等相关专业优先。
+2.了解 SEO/SEM、网站推广，品牌推广、线上运营等数字营销基础逻辑，有相关实习或工作经验优先。
+3.具备良好的文案写作、沟通表达与逻辑思维能力，能够独立梳理方案、撰写推广内容。
+4.工作认真负责，学习能力强，具备良好的服务意识与团队协作能力。",线下,悉尼,22000,否,否,,,,,,,,,
+,,,Software Development Intern 软件开发实习生,"软件开发实习生 （Software Development Intern）
+岗位职责： 
+1.协助 IT 团队进行网站与应用（Web/App）的日常维护，性能优化与功能迭代（前后端相关 
+任务）。 
+2.参与服务器与云资源的配置、管理与监控（如 Nginx/Apache、CDN、SSL、日志与报警）。 
+3.协助排查和解决常见的系统/网络问题，提升稳定性与可用性。 
+4.提供内部与客户的技术支持，完善技术文档与变更记录。 
+要求： 
+1.计算机/软件工程/信息技术等相关专业在读（本科/研）。 
+2.具备基础的前端或后端开发能力（如 JavaScript/TypeScript、HTML/CSS、 
+Node.js/Python/Java/PHP）。 
+3.了解常见的 Web 架构、HTTP/REST API、数据库基础（MySQL/PostgreSQL 其一）。 
+4.具备良好的问题定位能力与沟通协作能力",线下,悉尼,22000,否,否,,,,,,,,,
+,,,"数据分析实习生 （Data Analysis Intern）
+岗位职责： 
+1.协助收集、清洗与整合网站与投放数据（Google Analytics/GA4、Google Search Console、Google 
+Ads 等）。 
+2.参与 SEO/SEM 项目的数据追踪与归因，监测核心指标：流量、关键词排名、CTR、CVR、 
+CPA/ROAS 等。 
+3.构建可复用的周/月度看板与报告（Data Studio/Looker Studio、Sheets/Excel），输出洞见与优 
+化建议。 
+4.与市场与技术团队协作，基于数据支持落地改版、A/B 测试与投放策略优化。 
+要求： 
+1.IT/数据科学/市场营销等相关专业。 
+2.熟悉基础数据分析方法与指标体系，能使用 Excel/Sheets 进行数据处理与可视化。 
+3.了解至少一种分析/脚本工具（Python/R/SQL）或可快速上手。 
+4.逻辑清晰、细致严谨，具备良好的书面表达与跨团队沟通能力","数据分析实习生 （Data Analysis Intern）
+岗位职责： 
+1.协助收集、清洗与整合网站与投放数据（Google Analytics/GA4、Google Search Console、Google 
+Ads 等）。 
+2.参与 SEO/SEM 项目的数据追踪与归因，监测核心指标：流量、关键词排名、CTR、CVR、 
+CPA/ROAS 等。 
+3.构建可复用的周/月度看板与报告（Data Studio/Looker Studio、Sheets/Excel），输出洞见与优 
+化建议。 
+4.与市场与技术团队协作，基于数据支持落地改版、A/B 测试与投放策略优化。 
+要求： 
+1.IT/数据科学/市场营销等相关专业。 
+2.熟悉基础数据分析方法与指标体系，能使用 Excel/Sheets 进行数据处理与可视化。 
+3.了解至少一种分析/脚本工具（Python/R/SQL）或可快速上手。 
+4.逻辑清晰、细致严谨，具备良好的书面表达与跨团队沟通能力",线下,悉尼,22000,否,否,,,,,,,,,
+金融,Finture Alternative Investments,,"About Finture 
+Finture Alternative Investments is a specialist alternative investment and corporate advisory firm, 
+licensed under AFSL 514063, operating across Australia and Asia-Pacific. Its core business areas 
+include: 
+• Private Equity & Venture Capital – Early- to growth-stage investments 
+• Private Credit – Structured lending and downside-protected yield solutions 
+• Real Assets – Infrastructure, property, and natural assets 
+• Corporate Advisory – M&A, capital raising, valuation, financial modelling 
+• Legal & Compliance – Licensing, KYC/AML, structuring and regulatory advisory",Investments & Quantitative Research Intern 投资与量化研究实习生,"投资与量化研究实习生 Investments & Quantitative Research Intern
+1. This role is designed for students interested in quantitative finance, financial modelling, 
+alternative investments, risk analysis, and corporate transactions. 
+2. You will support the investment and advisory teams in research, modelling, due diligence, and 
+operational tasks across private markets. 
+3. The role is especially suitable for candidates with strong programming and mathematical 
+modelling skills, such as C++, Python, HPC, and quantitative analysis (based on résumé). 
+Key Responsibilities 
+Quantitative Research & Market Analysis 
+• Develop analytical models using Python (NumPy, pandas, SciPy) for asset pricing, volatility 
+estimation, Monte Carlo simulations, and scenario analysis (aligned with past projects) . 
+• Conduct quantitative and qualitative research across PE/VC, private credit, real assets, and 
+fintech sectors, referencing Finture's investment focus . 
+• Prepare research reports and presentations for internal investment committees. 
+Transaction & Due Diligence Support 
+• Assist with company research, financial statement review, market sizing, and competitive 
+landscape analysis. 
+• Support the preparation of M&A, capital raising, valuation, and due diligence materials, aligned 
+with Finture's corporate advisory services. 
+• Build or refine deal-related financial models, including cap tables and debt structures. 
+Financial Modelling & Valuation• Develop valuation models such as DCF, Comparable Comps, and Precedent Transactions. 
+• Build return analysis frameworks for PE/VC investments, including sensitivity and scenario 
+modelling. 
+Fund Operations & Portfolio Support 
+• Assist with fund data management, reporting, and operational workflows. 
+• Research fund structures (unit trusts, companies, ESVCLP/VCLP, offshore structures). 
+• Support compliance processes including AML/KYC and regulatory documentation. 
+Required Qualifications 
+• Currently studying Financial Mathematics, Mathematics, Computer Science, Finance, or related 
+field. 
+• Solid foundation in quantitative methods: probability, stochastic processes, linear algebra, 
+numerical methods. 
+• Proficiency in Python for data analysis and modelling. 
+• Understanding of financial instruments, asset pricing, or derivatives. 
+• Strong analytical, problem-solving, and communication skills. 
+• Ability to work independently in a fast-paced investment environment. 
+What You Will Gain 
+• First-hand exposure to real-world alternative investment and advisory transactions. 
+• Training in PE/VC, private credit, fund operations, and investment structuring. 
+• Understanding of the Australian financial regulatory environment (AFSL, AML/KYC). 
+• Mentorship from senior professionals with backgrounds at JP Morgan, Citigroup, BlackRock, 
+NAB, Investec. 
+• Strengthened quantitative finance and modelling skill set through hands-on projects. 
+• Opportunity to contribute to high-impact investment decisions and strategic initiatives.",线上,线下,墨尔本,25000,否,否,,,,,,,,,
+金融,JCL Financial,https://www.jclfinancialaust.com.au/col.jsp?id=101,"JCL Financial拥有独立澳大利亚信贷资质的抵押贷款经纪，持有 50 多家澳大利亚本地银行和非银行机构（包括四大银行）颁发的营业执照。
+- 澳大利亚抵押贷款与金融协会 (MFAA) 和澳大利亚金融经纪人协会 (FFAA) 认证的抵押贷款经纪人。
+- 凭借丰富的经验、强大的金融网络资源和出色的客户服务：住房贷款，投资物业贷款，建筑开发贷款、商业贷款和大型开发项目贷款。",Loan Broker 贷款经纪人,"贷款经纪人（Loan Broker）
+岗位职责：
+1. 负责对接客户，了解客户贷款需求（住房，投资物业、建筑开发、商业及大型开发项目等），提供专业的贷款咨询服务，结合公司资源匹配合适的贷款方案。
+2. 依托公司50多家合作银行及非银行机构资源，协助客户准备贷款申请材料，跟进申请流程，协调银行及相关机构，确保贷款业务顺利推进。
+3. 严格遵循MFAA、FFAA认证标准及行业规范，合规开展贷款经纪业务，维护公司及行业良好口碑。
+4. 主动拓展新客户资源，维护老客户关系，挖掘客户潜在贷款需求，提升客户满意度与复购率。
+5. 配合团队完成贷款业务数据统计、客户档案整理，参与业务复盘，优化服务流程，提升业务办理效率。
+
+要求：
+1. 本科及以上学历，金融、经济、会计、工商管理等相关专业优先，具备澳大利亚本地相关金融从业背景者加分。
+2. 了解澳大利亚抵押贷款相关政策，行业规范，熟悉住房贷款、商业贷款等各类贷款产品及办理流程，有贷款经纪相关实习或工作经验者优先。
+3. 具备出色的沟通表达能力、逻辑思维能力和问题解决能力，善于倾听客户需求，能精准匹配贷款方案，具备良好的谈判技巧。
+4. 具备高度的责任心、诚信意识和服务意识，严格遵守行业合规要求，学习能力强，能快速适应行业政策及产品变化，具备良好的团队协作能力。",线下,墨尔本,22000,是,培训期后，根据case完成情况拿Commission,,,,,,,,,
+金融,Synray Capital,https://synraycapital.com.au/,Synray Capital 是一家面向企业提供企业服务、家族办公室与个人服务、以及投资与财富管理等一体化方案；强调本地专业与全球网络，提供定制化跨境金融策略。官网披露其累计主导 60+ 投资项目、管理资产规模超 A$10 亿，并管理 100+ 只基金。,Financial Analyst 金融分析,"金融分析（Financial Analyst ）
+岗位职责：
+1. 分析公司投资项目、基金及资产状况，输出分析报告。
+2. 跟踪跨境金融市场动态，提供策略参考及数据支持。
+3. 协助梳理家族办公室及个人财富管理相关金融逻辑。
+4. 配合团队完成定制化跨境金融方案的数据分析工作。
+5. 参与公司投资项目尽调，整理分析相关金融资料。
+要求：
+1. 本科及以上学历，金融、经济、会计相关专业。
+2. 具备较强的逻辑思维及数据整理分析能力。
+3. 熟练使用办公及金融数据分析工具（如Excel、Wind）。
+4. 具备良好的中英文读写能力及沟通协作能力。",线上,线下,墨尔本/悉尼,22000,否,否,,,,,,,,,
+金融,Finstreet,https://finstreet.au/,Finstreet成立于2016年，是一家专注于非银行贷款的金融科技公司，通过 AI 和数字化平台（如 FINSERV），为经纪人提供广泛灵活的贷款解决方案。其产品类型覆盖 Full Doc 至 Non‑Conforming，特别注重帮扶传统银行不易覆盖的借款人群。,Marketing Operations & Project Manager 市场运营/项目管理,"市场运营/项目管理(Marketing Operations & Project Manager)
+岗位职责：
+1.统筹市场运营，策划推广活动，提升品牌曝光与业务影响力。
+2.管控营销项目全流程，联动合作机构保障项目落地。
+3.遵循行业规范，确保市场运营及项目执行合规。
+4.分析市场数据，优化方案，拓展渠道提升转化。
+5.配合团队，协调资源，优化流程提升协作效率。
+要求：
+1.本科及以上，市场营销、项目管理等相关专业优先。
+2.了解非银行贷款行业，熟悉数字化运营流程。
+3.具备统筹、沟通能力及基本文案撰写能力。
+4.责任心强、善学习，逻辑清晰且协作能力佳。",线下,悉尼,22000,是,培训期后，根据case完成情况拿Commission,,,,,,,,,
+,,,Financial Analyst（Foreign Exchange Back Office Analyst） 金融分析 （外汇业务后台分析）,"金融分析 （外汇业务后台分析）（Financial Analyst-Foreign Exchange Back Office Analyst） 
+岗位职责： 
+1.协助后台数据分析，包括贷款申请流程、风险定价、产品使用统计等； 
+2.使用 Excel / SQL /Python 等工具整理业务指标与报表； 
+3.支持 FINCAP、Easy Refi、SMSF、Expat 等产品线的数据分析工作； 
+4.协助信用风险评估流程及产品定价辅助。 
+要求： 
+1.本科或以上学历，金融、经济、数据分析或相关专业优先； 
+2.熟悉基本的数据分析工具（Excel、SQL，或基础 Python/R）； 
+3.具备良好的逻辑思维、学习能力与沟通能力； 
+4.对金融科技、非银行贷款产品有兴趣。",线下,悉尼,22000,是,培训期后，根据case完成情况拿Commission,,,,,,,,,
+金融,Corporate Alliance Group,https://corporatealliance.com/about-us/,"Corporate Alliance Group专注于为澳大利亚、新西兰和香港的企业提供跨境支付、外汇风险管理和贸易融资等综合金融解决方案。
+成立于2013年，业务覆盖180多个国家，支持39种货币。",Financial/Marketing 市场/金融,"市场/金融（Financial/Marketing）
+岗位职责：
+1.推广跨境支付、外汇风险管理等综合金融解决方案。
+2.对接澳新港企业客户，了解需求并提供专业服务。
+3。统筹市场推广项目，保障业务覆盖及品牌曝光。
+4.分析市场及业务数据，优化推广与服务策略。
+5.协调内外部资源，配合团队达成业务目标。
+要求：
+1.本科及以上，金融、市场营销、国际贸易等专业优先。
+2.了解跨境支付、外汇业务，熟悉金融行业规则。
+3.具备良好沟通、逻辑思维及文案撰写能力。
+4.责任心强、善学习，具备团队协作与抗压能力。",线下,悉尼,22000,否,否,,,,,,,,,
+金融,Privy Capital Pty Ltd,https://www.privycapital.com.au/,Privy Capital Pty Ltd是一家澳大利亚金融机构，为中小型企业和房地产专业人士提供房地产支持交易资金,Financial Broker / Marketing Operations 金融经纪人/市场运营,"金融经纪人/市场运营（Financial Broker / Marketing Operations）
+岗位职责：
+1.协助推广公司房地产支持交易资金相关业务。
+2.协助对接中小企业及房地产专业人士咨询。
+3.整理业务相关资料、客户信息及基础数据。
+4.协助跟进业务流程，反馈基础执行情况。
+5.配合团队完成日常运营及辅助工作。
+要求：
+1.本科及以上学历，金融、经济等相关专业优先。
+2.了解基础金融知识，对房地产金融有兴趣。
+3.具备良好沟通能力、逻辑思维及学习能力。
+4.认真负责、细心严谨，具备基础协作能力。",线下,悉尼,22000,否,培训期后，根据case完成情况拿Commission,,,,,,,,,
