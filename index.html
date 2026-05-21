@@ -4,525 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实习智能匹配平台 - AI智能岗位匹配</title>
-    <style>
+        <style>
+        /* ====== 基础重置 ====== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; 
-            background: #f0f2f5; 
-            min-height: 100vh; 
-            color: #333;
+            background: #f0f2f5; min-height: 100vh; color: #333;
+            -webkit-overflow-scrolling: touch;
         }
         
-        /* 顶部导航 */
+        /* ====== 顶部导航 - 移动端默认堆叠 ====== */
         .header { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            padding: 20px 40px; 
-            color: white; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
+            padding: 15px 20px; color: white; 
+            display: flex; flex-direction: column; gap: 10px; align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .header-left h1 { font-size: 28px; font-weight: bold; margin-bottom: 4px; }
-        .header-left p { font-size: 14px; opacity: 0.9; }
+        .header-left { text-align: center; }
+        .header-left h1 { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+        .header-left p { font-size: 12px; opacity: 0.9; }
         .header-right { 
-            display: flex; 
-            gap: 20px; 
-            font-size: 14px; 
-            background: rgba(255,255,255,0.15); 
-            padding: 10px 20px; 
-            border-radius: 8px; 
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; 
+            font-size: 12px; background: rgba(255,255,255,0.15); 
+            padding: 8px 15px; border-radius: 8px; width: 100%;
         }
-        .stat-item { white-space: nowrap; }
+        .stat-item { white-space: nowrap; font-size: 12px; }
         
-        /* 主容器 */
+        /* ====== 主容器 - 移动端默认单栏 ====== */
         .main-container { 
-            display: flex; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            gap: 20px;
+            display: flex; flex-direction: column;
+            max-width: 1400px; margin: 0 auto; padding: 10px; gap: 10px;
         }
+        .sidebar { width: 100%; }
+        .content { flex: 1; min-width: 0; }
         
-        /* 左侧筛选区 */
-        .sidebar { 
-            width: 300px; 
-            flex-shrink: 0; 
-        }
+        /* ====== 搜索卡片 ====== */
         .search-card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            background: white; border-radius: 12px; padding: 15px; 
+            margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
         }
         .search-box { 
-            display: flex; 
-            align-items: center; 
-            background: #f5f5f5; 
-            border-radius: 8px; 
-            padding: 12px 16px; 
-            margin-bottom: 16px;
+            display: flex; align-items: center; background: #f5f5f5; 
+            border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
         }
         .search-icon { font-size: 18px; margin-right: 10px; }
         .search-box input { 
-            flex: 1; 
-            border: none; 
-            outline: none; 
-            font-size: 14px; 
-            background: transparent; 
+            flex: 1; border: none; outline: none; font-size: 14px; 
+            background: transparent; min-height: 44px;
         }
         
         /* 模式切换 */
-        .mode-switch { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 16px; 
-        }
+        .mode-switch { display: flex; gap: 8px; margin-bottom: 12px; }
         .mode-btn { 
-            flex: 1; 
-            padding: 10px; 
-            border: 2px solid #e0e0e0; 
-            background: white; 
-            color: #666; 
-            border-radius: 8px; 
-            font-size: 13px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
+            flex: 1; padding: 10px; border: 2px solid #e0e0e0; 
+            background: white; color: #666; border-radius: 8px; 
+            font-size: 13px; cursor: pointer; transition: all 0.3s; min-height: 44px;
         }
+        .mode-btn:active { transform: scale(0.97); }
         .mode-btn.active { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            border-color: transparent; 
+            color: white; border-color: transparent; 
         }
         
-        /* 智能匹配表单 */
-        .match-form { 
-            display: none; 
-            margin-top: 16px; 
-        }
+        /* 匹配表单 */
+        .match-form { display: none; margin-top: 12px; }
         .match-form.show { display: block; }
-        .form-group { margin-bottom: 12px; }
-        .form-label { 
-            display: block; 
-            font-size: 13px; 
-            color: #333; 
-            margin-bottom: 6px; 
-            font-weight: 500; 
-        }
+        .form-group { margin-bottom: 10px; }
+        .form-label { display: block; font-size: 13px; color: #333; margin-bottom: 6px; font-weight: 500; }
         .form-input { 
-            width: 100%; 
-            padding: 10px 12px; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 8px; 
-            font-size: 13px; 
-            outline: none; 
-            transition: border-color 0.3s;
+            width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; 
+            border-radius: 8px; font-size: 14px; outline: none; 
+            transition: border-color 0.3s; min-height: 44px;
         }
         .form-input:focus { border-color: #667eea; }
         .match-btn { 
-            width: 100%; 
-            padding: 12px; 
+            width: 100%; padding: 12px; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 15px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: opacity 0.3s;
+            color: white; border: none; border-radius: 8px; font-size: 15px; 
+            font-weight: bold; cursor: pointer; transition: opacity 0.3s; min-height: 48px;
         }
-        .match-btn:hover { opacity: 0.9; }
+        .match-btn:active { opacity: 0.8; }
         
         /* 分类标签 */
-        .category-tabs { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-            margin-top: 16px; 
-        }
+        .category-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
         .category-tab { 
-            padding: 8px 16px; 
-            background: #f5f5f5; 
-            border: none; 
-            border-radius: 20px; 
-            font-size: 13px; 
-            color: #666; 
-            cursor: pointer; 
-            transition: all 0.3s; 
+            padding: 8px 14px; background: #f5f5f5; border: none; border-radius: 20px; 
+            font-size: 13px; color: #666; cursor: pointer; transition: all 0.3s; min-height: 36px;
         }
-        .category-tab:hover { background: #e8e8e8; }
+        .category-tab:active { background: #e0e0e0; }
         .category-tab.active { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; 
         }
         
-        /* 右侧内容区 */
-        .content { 
-            flex: 1; 
-            min-width: 0; 
-        }
+        /* 结果头部 */
         .result-header { 
-            background: white; 
-            padding: 16px 20px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
-            font-size: 14px; 
-            color: #666;
+            background: white; padding: 12px 15px; border-radius: 12px; 
+            margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-size: 13px; color: #666;
         }
-        .result-title { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #333; 
-            margin-bottom: 4px;
-        }
+        .result-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 4px; }
         
-        /* 岗位列表 - 响应式网格布局 */
-        .job-grid { 
-            display: grid; 
-            grid-template-columns: 1fr; /* 移动端默认单栏 */
-            gap: 16px; 
-        }
-        
-        /* PC端双栏 */
-        @media (min-width: 768px) {
-            .job-grid {
-                grid-template-columns: repeat(2, 1fr); /* PC端双栏 */
-            }
-        }
+        /* ====== 岗位网格 ====== */
+        .job-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .job-card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 20px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
-            border: 2px solid transparent;
+            background: white; border-radius: 12px; padding: 16px; cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            border: 2px solid transparent; min-height: 100px;
+            -webkit-tap-highlight-color: transparent; contain: layout style paint;
         }
-        .job-card:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-            border-color: #667eea;
-        }
-        .job-title-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            margin-bottom: 10px; 
-        }
-        .job-title { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #333; 
-            flex: 1; 
-            margin-right: 10px; 
-            line-height: 1.4;
-        }
-        .job-category-badge { 
-            background: #e3f2fd; 
-            color: #1976d2; 
-            padding: 4px 10px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            white-space: nowrap; 
-        }
-        .job-company { 
-            font-size: 14px; 
-            color: #667eea; 
-            margin-bottom: 12px; 
-            font-weight: 500; 
-        }
-        .job-tags { 
-            display: flex; 
-            gap: 6px; 
-            flex-wrap: wrap; 
-        }
-        .job-tag { 
-            background: #f5f5f5; 
-            padding: 4px 10px; 
-            border-radius: 4px; 
-            font-size: 12px; 
-            color: #666; 
-        }
+        .job-card:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-color: #667eea; }
+        .job-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .job-title { font-size: 15px; font-weight: bold; color: #333; flex: 1; margin-right: 10px; line-height: 1.4; }
+        .job-category-badge { background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; }
+        .job-company { font-size: 13px; color: #667eea; margin-bottom: 8px; font-weight: 500; }
+        .job-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .job-tag { background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: #666; }
         
         /* 加载和空状态 */
-        .loading { 
-            text-align: center; 
-            padding: 60px 20px; 
-            color: #999; 
-            font-size: 14px;
-        }
-        .empty { 
-            text-align: center; 
-            padding: 80px 20px; 
-            color: #999; 
-        }
+        .loading { text-align: center; padding: 60px 20px; color: #999; font-size: 14px; }
+        .empty { text-align: center; padding: 80px 20px; color: #999; }
         .empty-icon { font-size: 64px; margin-bottom: 16px; }
         
-        /* 首选推荐卡片 */
+        /* 首选推荐 */
         .top-recommendation {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+            border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
-        .top-rec-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .top-rec-content {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .top-rec-name {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .top-rec-desc {
-            opacity: 0.95;
-            margin-bottom: 12px;
-        }
-        .top-rec-info {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
+        .top-rec-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .top-rec-content { font-size: 14px; line-height: 1.6; }
+        .top-rec-name { font-size: 18px; font-weight: bold; margin-bottom: 6px; }
+        .top-rec-desc { opacity: 0.95; margin-bottom: 10px; }
+        .top-rec-info { background: rgba(255,255,255,0.15); padding: 10px; border-radius: 8px; font-size: 13px; }
         
-        /* 可复制岗位总结 */
-        .copyable-summary {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .summary-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-weight: bold;
-            color: #333;
-        }
-        .copy-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-        .copy-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        #summaryText {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.6;
-            resize: vertical;
-            font-family: monospace;
-            background: #f9f9f9;
-        }
+        /* 可复制总结 */
+        .copyable-summary { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: #333; font-size: 14px; }
+        .copy-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.3s; min-height: 36px; }
+        .copy-btn:active { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+        #summaryText { width: 100%; min-height: 100px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 13px; line-height: 1.6; resize: vertical; font-family: monospace; background: #f9f9f9; }
         
         /* 弹窗 */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0; 
-            background: rgba(0,0,0,0.5); 
-            z-index: 1000; 
-            overflow-y: auto; 
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .modal-overlay.show { display: block; }
-        .modal-content { 
-            background: white; 
-            max-width: 800px; 
-            margin: 40px auto; 
-            border-radius: 16px; 
-            padding: 32px; 
-            max-height: 85vh; 
-            overflow-y: auto; 
-        }
-        .modal-close { 
-            float: right; 
-            font-size: 32px; 
-            cursor: pointer; 
-            color: #999; 
-            line-height: 1; 
-            transition: color 0.3s;
-        }
-        .modal-close:hover { color: #333; }
-        .modal-title { 
-            font-size: 24px; 
-            font-weight: bold; 
-            margin-bottom: 24px; 
-            padding-right: 40px; 
-            color: #333; 
-            line-height: 1.4;
-        }
-        .modal-section { margin-bottom: 24px; }
-        .modal-section-title { 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #667eea; 
-            margin-bottom: 10px; 
-            padding-bottom: 6px; 
-            border-bottom: 2px solid #f0f0f0; 
-        }
-        .modal-section-content { 
-            font-size: 14px; 
-            color: #555; 
-            line-height: 1.8; 
+        .modal-content { background: white; max-width: 800px; margin: 10px auto; border-radius: 16px; padding: 20px 15px; max-height: 90vh; overflow-y: auto; }
+        .modal-close { float: right; font-size: 28px; cursor: pointer; color: #999; line-height: 1; padding: 4px 10px; transition: color 0.3s; min-height: 44px; min-width: 44px; }
+        .modal-close:active { color: #333; }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-right: 40px; color: #333; line-height: 1.4; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title { font-size: 14px; font-weight: bold; color: #667eea; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid #f0f0f0; }
+        .modal-section-content { font-size: 14px; color: #555; line-height: 1.8; }
+        
+        /* 海报 */
+        .poster-btn { display: block; width: 100%; margin-top: 16px; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; min-height: 48px; }
+        .poster-btn:active { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+        .poster-preview-content { max-width: 600px; text-align: center; }
+        .poster-preview-content img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        
+        /* ============================================= */
+        /*  平板及以上 (≥768px)：改为双栏布局              */
+        /* ============================================= */
+        @media (min-width: 768px) {
+            .header { flex-direction: row; padding: 20px 40px; justify-content: space-between; gap: 20px; }
+            .header-left { text-align: left; }
+            .header-left h1 { font-size: 28px; }
+            .header-left p { font-size: 14px; }
+            .header-right { width: auto; flex-wrap: nowrap; font-size: 14px; padding: 10px 20px; gap: 20px; }
+            .stat-item { font-size: 14px; }
+            .main-container { flex-direction: row; padding: 20px; gap: 20px; }
+            .sidebar { width: 300px; flex-shrink: 0; }
+            .search-card { padding: 20px; margin-bottom: 20px; }
+            .search-box { padding: 12px 16px; }
+            .job-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .job-card { padding: 20px; }
+            .job-title { font-size: 16px; }
+            .job-company { font-size: 14px; margin-bottom: 12px; }
+            .job-tag { font-size: 12px; padding: 4px 10px; }
+            .result-header { padding: 16px 20px; margin-bottom: 20px; font-size: 14px; }
+            .result-title { font-size: 16px; }
+            .top-recommendation { padding: 24px; }
+            .top-rec-title { font-size: 18px; }
+            .top-rec-name { font-size: 20px; }
+            .copyable-summary { padding: 20px; }
+            .summary-header { font-size: 16px; }
+            .modal-content { margin: 40px auto; padding: 32px; max-height: 85vh; }
+            .modal-title { font-size: 24px; }
+            .modal-section-title { font-size: 15px; }
+            .category-tab { padding: 8px 16px; font-size: 13px; }
+            .category-tabs { gap: 8px; }
+            .mode-btn { padding: 10px; font-size: 13px; }
         }
         
-        /* 响应式 */
-        @media (max-width: 1024px) {
-            .main-container { flex-direction: column; }
-            .sidebar { width: 100%; }
-            .job-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        /* ============================================= */
+        /*  桌面 (≥1024px)：三栏布局                       */
+        /* ============================================= */
+        @media (min-width: 1024px) {
+            .job-grid { grid-template-columns: repeat(3, 1fr); }
         }
         
-        /* 海报按钮样式 */
-        .poster-btn {
-            display: block;
-            width: 100%;
-            margin-top: 20px;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .poster-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        /* 海报预览弹窗 */
-        .poster-preview-content {
-            max-width: 600px;
-            text-align: center;
-        }
-        .poster-preview-content img {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        
-        /* ========== 移动端响应式适配 ========== */
-        @media (max-width: 768px) {
-            /* 顶部导航 */
-            .header {
-                flex-direction: column;
-                padding: 15px 20px;
-                gap: 10px;
-            }
-            .header-left h1 { font-size: 22px; }
-            .header-left p { font-size: 12px; }
-            .header-right {
-                width: 100%;
-                justify-content: center;
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-            
-            /* 主容器：改为单栏 */
-            .main-container {
-                flex-direction: column;
-                padding: 10px;
-                gap: 10px;
-            }
-            
-            /* 侧边栏：宽度100% */
-            .sidebar {
-                width: 100%;
-            }
-            .search-card {
-                padding: 15px;
-                margin-bottom: 10px;
-            }
-            
-            /* 搜索框 */
-            .search-box {
-                padding: 10px 12px;
-            }
-            .search-box input { font-size: 14px; }
-            
-            /* 模式切换按钮 */
-            .mode-btn { padding: 8px; font-size: 12px; }
-            
-            /* 匹配表单 */
-            .form-input { padding: 8px 10px; font-size: 12px; }
-            .match-btn { padding: 10px; font-size: 14px; }
-            
-            /* 分类标签 */
-            .category-tabs { gap: 6px; }
-            .category-tab { padding: 6px 12px; font-size: 12px; }
-            
-            /* 结果头部 */
-            .result-header {
-                padding: 12px 15px;
-                margin-bottom: 10px;
-            }
-            .result-title { font-size: 14px; }
-            .result-header { font-size: 13px; }
-            
-            /* 岗位网格：改为单列 */
-            .job-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            /* 岗位卡片 */
-            .job-card { padding: 15px; }
-            .job-title { font-size: 15px; }
-            .job-company { font-size: 13px; margin-bottom: 8px; }
-            .job-tag { font-size: 11px; padding: 3px 8px; }
-            
-            /* 弹窗 */
-            .modal-content {
-                margin: 10px;
-                padding: 20px 15px;
-                max-height: 90vh;
-            }
-            .modal-title { font-size: 18px; }
-            .modal-section-title { font-size: 14px; }
-            .modal-section-content { font-size: 13px; }
-            
-            /* 海报按钮 */
-            .poster-btn { padding: 12px; font-size: 14px; }
-        }
-        
-        /* 超小屏幕（iPhone 5/SE等） */
-        @media (max-width: 375px) {
-            .header-left h1 { font-size: 18px; }
-            .header-right { flex-wrap: wrap; justify-content: center; }
-            .stat-item { font-size: 11px; }
+        /* ============================================= */
+        /*  仅 hover 设备启用悬停效果（不干扰触屏）          */
+        /* ============================================= */
+        @media (hover: hover) {
+            .job-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #667eea; }
+            .match-btn:hover { opacity: 0.9; }
+            .copy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+            .modal-close:hover { color: #333; }
+            .poster-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+            .category-tab:hover { background: #e8e8e8; }
         }
     </style>
+
 </head>
 <body>
     <!-- 顶部导航 -->
@@ -646,6 +336,15 @@
         let currentCategory = 'all';
         let currentDetailJob = null;
         let currentMode = 'search';
+        let _searchTimeout = null;
+        
+        // 🔒 XSS安全：HTML转义函数
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
         
         // 获取岗位显示类型（实地/远程/PTA/美国）
         // 根据sheet_name和category判断
@@ -971,34 +670,31 @@
                 // 根据类型调整展示信息
                 let infoTags = '';
                 if (jobType === '实地') {
-                    // 实地：展示地点、公司、方向
                     infoTags = `
-                        ${job.location ? `<span class="job-tag">📍 ${job.location}</span>` : ''}
-                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
-                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                        ${job.location ? `<span class="job-tag">📍 ${escapeHtml(job.location)}</span>` : ''}
+                        ${job.industry ? `<span class="job-tag">🎯 ${escapeHtml(job.industry)}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
                     `;
                 } else if (jobType === 'PTA') {
-                    // PTA：展示学校、方向
                     infoTags = `
-                        ${job.company ? `<span class="job-tag">🏛️ ${job.company}</span>` : ''}
-                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
-                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                        ${job.company ? `<span class="job-tag">🏛️ ${escapeHtml(job.company)}</span>` : ''}
+                        ${job.industry ? `<span class="job-tag">🎯 ${escapeHtml(job.industry)}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
                     `;
                 } else {
-                    // 远程/美国：展示公司、方向
                     infoTags = `
-                        ${job.company ? `<span class="job-tag">🏢 ${job.company}</span>` : ''}
-                        ${job.industry ? `<span class="job-tag">🎯 ${job.industry}</span>` : ''}
-                        ${job.duration ? `<span class="job-tag">⏰ ${job.duration}</span>` : ''}
+                        ${job.company ? `<span class="job-tag">🏢 ${escapeHtml(job.company)}</span>` : ''}
+                        ${job.industry ? `<span class="job-tag">🎯 ${escapeHtml(job.industry)}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
                     `;
                 }
                 
                 div.innerHTML = `
                     <div class="job-title-row">
-                        <div class="job-title">${job.position || '未知岗位'}</div>
-                        <div class="job-category-badge" style="background: ${badgeStyle.bg}; color: ${badgeStyle.color};">${jobType}</div>
+                        <div class="job-title">${escapeHtml(job.position || '未知岗位')}</div>
+                        <div class="job-category-badge" style="background: ${badgeStyle.bg}; color: ${badgeStyle.color};">${escapeHtml(jobType)}</div>
                     </div>
-                    <div class="job-company">🏢 ${job.company || '未知公司'}</div>
+                    <div class="job-company">🏢 ${escapeHtml(job.company || '未知公司')}</div>
                     <div class="job-tags">
                         ${infoTags}
                     </div>
@@ -1034,9 +730,9 @@
             if (job.industry) info += `🎯 ${job.industry}`;
             
             container.innerHTML = `
-                <div class="top-rec-name">${job.position || '未知岗位'}</div>
-                <div class="top-rec-desc">${desc}</div>
-                <div class="top-rec-info">${info}</div>
+                <div class="top-rec-name">${escapeHtml(job.position || '未知岗位')}</div>
+                <div class="top-rec-desc">${escapeHtml(desc)}</div>
+                <div class="top-rec-info">${escapeHtml(info)}</div>
             `;
         }
         
@@ -1108,11 +804,10 @@
                 const value = job[field.key];
                 if (value && String(value).trim()) {
                     hasContent = true;
-                    // 保留换行符，使内容更易读
-                    const formattedValue = String(value).replace(/\n/g, '<br>');
+                    const safeValue = escapeHtml(String(value)).replace(/\n/g, '<br>');
                     bodyHTML += `<div class="modal-section">
-                        <div class="modal-section-title">${field.title}</div>
-                        <div class="modal-section-content">${formattedValue}</div>
+                        <div class="modal-section-title">${escapeHtml(field.title)}</div>
+                        <div class="modal-section-content">${safeValue}</div>
                     </div>`;
                 }
             });
@@ -1209,9 +904,10 @@
             document.querySelector('.content').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // 事件监听
+        // 事件监听 - 搜索防抖300ms
         document.getElementById('searchInput').addEventListener('input', function() {
-            filterJobs();
+            clearTimeout(_searchTimeout);
+            _searchTimeout = setTimeout(filterJobs, 300);
         });
         
         document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -1254,674 +950,368 @@
         
         // ========== 海报生成功能 ==========
         let _isGeneratingPoster = false;
-        
+
+        // 工具函数：哈希、随机种子、圆角矩形
+        function hashStr(str){let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}return h;}
+        function seedRnd(s){let x=s;return function(){x=(x*1103515245+12345)&0x7fffffff;return x/0x7fffffff;};}
+        function rRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+        function txtLines(ctx,text,mw){
+            if(!text) return 0;
+            let l=1,line='';
+            for(let i=0;i<text.length;i++){
+                const t=line+text[i];
+                if(ctx.measureText(t).width>mw&&i>0){l++;line=text[i];}
+                else line=t;
+            }
+            return l;
+        }
+
+        function drawWrap(ctx,text,x,y,mw,lh,align){
+            if(!text) return y;
+            align=align||'left';
+            const savedAlign=ctx.textAlign;
+            ctx.textAlign=align;
+            const parts=text.split('\n');
+            let cur=y;
+            for(let pi=0;pi<parts.length;pi++){
+                const raw=parts[pi];
+                if(!raw.trim()){cur+=lh*0.5;continue;}
+                let line='';
+                for(let i=0;i<raw.length;i++){
+                    const t=line+raw[i];
+                    if(ctx.measureText(t).width>mw&&i>0){
+                        ctx.fillText(line,x,cur);
+                        cur+=lh;line=raw[i];
+                    }else line=t;
+                }
+                if(line){ctx.fillText(line,x,cur);cur+=lh;}
+            }
+            ctx.textAlign=savedAlign;
+            return cur;
+        }
+
         // 生成岗位海报
         function generatePoster() {
-            // 防止重复点击
             if (_isGeneratingPoster) return;
             _isGeneratingPoster = true;
-            
+
             const job = currentDetailJob;
             if (!job) {
                 alert('无法获取岗位数据');
                 _isGeneratingPoster = false;
                 return;
             }
-            
+
             const width = 750;
-            
-            // 先创建一个临时canvas计算高度
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
             tempCanvas.width = width;
-            tempCanvas.height = 3000; // 足够大
-            tempCtx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
-            
-            const finalHeight = drawNewPoster(tempCtx, width, job);
-            
-            // 创建正式canvas，设置正确尺寸
+            tempCanvas.height = 3000;
+
+            const finalHeight = drawPoster(tempCtx, width, job);
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = width;
             canvas.height = finalHeight;
-            ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
-            
-            // 正式绘制
-            drawNewPoster(ctx, width, job);
-            
+
+            drawPoster(ctx, width, job);
             showPosterPreview(canvas);
             _isGeneratingPoster = false;
         }
-        
-        // 绘制城市照片风格背景（参考图2：真实城市天际线+暗角遮罩）
-        function drawCityPhotoBackground(ctx, width, height) {
-            // 绘制城市建筑剪影（模拟真实城市天际线照片感）
-            // 使用多层建筑创造景深效果
-            
-            // 远景建筑（更淡、更小）
-            ctx.fillStyle = '#1a2744';
-            const farBuildings = [
-                { x: 0, w: 80, h: 200 },
-                { x: 70, w: 60, h: 280 },
-                { x: 120, w: 100, h: 180 },
-                { x: 210, w: 50, h: 320 },
-                { x: 250, w: 80, h: 250 },
-                { x: 320, w: 70, h: 350 },
-                { x: 380, w: 90, h: 200 },
-                { x: 460, w: 60, h: 300 },
-                { x: 510, w: 80, h: 220 },
-                { x: 580, w: 70, h: 280 },
-                { x: 640, w: 100, h: 190 },
-                { x: 720, w: 60, h: 240 }
-            ];
-            farBuildings.forEach(b => {
-                ctx.fillRect(b.x, height - b.h, b.w, b.h);
-            });
 
-            // 中景建筑（带窗户细节，模拟真实照片）
-            ctx.fillStyle = '#0f1d33';
-            const midBuildings = [
-                { x: -20, w: 100, h: 400 },
-                { x: 70, w: 80, h: 550 },
-                { x: 140, w: 60, h: 350 },
-                { x: 190, w: 90, h: 480 },
-                { x: 270, w: 70, h: 600 },
-                { x: 330, w: 100, h: 420 },
-                { x: 420, w: 80, h: 520 },
-                { x: 490, w: 70, h: 380 },
-                { x: 550, w: 90, h: 500 },
-                { x: 630, w: 80, h: 450 },
-                { x: 700, w: 70, h: 580 }
-            ];
-            midBuildings.forEach(b => {
-                ctx.fillRect(b.x, height - b.h, b.w, b.h);
-            });
+        // ===== 城市夜景背景（多层景深+灯光氛围） =====
+        function drawBg(ctx,w,h){
+            // 天空渐变
+            const sky=ctx.createLinearGradient(0,0,0,h*0.65);
+            sky.addColorStop(0,'#050510');sky.addColorStop(0.12,'#0a0f25');sky.addColorStop(0.25,'#151a3a');
+            sky.addColorStop(0.4,'#2a2050');sky.addColorStop(0.55,'#452a55');sky.addColorStop(0.7,'#6b3a45');
+            sky.addColorStop(0.85,'#8b4a30');sky.addColorStop(1,'#3a2015');
+            ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
 
-            // 窗户细节（模拟真实建筑窗户反光）
-            ctx.fillStyle = 'rgba(255, 220, 150, 0.15)';
-            midBuildings.forEach(b => {
-                if (b.h > 300) {
-                    // 每栋建筑绘制几扇窗户
-                    for (let wy = height - b.h + 40; wy < height - 40; wy += 50) {
-                        for (let wx = b.x + 10; wx < b.x + b.w - 10; wx += 25) {
-                            if (Math.random() > 0.3) {
-                                ctx.fillRect(wx, wy, 12, 18);
-                            }
-                        }
-                    }
+            // 雾霾层
+            const haze=ctx.createLinearGradient(0,h*0.3,0,h);
+            haze.addColorStop(0,'rgba(30,25,60,0)');haze.addColorStop(0.3,'rgba(80,50,60,0.06)');
+            haze.addColorStop(0.6,'rgba(120,70,50,0.1)');haze.addColorStop(0.85,'rgba(180,100,60,0.15)');
+            haze.addColorStop(1,'rgba(200,120,70,0.08)');
+            ctx.fillStyle=haze;ctx.fillRect(0,h*0.3,w,h*0.7);
+
+            // 远山
+            ctx.fillStyle='#08091a';ctx.beginPath();ctx.moveTo(0,h*0.35);
+            for(let x=0;x<=w;x+=30){const hh=Math.sin(x*0.008)*25+Math.sin(x*0.023)*15+Math.sin(x*0.05)*8;ctx.lineTo(x,h*0.35-hh);}
+            ctx.lineTo(w,h*0.4);ctx.lineTo(w,h*0.45);ctx.lineTo(0,h*0.45);ctx.closePath();ctx.fill();
+
+            // 远景建筑
+            const rF=seedRnd(hashStr('far'));
+            ctx.fillStyle='#0c0e1e';
+            for(let i=0;i<25;i++) ctx.fillRect(rF()*w-20,h*0.45-(40+rF()*120),15+rF()*40,40+rF()*120);
+
+            // 中景建筑群（带窗户灯光）
+            const bldgs=[{x:-20,w:55,h:180,wr:4,wc:3,c:'#0a0f1e',a:0},{x:25,w:70,h:280,wr:7,wc:4,c:'#0d1225',a:1},{x:85,w:45,h:150,wr:3,wc:3,c:'#080e1c',a:0},{x:120,w:90,h:350,wr:9,wc:5,c:'#101830',a:1},{x:200,w:60,h:220,wr:5,wc:4,c:'#0b1120',a:0},{x:255,w:75,h:400,wr:10,wc:4,c:'#121c35',a:1},{x:325,w:50,h:180,wr:4,wc:3,c:'#0a1020',a:0},{x:370,w:100,h:480,wr:12,wc:6,c:'#142035',a:1},{x:465,w:65,h:300,wr:7,wc:4,c:'#0e1528',a:0},{x:525,w:80,h:420,wr:10,wc:5,c:'#111d32',a:1},{x:600,w:55,h:250,wr:6,wc:3,c:'#0c1222',a:0},{x:650,w:95,h:380,wr:9,wc:5,c:'#101a30',a:1},{x:740,w:60,h:200,wr:5,wc:3,c:'#0a1020',a:0}];
+            bldgs.forEach(b=>{
+                ctx.fillStyle=b.c;ctx.fillRect(b.x,h-b.h,b.w,b.h);
+                const hl=ctx.createLinearGradient(b.x,0,b.x+b.w,0);
+                hl.addColorStop(0,'rgba(100,140,200,0.02)');hl.addColorStop(0.5,'rgba(100,140,200,0.06)');hl.addColorStop(1,'rgba(100,140,200,0.01)');
+                ctx.fillStyle=hl;ctx.fillRect(b.x,h-b.h,b.w,b.h);
+                const rW=seedRnd(hashStr('wn'+b.x));
+                for(let r=0;r<b.wr;r++) for(let c=0;c<b.wc;c++){
+                    const wx=b.x+8+c*11,wy=h-b.h+15+r*18;
+                    if(wx+6>b.x+b.w-6||rW()>0.3) continue;
+                    const cr=rW();
+                    let wc=`rgba(255,220,130,${0.25+rW()*0.35})`;
+                    if(cr>=0.5&&cr<0.8) wc=`rgba(180,210,255,${0.15+rW()*0.25})`;
+                    else if(cr>=0.8) wc=`rgba(255,160,80,${0.2+rW()*0.3})`;
+                    ctx.fillStyle=wc;ctx.fillRect(wx,wy,6,9);
                 }
-            });
-
-            // 近景建筑（最深色，形成前景层次）
-            ctx.fillStyle = '#080f1f';
-            const nearBuildings = [
-                { x: -30, w: 120, h: 300 },
-                { x: 80, w: 90, h: 450 },
-                { x: 160, w: 110, h: 350 },
-                { x: 260, w: 80, h: 500 },
-                { x: 330, w: 100, h: 400 },
-                { x: 420, w: 90, h: 550 },
-                { x: 500, w: 80, h: 380 },
-                { x: 570, w: 100, h: 480 },
-                { x: 660, w: 90, h: 320 },
-                { x: 740, w: 50, h: 420 }
-            ];
-            nearBuildings.forEach(b => {
-                ctx.fillRect(b.x, height - b.h, b.w, b.h);
-            });
-
-            // 顶部强暗角（确保标题绝对可读）
-            const topVignette = ctx.createLinearGradient(0, 0, 0, height * 0.45);
-            topVignette.addColorStop(0, 'rgba(5, 10, 20, 0.92)');
-            topVignette.addColorStop(0.6, 'rgba(5, 10, 20, 0.7)');
-            topVignette.addColorStop(1, 'rgba(5, 10, 20, 0.2)');
-            ctx.fillStyle = topVignette;
-            ctx.fillRect(0, 0, width, height * 0.45);
-
-            // 底部强暗角（确保底部信息可读）
-            const bottomVignette = ctx.createLinearGradient(0, height * 0.65, 0, height);
-            bottomVignette.addColorStop(0, 'rgba(5, 10, 20, 0.3)');
-            bottomVignette.addColorStop(0.4, 'rgba(5, 10, 20, 0.75)');
-            bottomVignette.addColorStop(1, 'rgba(5, 10, 20, 0.95)');
-            ctx.fillStyle = bottomVignette;
-            ctx.fillRect(0, height * 0.65, width, height * 0.35);
-
-            // 整体暗色遮罩（统一色调，增强文字对比）
-            const overlay = ctx.createLinearGradient(0, 0, 0, height);
-            overlay.addColorStop(0, 'rgba(8, 16, 32, 0.6)');
-            overlay.addColorStop(0.3, 'rgba(8, 16, 32, 0.3)');
-            overlay.addColorStop(0.7, 'rgba(8, 16, 32, 0.4)');
-            overlay.addColorStop(1, 'rgba(8, 16, 32, 0.8)');
-            ctx.fillStyle = overlay;
-            ctx.fillRect(0, 0, width, height);
-        }
-        
-        // 绘制红色标签（参考图2风格：居中红色圆角标签）
-        function drawRedTag(ctx, text, x, y) {
-            ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
-            const metrics = ctx.measureText(text);
-            const padding = 24;
-            const tagWidth = metrics.width + padding * 2;
-            const tagHeight = 48;
-            const cornerRadius = 6;
-            const tagX = x - tagWidth / 2; // 居中
-            const tagY = y - tagHeight + 12;
-            
-            // 绘制圆角矩形路径
-            ctx.beginPath();
-            ctx.moveTo(tagX + cornerRadius, tagY);
-            ctx.lineTo(tagX + tagWidth - cornerRadius, tagY);
-            ctx.quadraticCurveTo(tagX + tagWidth, tagY, tagX + tagWidth, tagY + cornerRadius);
-            ctx.lineTo(tagX + tagWidth, tagY + tagHeight - cornerRadius);
-            ctx.quadraticCurveTo(tagX + tagWidth, tagY + tagHeight, tagX + tagWidth - cornerRadius, tagY + tagHeight);
-            ctx.lineTo(tagX + cornerRadius, tagY + tagHeight);
-            ctx.quadraticCurveTo(tagX, tagY + tagHeight, tagX, tagY + tagHeight - cornerRadius);
-            ctx.lineTo(tagX, tagY + cornerRadius);
-            ctx.quadraticCurveTo(tagX, tagY, tagX + cornerRadius, tagY);
-            ctx.closePath();
-            
-            // 红色渐变背景
-            const tagGradient = ctx.createLinearGradient(tagX, tagY, tagX, tagY + tagHeight);
-            tagGradient.addColorStop(0, '#ff4757');
-            tagGradient.addColorStop(1, '#c62828');
-            ctx.fillStyle = tagGradient;
-            ctx.fill();
-            
-            // 文字
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, x, y + 2);
-            ctx.textAlign = 'left';
-            
-            return tagWidth;
-        }
-        
-        // 绘制高亮条（参考图2风格：宽半透明条+粗体金色字）
-        function drawHighlightBar(ctx, text, width, y) {
-            const barHeight = 80;
-            const barY = y - barHeight / 2 - 8;
-            
-            // 主背景条（两端渐隐，更宽）
-            const barGradient = ctx.createLinearGradient(0, barY + barHeight/2, width, barY + barHeight/2);
-            barGradient.addColorStop(0, 'rgba(0,0,0,0)');
-            barGradient.addColorStop(0.08, 'rgba(0,0,0,0.6)');
-            barGradient.addColorStop(0.92, 'rgba(0,0,0,0.6)');
-            barGradient.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = barGradient;
-            ctx.fillRect(0, barY, width, barHeight);
-            
-            // 文字（金色，更大更粗）
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, width / 2, y + 4);
-            ctx.textAlign = 'left';
-            
-            return barHeight;
-        }
-        
-        // 绘制白色分割线（参考图2粗线风格）
-        function drawDivider(ctx, width, y) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(50, y);
-            ctx.lineTo(width - 50, y);
-            ctx.stroke();
-        }
-        
-        // 多行文本绘制函数（支持居中）
-        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-            if (!text) return y;
-            const lines = text.split('\n');
-            let currentY = y;
-            const isCenter = ctx.textAlign === 'center';
-            
-            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-                const lineText = lines[lineIndex];
-                if (!lineText.trim()) {
-                    currentY += lineHeight * 0.5;
-                    continue;
+                if(b.a){
+                    ctx.strokeStyle='rgba(255,200,100,0.4)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(b.x+b.w/2,h-b.h);ctx.lineTo(b.x+b.w/2,h-b.h-18);ctx.stroke();
+                    ctx.fillStyle='rgba(255,50,50,0.7)';ctx.beginPath();ctx.arc(b.x+b.w/2,h-b.h-20,2.5,0,Math.PI*2);ctx.fill();
                 }
-                
-                const chars = lineText.split('');
-                let line = '';
-                let lineWords = [];
-                
-                for (let i = 0; i < chars.length; i++) {
-                    const testLine = line + chars[i];
-                    const metrics = ctx.measureText(testLine);
-                    if (metrics.width > maxWidth && i > 0) {
-                        lineWords.push(line);
-                        line = chars[i];
-                    } else {
-                        line = testLine;
-                    }
-                }
-                lineWords.push(line);
-                
-                // 绘制每一行
-                lineWords.forEach(word => {
-                    let drawX = x;
-                    if (isCenter) {
-                        const wordWidth = ctx.measureText(word).width;
-                        drawX = x - wordWidth / 2; // 居中对齐时x是中心点
-                    }
-                    ctx.fillText(word, drawX, currentY);
-                    currentY += lineHeight;
-                });
-            }
-            
-            return currentY;
-        }
-        
-        // 绘制项目符号列表（参考图2风格：圆点+左对齐文字）
-        function drawBulletList(ctx, text, x, y, maxWidth, lineHeight) {
-            if (!text) return y;
-            const items = text.split(/[\n•]/).filter(item => item.trim());
-            let currentY = y;
-            
-            items.forEach(item => {
-                const trimmed = item.trim();
-                if (!trimmed) return;
-                
-                // 绘制项目符号（白色圆点）
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(x + 8, currentY - 8, 4, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 绘制文字
-                ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                currentY = wrapText(ctx, trimmed, x + 28, currentY, maxWidth - 30, lineHeight);
-                currentY += lineHeight * 0.4;
+                ctx.fillStyle='rgba(255,200,120,0.15)';ctx.fillRect(b.x+b.w/2-8,h-5,16,5);
             });
-            
-            return currentY;
-        }
-        
-        // ========== 参考图风格海报绘制 ==========
-        // 绘制红色圆角标签（参考图2风格：居中红色标签）
-        function drawRedLabel(ctx, text, x, y, fontSize, align) {
-            fontSize = fontSize || 24;
-            align = align || 'left';
-            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-            const metrics = ctx.measureText(text);
-            const paddingX = 18;
-            const paddingY = 10;
-            const labelWidth = metrics.width + paddingX * 2;
-            const labelHeight = fontSize + paddingY * 2;
-            const cornerRadius = 6;
 
-            // 根据对齐方式计算标签位置
-            let labelX = x;
-            if (align === 'center') {
-                labelX = x - labelWidth / 2;
-            }
-
-            // 绘制圆角矩形背景
-            ctx.beginPath();
-            ctx.moveTo(labelX + cornerRadius, y);
-            ctx.lineTo(labelX + labelWidth - cornerRadius, y);
-            ctx.quadraticCurveTo(labelX + labelWidth, y, labelX + labelWidth, y + cornerRadius);
-            ctx.lineTo(labelX + labelWidth, y + labelHeight - cornerRadius);
-            ctx.quadraticCurveTo(labelX + labelWidth, y + labelHeight, labelX + labelWidth - cornerRadius, y + labelHeight);
-            ctx.lineTo(labelX + cornerRadius, y + labelHeight);
-            ctx.quadraticCurveTo(labelX, y + labelHeight, labelX, y + labelHeight - cornerRadius);
-            ctx.lineTo(labelX, y + cornerRadius);
-            ctx.quadraticCurveTo(labelX, y, labelX + cornerRadius, y);
-            ctx.closePath();
-
-            // 红色填充 - 使用更沉稳的红色
-            ctx.fillStyle = '#c62828';
-            ctx.fill();
-
-            // 白色文字
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, labelX + labelWidth / 2, y + labelHeight - paddingY - 2);
-            ctx.textAlign = 'left';
-
-            return labelHeight + 12; // 返回标签高度+下方间距
-        }
-
-        // 绘制金色高亮条（参考图2风格：更宽的半透明条+粗体金色字）
-        function drawGoldBar(ctx, text, width, y, fontSize) {
-            fontSize = fontSize || 36;
-            const barHeight = fontSize + 32;
-            const barY = y - barHeight / 2;
-
-            // 半透明黑色背景条（两端渐隐，更宽更明显）
-            const barGradient = ctx.createLinearGradient(0, barY + barHeight/2, width, barY + barHeight/2);
-            barGradient.addColorStop(0, 'rgba(0,0,0,0)');
-            barGradient.addColorStop(0.05, 'rgba(0,0,0,0.6)');
-            barGradient.addColorStop(0.95, 'rgba(0,0,0,0.6)');
-            barGradient.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = barGradient;
-            ctx.fillRect(0, barY, width, barHeight);
-
-            // 金色文字 - 使用更亮的金色
-            ctx.fillStyle = '#ffd700';
-            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText(text, width / 2, y + fontSize / 3);
-            ctx.textAlign = 'left';
-
-            return barHeight + 20;
-        }
-
-        // 绘制白色分割线（参考图2风格：粗白线+上下留白）
-        function drawWhiteDivider(ctx, width, y, margin) {
-            margin = margin || 50;
-            // 主白线（更粗更明显）
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(margin, y);
-            ctx.lineTo(width - margin, y);
-            ctx.stroke();
-            
-            // 上方细线（增加层次感）
-            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(margin + 30, y - 8);
-            ctx.lineTo(width - margin - 30, y - 8);
-            ctx.stroke();
-        }
-
-        // 新海报绘制主函数（参考图2风格 - 居中对齐+城市背景+二维码）
-        function drawNewPoster(ctx, width, job) {
-            const centerX = width / 2;
-            const margin = 50;
-            const maxTextWidth = width - margin * 2;
-            const sectionGap = 32;   // 区块间距
-
-            // ========== 第一遍：计算所有内容高度 ==========
-            let calcY = 120; // 从顶部信息栏后开始
-
-            // 1. 公司名（超大字）
-            ctx.font = 'bold 52px "PingFang SC", "Microsoft YaHei", sans-serif';
-            const companyName = job.company || '未知公司';
-            const companyLines = calcWrapLines(ctx, companyName, maxTextWidth);
-            calcY += companyLines * 66 + sectionGap;
-
-            // 2. 岗位名（大字）
-            ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
-            const positionName = job.position || '未知岗位';
-            const positionLines = calcWrapLines(ctx, positionName, maxTextWidth);
-            calcY += positionLines * 58 + sectionGap;
-
-            // 3. 公司介绍（居中）
-            const introText = job.jd || job.company_intro || '';
-            if (introText) {
-                ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-                const introLines = calcWrapLines(ctx, introText.substring(0, 200), maxTextWidth);
-                calcY += introLines * 36 + sectionGap;
-            }
-
-            // 4. 适合专业（红色标签+居中内容）
-            calcY += 46 + sectionGap; // 标签高度
-            const majorText = job.industry || job.requirements || '相关专业';
-            ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
-            const majorLines = calcWrapLines(ctx, majorText, maxTextWidth);
-            calcY += majorLines * 38 + sectionGap;
-
-            // 5. 实习收获（红色标签+居中列表）
-            calcY += 46 + sectionGap; // 标签高度
-            const benefits = job.benefits || '名企导师推荐信\n100%实习背调支持 + 实习证明\n1v1 职业规划咨询 & 简历精修\n积累相关工作经验 & 岗位技能 & 人脉资源';
-            const benefitLines = benefits.split(/\n/).filter(l => l.trim());
-            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-            benefitLines.forEach(() => {
-                calcY += 38;
+            // 路灯
+            [{x:100,i:0.04},{x:300,i:0.05},{x:500,i:0.035},{x:650,i:0.045}].forEach(ls=>{
+                const lg=ctx.createRadialGradient(ls.x,h,0,ls.x,h,w*0.4);
+                lg.addColorStop(0,`rgba(255,200,120,${ls.i})`);lg.addColorStop(0.5,`rgba(255,180,100,${ls.i*0.3})`);lg.addColorStop(1,'rgba(255,180,100,0)');
+                ctx.fillStyle=lg;ctx.fillRect(0,h*0.5,w,h*0.5);
             });
-            calcY += sectionGap;
 
-            // 6. 实习周期（金色高亮条）
-            calcY += 75 + sectionGap;
+            // 近景剪影
+            ctx.fillStyle='#030510';
+            ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,h-200);ctx.lineTo(30,h-280);ctx.lineTo(80,h-240);ctx.lineTo(120,h-320);ctx.lineTo(160,h-280);ctx.lineTo(200,h-350);ctx.lineTo(220,h-300);ctx.lineTo(250,h-380);ctx.lineTo(260,h);ctx.closePath();ctx.fill();
+            ctx.beginPath();ctx.moveTo(w,h);ctx.lineTo(w,h-180);ctx.lineTo(w-40,h-260);ctx.lineTo(w-90,h-220);ctx.lineTo(w-130,h-300);ctx.lineTo(w-170,h-260);ctx.lineTo(w-210,h-340);ctx.lineTo(w-230,h-290);ctx.lineTo(w-260,h-360);ctx.lineTo(w-270,h);ctx.closePath();ctx.fill();
 
-            // 7. 分割线
-            calcY += 30 + sectionGap;
+            // 星星
+            const rS=seedRnd(hashStr('stars'));
+            for(let i=0;i<40;i++){ctx.fillStyle=`rgba(255,255,240,${0.2+rS()*0.5})`;ctx.beginPath();ctx.arc(rS()*w,rS()*h*0.35,0.5+rS()*1.5,0,Math.PI*2);ctx.fill();}
 
-            // 8. 岗位职责（红色标签+项目符号列表）
-            calcY += 46 + 15; // 标签+间距
-            const dutyContent = job.duty || job.jd || '';
-            if (dutyContent) {
-                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
-                const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
-                const dutyItems = allDutyItems.slice(0, 8);
-                dutyItems.forEach(item => {
-                    const lines = calcWrapLines(ctx, item.trim(), maxTextWidth - 40);
-                    calcY += Math.max(lines * 34, 34) + 14;
-                });
+            // 顶部暗角（确保标题绝对可读）
+            const tv=ctx.createLinearGradient(0,0,0,h*0.55);
+            tv.addColorStop(0,'rgba(2,3,8,0.97)');tv.addColorStop(0.25,'rgba(2,3,8,0.88)');tv.addColorStop(0.5,'rgba(2,3,8,0.6)');tv.addColorStop(0.75,'rgba(2,3,8,0.3)');tv.addColorStop(1,'rgba(2,3,8,0)');
+            ctx.fillStyle=tv;ctx.fillRect(0,0,w,h*0.55);
+
+            // 底部暗角
+            const bv=ctx.createLinearGradient(0,h*0.55,0,h);
+            bv.addColorStop(0,'rgba(2,3,8,0)');bv.addColorStop(0.3,'rgba(2,3,8,0.5)');bv.addColorStop(0.6,'rgba(2,3,8,0.82)');bv.addColorStop(0.85,'rgba(2,3,8,0.95)');bv.addColorStop(1,'rgba(2,3,8,0.99)');
+            ctx.fillStyle=bv;ctx.fillRect(0,h*0.55,w,h*0.45);
+
+            // 暖色叠层
+            const wo=ctx.createLinearGradient(0,0,w,h);
+            wo.addColorStop(0,'rgba(20,12,5,0.2)');wo.addColorStop(0.5,'rgba(20,12,5,0.08)');wo.addColorStop(1,'rgba(20,12,5,0.3)');
+            ctx.fillStyle=wo;ctx.fillRect(0,0,w,h);
+
+            // 光斑
+            const fl=ctx.createRadialGradient(w*0.7,h*0.2,0,w*0.7,h*0.2,w*0.5);
+            fl.addColorStop(0,'rgba(255,200,150,0.02)');fl.addColorStop(0.5,'rgba(255,180,120,0.008)');fl.addColorStop(1,'rgba(255,180,120,0)');
+            ctx.fillStyle=fl;ctx.fillRect(0,0,w,h);
+        }
+
+        // ===== UI组件：红色标签 =====
+        function drawRedTag(ctx,text,cx,y,fSz){
+            fSz=fSz||24;
+            ctx.font=`bold ${fSz}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            const tw=ctx.measureText(text).width;
+            const px=18,py=9,bw=Math.min(tw+px*2, 650),bh=fSz+py*2,rad=5;
+            const bx=cx-bw/2;
+            ctx.shadowColor='rgba(198,40,40,0.4)';ctx.shadowBlur=10;ctx.shadowOffsetY=2;
+            rRect(ctx,bx,y,bw,bh,rad);ctx.fillStyle='#c62828';ctx.fill();
+            ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+            ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(text,cx,y+bh-py-2);
+            ctx.textAlign='left';
+            return bh+12;
+        }
+
+        // ===== UI组件：金色高亮条 =====
+        function drawGoldBar(ctx,text,w,y,fSz){
+            fSz=fSz||36;
+            const bh=fSz+34,by=y-bh/2;
+            const bg=ctx.createLinearGradient(0,by,0,by+bh);
+            bg.addColorStop(0,'rgba(0,0,0,0.7)');bg.addColorStop(0.5,'rgba(0,0,0,0.85)');bg.addColorStop(1,'rgba(0,0,0,0.7)');
+            ctx.fillStyle=bg;ctx.fillRect(0,by,w,bh);
+            const gl=ctx.createLinearGradient(60,0,w-60,0);
+            gl.addColorStop(0,'rgba(255,215,0,0)');gl.addColorStop(0.2,'rgba(255,215,0,0.6)');gl.addColorStop(0.5,'rgba(255,215,0,0.9)');gl.addColorStop(0.8,'rgba(255,215,0,0.6)');gl.addColorStop(1,'rgba(255,215,0,0)');
+            ctx.fillStyle=gl;ctx.fillRect(0,by,w,2);ctx.fillRect(0,by+bh-2,w,2);
+            ctx.shadowColor='rgba(255,215,0,0.3)';ctx.shadowBlur=8;
+            ctx.fillStyle='#ffd700';ctx.font=`bold ${fSz}px "PingFang SC","Microsoft YaHei",sans-serif`;ctx.textAlign='center';ctx.fillText(text,w/2,y+fSz/3-1);
+            ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.textAlign='left';
+            return bh+20;
+        }
+
+        // ===== UI组件：装饰分割线 =====
+        function drawDiv(ctx,w,y,m){
+            m=m||50;
+            ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(m,y);ctx.lineTo(w-m,y);ctx.stroke();
+            ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m+40,y-10);ctx.lineTo(w-m-40,y-10);ctx.stroke();
+        }
+
+        // ===== 新海报主绘制函数（城市夜景背景+无二维码纯净底部） =====
+        function drawPoster(ctx,w,job){
+            const cx=w/2,mg=50,mw=w-mg*2,GAP=30;
+
+            // === 第一遍：计算高度 ===
+            let cy=120;
+
+            // 公司名 - 自适应字号 + 换行
+            let cfs=72, cNameWrap=false;
+            ctx.font=`bold ${cfs}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            const cName=job.company||'';
+            while(ctx.measureText(cName).width>mw && cfs>22){cfs-=4;ctx.font=`bold ${cfs}px "PingFang SC","Microsoft YaHei",sans-serif`;}
+            if(ctx.measureText(cName).width>mw){cNameWrap=true;cy+=txtLines(ctx,cName,mw)*(cfs+12)+GAP;}
+            else{cy+=cfs+20+GAP;}
+
+            // 岗位名（自适应字号）
+            let posFontSize2=40;
+            ctx.font=`bold ${posFontSize2}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            while(ctx.measureText(job.position||'').width>mw-40 && posFontSize2>22){posFontSize2-=2;ctx.font=`bold ${posFontSize2}px "PingFang SC","Microsoft YaHei",sans-serif`;}
+            if(ctx.measureText(job.position||'').width>mw-40){
+                cy+=txtLines(ctx,job.position||'',mw-40)*(posFontSize2+12)+GAP;
+            }else{
+                cy+=posFontSize2+12+GAP;
             }
 
-            // 底部留白+二维码区域（参考图2有二维码）
-            calcY += 160;
-
-            const height = Math.max(calcY, 1200); // 最小高度
-
-            // ========== 第二遍：正式绘制 ==========
-            // 1. 绘制城市照片风格背景
-            drawCityPhotoBackground(ctx, width, height);
-
-            // 2. 顶部信息栏（参考图2：左右分布）
-            const headerY = 40;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('实习地点', margin, headerY);
-            ctx.textAlign = 'right';
-            ctx.fillText('实习形式', width - margin, headerY);
-
-            ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(job.location || '线上/远程', margin, headerY + 34);
-            ctx.textAlign = 'right';
-            ctx.fillText(job.category || '人事', width - margin, headerY + 34);
-
-            let currentY = headerY + 95;
-
-            // 3. 公司名（超大白色居中，参考图2风格）
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            currentY = drawSmartText(ctx, companyName, centerX, currentY, maxTextWidth, 62, 50, 'bold');
-            currentY += sectionGap;
-
-            // 4. 岗位名（白色居中，稍小字号）
-            currentY = drawSmartText(ctx, positionName, centerX, currentY, maxTextWidth, 48, 36, 'bold');
-            currentY += sectionGap + 10;
-
-            // 5. 公司介绍（白色小字，居中）
-            if (introText) {
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-                ctx.textAlign = 'center';
-                const displayIntro = introText.substring(0, 180) + (introText.length > 180 ? '...' : '');
-                currentY = wrapText(ctx, displayIntro, centerX, currentY, maxTextWidth, 36);
-                currentY += sectionGap;
+            // 公司介绍 — 仅当 JD 不是岗位职责格式时展示
+            let intro='', showIntro=false;
+            const raw=(job.jd||'').replace(/^[^：]*：/g,'').trim();
+            if(raw && !/^\d[\.、）\)]/.test(raw) && !/^【/.test(raw)){
+                intro=raw.length>160?raw.substring(0,160)+'...':raw;
+                showIntro=true;
+                ctx.font='19px "PingFang SC","Microsoft YaHei",sans-serif';cy+=txtLines(ctx,intro,mw)*32+GAP;
             }
 
-            // 6. 适合专业（红色标签居中+白色内容居中）
-            currentY += drawRedLabel(ctx, '适合专业', centerX, currentY, 26, 'center');
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'center';
-            currentY = wrapText(ctx, majorText, centerX, currentY, maxTextWidth, 38);
-            currentY += sectionGap;
+            // 适合专业
+            cy+=40+14+GAP;
+            ctx.font='23px "PingFang SC","Microsoft YaHei",sans-serif';
+            cy+=txtLines(ctx,job.industry||'相关专业',mw)*36+GAP;
 
-            // 7. 实习收获（红色标签居中+白色列表居中）
-            currentY += drawRedLabel(ctx, '实习收获', centerX, currentY, 26, 'center');
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'center';
-            benefitLines.forEach(line => {
-                ctx.fillText(line.trim(), centerX, currentY);
-                currentY += 38;
-            });
-            currentY += sectionGap;
+            // 实习收获
+            cy+=40+14+GAP;
+            const bens=(job.benefits||"名企导师推荐信\n100%实习背调支持+实习证明\n1v1职业规划咨询\n积累相关工作经验").split('\n').filter(l=>l.trim());
+            ctx.font='21px "PingFang SC","Microsoft YaHei",sans-serif';
+            bens.forEach(()=>{cy+=36;});
+            cy+=GAP;
 
-            // 8. 实习周期（金色高亮条）
-            const durationText = job.duration ? '实习周期：' + job.duration : '实习周期：2-3个月';
-            drawGoldBar(ctx, durationText, width, currentY, 38);
-            currentY += 75;
+            // 实习周期
+            cy+=72+GAP;
 
-            // 9. 分割线（粗白线）
-            drawWhiteDivider(ctx, width, currentY, margin);
-            currentY += sectionGap + 10;
+            // 分割线
+            cy+=30+GAP;
 
-            // 10. 岗位职责（红色标签居中+项目符号列表）
-            currentY += drawRedLabel(ctx, '岗位职责', centerX, currentY, 26, 'center');
-            currentY += 18;
-
-            if (dutyContent) {
-                ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                ctx.font = '21px "PingFang SC", "Microsoft YaHei", sans-serif';
-                ctx.textAlign = 'left';
-
-                // 智能过滤：去除与标题/公司名重复的内容
-                const allDutyItems = dutyContent.split(/[\n•]/).filter(item => item.trim());
-                const maxItems = Math.min(allDutyItems.length, 6);
-                let dutyItems = allDutyItems.slice(0, maxItems);
-
-                // 过滤掉与标题或公司名高度相似的内容
-                const companyNameLower = (job.company || '').toLowerCase();
-                const positionNameLower = (job.position || '').toLowerCase();
-                dutyItems = dutyItems.filter(item => {
-                    const itemLower = item.trim().toLowerCase();
-                    if (itemLower === (companyNameLower + ' ' + positionNameLower).trim()) return false;
-                    if (itemLower === (positionNameLower).trim()) return false;
-                    if (itemLower === companyNameLower) return false;
+            // 岗位职责
+            cy+=40+16+GAP;
+            const dc=job.duty||job.jd||'';
+            if(dc){
+                ctx.font='20px "PingFang SC","Microsoft YaHei",sans-serif';
+                let di=dc.split(/[\n\u2022\u00b7]/).map(s=>s.trim()).filter(s=>s);
+                const cl=(job.company||'').toLowerCase(),pl=(job.position||'').toLowerCase();
+                di=di.filter(s=>{
+                    const sl=s.toLowerCase();
+                    if(['岗位职责','岗位职责：','适合专业','实习收获','实习周期','实习周期：'].includes(sl)) return false;
+                    if([cl+' '+pl,pl,cl].includes(sl)) return false;
+                    if(s.length<5) return false;
                     return true;
+                }).slice(0,6);
+                di.forEach(s=>{cy+=Math.max(txtLines(ctx,s,mw-36)*30,30)+14;});
+            }
+
+            // 底部留白
+            cy+=80;
+            const fh=Math.max(cy,1100);
+
+            // === 第二遍：正式绘制 ===
+            drawBg(ctx,w,fh);
+
+            // 顶部信息
+            const hy=42;
+            ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 21px "PingFang SC","Microsoft YaHei",sans-serif';
+            ctx.textAlign='left';ctx.fillText('实习地点',mg,hy);ctx.textAlign='right';ctx.fillText('实习形式',w-mg,hy);
+            ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='17px "PingFang SC","Microsoft YaHei",sans-serif';
+            ctx.textAlign='left';ctx.fillText(job.location||'线上/远程',mg,hy+30);ctx.textAlign='right';ctx.fillText(job.category||'实习',w-mg,hy+30);
+
+            cy=hy+95;
+
+            // 公司名（描边增强可读性）
+            ctx.textAlign='center';ctx.font=`bold ${cfs}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            if(cNameWrap){
+                cy=drawWrap(ctx,cName,cx,cy,mw,cfs+12,'center');
+            }else{
+                ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeText(cName,cx,cy);
+                ctx.fillStyle='#fff';ctx.fillText(cName,cx,cy);ctx.lineWidth=1;
+                cy+=cfs+20;
+            }
+
+            // 岗位名
+            const posText=job.position||'';
+            ctx.fillStyle='#fff';ctx.textAlign='center';
+            let posFontSize=40;
+            ctx.font=`bold ${posFontSize}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            while(ctx.measureText(posText).width>mw-40 && posFontSize>22){
+                posFontSize-=2;
+                ctx.font=`bold ${posFontSize}px "PingFang SC","Microsoft YaHei",sans-serif`;
+            }
+            if(ctx.measureText(posText).width>mw-40){
+                cy=drawWrap(ctx,posText,cx,cy,mw-40,posFontSize+12,'center');
+            }else{
+                ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=2;ctx.lineJoin='round';ctx.strokeText(posText,cx,cy);
+                ctx.fillStyle='#fff';ctx.fillText(posText,cx,cy);ctx.lineWidth=1;cy+=posFontSize+12;
+            }
+            cy+=GAP;
+
+            // 公司介绍
+            if(showIntro){
+                ctx.fillStyle='rgba(255,255,255,0.88)';ctx.font='19px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='left';
+                cy=drawWrap(ctx,intro,mg,cy,mw,32,'left');cy+=GAP;
+            }
+
+            // 适合专业
+            cy+=drawRedTag(ctx,'适合专业',cx,cy,24);cy+=14;
+            ctx.fillStyle='#fff';ctx.font='23px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';
+            cy=drawWrap(ctx,job.industry||'相关专业',cx,cy,mw,36,'center');cy+=GAP;
+
+            // 实习收获
+            cy+=drawRedTag(ctx,'实习收获',cx,cy,24);cy+=14;
+            ctx.fillStyle='#fff';ctx.font='21px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';
+            bens.forEach(ln=>{ctx.fillText(ln.trim(),cx,cy);cy+=36;});cy+=GAP;
+
+            // 实习周期
+            const durT=job.duration?'实习周期：'+job.duration:'实习周期：2-3个月';
+            cy+=drawGoldBar(ctx,durT,w,cy,36);
+
+            // 分割线
+            drawDiv(ctx,w,cy+15,mg);cy+=50;
+
+            // 岗位职责
+            cy+=drawRedTag(ctx,'岗位职责',cx,cy,24);cy+=16;
+            if(dc){
+                ctx.fillStyle='rgba(255,255,255,0.95)';ctx.font='20px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='left';
+                let di2=dc.split(/[\n\u2022\u00b7]/).map(s=>s.trim()).filter(s=>s);
+                const cl2=(job.company||'').toLowerCase(),pl2=(job.position||'').toLowerCase();
+                di2=di2.filter(s=>{
+                    const sl=s.toLowerCase();
+                    if(['岗位职责','岗位职责：','适合专业','实习收获','实习周期','实习周期：'].includes(sl)) return false;
+                    if([cl2+' '+pl2,pl2,cl2].includes(sl)) return false;
+                    if(s.length<5) return false;
+                    return true;
+                }).slice(0,6);
+                di2.forEach(s=>{
+                    const t=s.trim();if(!t) return;
+                    ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(mg+10,cy-6,3.5,0,Math.PI*2);ctx.fill();
+                    ctx.fillStyle='rgba(255,255,255,0.95)';
+                    cy=drawWrap(ctx,t,mg+26,cy,mw-36,30,'left');cy+=14;
                 });
-
-                dutyItems.forEach(item => {
-                    const trimmed = item.trim();
-                    if (!trimmed) return;
-
-                    // 项目符号（白色圆点）
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(margin + 12, currentY - 7, 4, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // 文字（支持自动换行）
-                    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                    currentY = wrapText(ctx, trimmed, margin + 30, currentY, maxTextWidth - 40, 32);
-                    currentY += 16;
-                });
             }
 
-            currentY += 40;
+            // 底部签名（纯净设计，无二维码）
+            const fy=fh-70;
+            ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mg,fy);ctx.lineTo(w-mg,fy);ctx.stroke();
+            ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='14px "PingFang SC","Microsoft YaHei",sans-serif';
+            ctx.textAlign='left';ctx.fillText('实习智能匹配平台',mg,fy+24);
+            ctx.textAlign='right';ctx.fillText('了解更多实习机会 \u2192',w-mg,fy+24);
 
-            // 11. 底部信息栏（参考图2风格：分割线+平台标识+二维码区域）
-            const footerY = height - 130;
-
-            // 底部装饰线
-            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(margin, footerY);
-            ctx.lineTo(width - margin, footerY);
-            ctx.stroke();
-
-            // 左下角平台标识
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.font = '15px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('实习智能匹配平台', margin, footerY + 30);
-
-            // 右下角引导语
-            ctx.textAlign = 'right';
-            ctx.fillText('了解更多实习机会', width - margin, footerY + 30);
-
-            // 二维码占位框（参考图2右下角）
-            const qrSize = 90;
-            const qrX = width - margin - qrSize;
-            const qrY = footerY + 45;
-            
-            // 二维码白色背景
-            ctx.fillStyle = 'rgba(255,255,255,0.95)';
-            roundRect(ctx, qrX, qrY, qrSize, qrSize, 6);
-            ctx.fill();
-            
-            // 二维码内部图案（模拟）
-            ctx.fillStyle = '#333';
-            const cellSize = 8;
-            const qrMargin = 8;
-            for (let row = 0; row < 9; row++) {
-                for (let col = 0; col < 9; col++) {
-                    if (Math.random() > 0.4) {
-                        ctx.fillRect(qrX + qrMargin + col * cellSize, qrY + qrMargin + row * cellSize, cellSize - 1, cellSize - 1);
-                    }
-                }
-            }
-            // 二维码定位角
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            // 左上
-            ctx.strokeRect(qrX + qrMargin, qrY + qrMargin, 20, 20);
-            ctx.fillRect(qrX + qrMargin + 4, qrY + qrMargin + 4, 12, 12);
-            // 右上
-            ctx.strokeRect(qrX + qrSize - qrMargin - 20, qrY + qrMargin, 20, 20);
-            ctx.fillRect(qrX + qrSize - qrMargin - 16, qrY + qrMargin + 4, 12, 12);
-            // 左下
-            ctx.strokeRect(qrX + qrMargin, qrY + qrSize - qrMargin - 20, 20, 20);
-            ctx.fillRect(qrX + qrMargin + 4, qrY + qrSize - qrMargin - 16, 12, 12);
-
-            // 二维码下方文字
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.font = '12px "PingFang SC", "Microsoft YaHei", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('扫码查看更多资料', qrX + qrSize / 2, qrY + qrSize + 18);
-
-            return height;
+            return fh;
         }
-        
-        // 计算文本需要多少行（用于动态高度）
-        function calcWrapLines(ctx, text, maxWidth) {
-            if (!text) return 0;
-            const chars = text.split('');
-            let lineCount = 1;
-            let line = '';
-            
-            for (let i = 0; i < chars.length; i++) {
-                const testLine = line + chars[i];
-                const metrics = ctx.measureText(testLine);
-                if (metrics.width > maxWidth && i > 0) {
-                    lineCount++;
-                    line = chars[i];
-                } else {
-                    line = testLine;
-                }
-            }
-            return lineCount;
-        }
-        
-        // 智能文本绘制（自动缩放+换行，居中模式）
-        function drawSmartText(ctx, text, x, y, maxWidth, lineHeight, fontSize, fontWeight) {
-            ctx.textAlign = 'center';
-            
-            // 尝试最大字体
-            ctx.font = fontWeight + ' ' + fontSize + 'px "PingFang SC", "Microsoft YaHei", sans-serif';
-            const lines = calcWrapLines(ctx, text, maxWidth);
-            
-            // 如果一行能放下，直接绘制
-            if (lines === 1) {
-                ctx.fillText(text, x, y);
-                return y + lineHeight * 0.8;
-            }
-            
-            // 如果太多行，缩小字体再试
-            if (lines > 2 && fontSize > 32) {
-                fontSize = Math.max(32, fontSize - 8);
-                lineHeight = Math.max(lineHeight - 10, lineHeight * 0.85);
-                ctx.font = fontWeight + ' ' + fontSize + 'px "PingFang SC", "Microsoft YaHei", sans-serif';
-            }
-            
-            // 使用wrapText绘制（居中模式）
-            return wrapText(ctx, text, x, y, maxWidth, lineHeight);
-        }
+
         
         // 圆角矩形辅助函数
         function roundRect(ctx, x, y, w, h, r) {
