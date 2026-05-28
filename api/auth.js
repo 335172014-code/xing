@@ -31,7 +31,8 @@ module.exports = async function handler(req, res) {
       .single();
 
     if (error || !tokenData) {
-      return res.status(200).json({ valid: false, error: 'Token无效' });
+      console.error('[auth] Token查询失败:', JSON.stringify({ error, tokenProvided: String(token).trim() }));
+      return res.status(200).json({ valid: false, error: 'Token无效', debug: error ? error.message : 'not_found' });
     }
 
     // 检查Token是否启用
