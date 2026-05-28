@@ -11,7 +11,7 @@
  */
 const supabase = require('./_lib/supabase');
 
-const ADMIN_KEY = process.env.ADMIN_KEY;
+const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY;
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
