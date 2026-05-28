@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/search.js": {
-      "includeFiles": ["data/jobs_data.json"]
+      "includeFiles": "data/jobs_data.json"
     }
   },
   "rewrites": [
