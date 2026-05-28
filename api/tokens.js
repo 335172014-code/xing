@@ -1,14 +1,15 @@
 /**
- * /api/tokens - Token CRUD管理（轻量版：基于代码内嵌Token）
+ * /api/tokens - Token CRUD管理（GitHub持久化版）
  *
  * POST:   创建新Token  { admin_key, name, max_searches }
  * GET:    列出所有Token ?admin_key=xxx
- * PATCH:  更新Token    { admin_key, token, is_active, name, max_searches }
- * DELETE: 删除Token    { admin_key, token }
+ * PATCH:  更新Token    { admin_key, token_id, is_active, name, max_searches }
+ * DELETE: 删除Token    { admin_key, token_id }
  *
- * ⚠️ 修改Token后需重新部署才生效
+ * ✅ 变更自动推送到GitHub → Vercel自动重部署 → Token持久化
  */
-const { getTokens, BUILT_IN_TOKENS } = require('./_lib/tokens-store');
+const { getTokens, setTokens } = require('./_lib/tokens-store');
+const { pushTokens } = require('./_lib/github');
 const crypto = require('crypto');
 
 const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY || 'admin-xing-2026';
@@ -47,50 +48,69 @@ async function handleCreate(req, res) {
   if (!verifyAdmin(admin_key)) return res.status(401).json({ error: '管理员密钥无效' });
   if (!name || !name.trim()) return res.status(400).json({ error: '请提供名称' });
 
-  const newToken = crypto.randomBytes(32).toString('hex');
+  const tokens = getTokens();
+  const newToken = crypto.randomBytes(16).toString('hex');
   const tokenObj = {
     token: newToken,
     name: String(name).trim().substring(0, 255),
     is_active: true,
-    max_searches: parseInt(max_searches, 10) || 500
+    max_searches: parseInt(max_searches, 10) || 500,
+    created_at: new Date().toISOString().split('T')[0]
   };
+
+  tokens.push(tokenObj);
+  setTokens(tokens);
+
+  // 推送到GitHub持久化
+  const pushed = await pushTokens(tokens);
 
   return res.status(201).json({
     token: tokenObj,
-    note: 'Token已生成。如需持久化，请更新 api/_lib/tokens-store.js 中的 BUILT_IN_TOKENS 数组并重新部署。'
+    persisted: pushed,
+    note: pushed 
+      ? '✅ Token已创建并持久化，Vercel将自动重部署（约1分钟生效）' 
+      : '⚠️ Token已创建（内存中），但GitHub推送失败。请在管理后台重试。'
   });
 }
 
 async function handleUpdate(req, res) {
-  const { admin_key, token, is_active, name, max_searches } = req.body || {};
+  const { admin_key, token_id, is_active, name, max_searches } = req.body || {};
   if (!verifyAdmin(admin_key)) return res.status(401).json({ error: '管理员密钥无效' });
-  if (!token) return res.status(400).json({ error: '请提供Token' });
 
   const tokens = getTokens();
-  const idx = tokens.findIndex(t => t.token === token);
-  if (idx === -1) return res.status(404).json({ error: 'Token不存在' });
+  const idx = parseInt(token_id, 10) - 1;
+  if (idx < 0 || idx >= tokens.length) return res.status(404).json({ error: 'Token不存在' });
 
   if (typeof is_active === 'boolean') tokens[idx].is_active = is_active;
   if (name !== undefined) tokens[idx].name = String(name).trim();
   if (max_searches !== undefined) tokens[idx].max_searches = parseInt(max_searches, 10) || 500;
 
+  setTokens(tokens);
+  const pushed = await pushTokens(tokens);
+
   return res.status(200).json({
     token: tokens[idx],
-    note: 'Token已更新。如需持久化，请更新 api/_lib/tokens-store.js 中的 BUILT_IN_TOKENS 数组并重新部署。'
+    persisted: pushed,
+    note: pushed ? '✅ 已更新' : '⚠️ 更新失败'
   });
 }
 
 async function handleDelete(req, res) {
-  const { admin_key, token } = req.body || {};
+  const { admin_key, token_id } = req.body || {};
   if (!verifyAdmin(admin_key)) return res.status(401).json({ error: '管理员密钥无效' });
-  if (!token) return res.status(400).json({ error: '请提供Token' });
 
   const tokens = getTokens();
-  const idx = tokens.findIndex(t => t.token === token);
-  if (idx === -1) return res.status(404).json({ error: 'Token不存在' });
+  const idx = parseInt(token_id, 10) - 1;
+  if (idx < 0 || idx >= tokens.length) return res.status(404).json({ error: 'Token不存在' });
+
+  const deleted = tokens.splice(idx, 1)[0];
+  setTokens(tokens);
+  const pushed = await pushTokens(tokens);
 
   return res.status(200).json({
     success: true,
-    note: 'Token已删除。如需持久化，请更新 api/_lib/tokens-store.js 中的 BUILT_IN_TOKENS 数组并重新部署。'
+    deleted_token: deleted.name,
+    persisted: pushed,
+    note: pushed ? '✅ 已删除' : '⚠️ 删除失败'
   });
 }
