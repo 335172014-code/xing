@@ -549,7 +549,8 @@
 
                 if (resp.ok) {
                     const tokenVal = data.token.token;
-                    alert(`✅ Token创建成功！\n\n名称：${name}\nToken：${tokenVal}\n搜索上限：${maxSearches}\n\n请将Token发送给使用者。Token只会显示一次！`);
+                    const persisted = data.persisted;
+                    alert(`✅ Token创建成功！\n\n名称：${name}\nToken：${tokenVal}\n搜索上限：${maxSearches}\n\n${persisted ? '✅ 已持久化，约1分钟后生效' : '⚠️ 持久化失败，请重试'}\n\n请将Token发送给使用者。`);
                     // 清空表单
                     document.getElementById('newTokenName').value = '';
                     document.getElementById('newTokenExpiry').value = '';
