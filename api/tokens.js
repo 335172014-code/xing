@@ -9,7 +9,7 @@
 const supabase = require('./_lib/supabase');
 const crypto = require('crypto');
 
-const ADMIN_KEY = process.env.ADMIN_KEY;
+const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY;
 
 /**
  * 验证管理员密钥
