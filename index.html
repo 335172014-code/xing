@@ -347,8 +347,8 @@
             <div id="loading" class="loading" style="display:none;">⏳ 正在搜索...</div>
             <div id="empty" class="empty" style="display:none;">
                 <div class="empty-icon">📭</div>
-                <div>没有找到匹配的岗位</div>
-                <div style="font-size:13px;margin-top:8px;color:#bbb;">请尝试调整搜索词或筛选条件</div>
+                <div id="emptyText">没有找到匹配的岗位</div>
+                <div id="emptyHint" style="font-size:13px;margin-top:8px;color:#bbb;">请尝试调整搜索词或筛选条件</div>
             </div>
             <div class="job-grid" id="jobList"></div>
         </div>
@@ -441,15 +441,15 @@
 
         // ==================== 客户端搜索引擎 ====================
         const smartDict = {
-            '计算机': ['计算机', '软件', '编程', '开发', 'IT', '互联网', '前端', '后端', '算法', '程序员', '码农'],
-            '金融': ['金融', '经济学', '经济', '银行', '证券', '投资', '理财', '金融学', 'Finance'],
+            '计算机': ['计算机', '软件', '编程', '开发', 'IT', '互联网', '前端', '后端', '算法', '程序员', '码农', '数据', '大数据', '数据分析', '产品', '运营', 'AI', '人工智能', '机器学习', '深度学习', 'NLP', 'CV', '计算机视觉', '自然语言处理'],
+            '金融': ['金融', '经济学', '经济', '银行', '证券', '投资', '理财', '金融学', 'Finance', '投行', '风控', '量化', '行研'],
             '会计': ['会计', '财务', '审计', '税务', 'ACCA', 'CPA', 'Accounting'],
-            '管理': ['管理', '工商管理', '行政管理', '人力资源', 'HR', 'Management'],
+            '管理': ['管理', '工商管理', '行政管理', '人力资源', 'HR', 'Management', '项目管理', '商业分析', 'BA'],
             '法律': ['法律', '法学', '律师', '法务', '合规', 'Law', '法律事务'],
             '医学': ['医学', '临床', '药学', '中医', '护理', 'Medical', 'Medicine'],
             '教育': ['教育', '师范', '教学', '培训', '教研', 'Education', '老师'],
             '设计': ['设计', '平面', 'UI', 'UX', '视觉', '艺术', 'Design', '设计师'],
-            '传媒': ['传媒', '新闻', '传播', '广告', '新媒体', 'Media', '传媒学'],
+            '传媒': ['传媒', '新闻', '传播', '广告', '新媒体', 'Media', '传媒学', '内容', '编辑', '品牌'],
             '数学': ['数学', '统计', '数据分析', '量化', '精算', 'Math', 'Statistics'],
             '化学': ['化学', '化工', 'Chemistry', 'Chemical', '化学工程', '应用化学'],
             '物理': ['物理', '物理学', 'Physics', '应用物理'],
@@ -459,7 +459,9 @@
             '材料': ['材料', '材料科学', 'Materials', '纳米材料', '高分子'],
             '环境': ['环境', '环境工程', 'Environmental', '环保', '生态学'],
             '数据': ['数据', '大数据', '数据科学', '数据分析', '数据挖掘', '数据可视化', 'Data', 'Data Science', 'Big Data'],
-            'AI': ['AI', '人工智能', '机器学习', '深度学习', 'NLP', 'CV', 'Artificial Intelligence', 'Machine Learning']
+            'AI': ['AI', '人工智能', '机器学习', '深度学习', 'NLP', 'CV', 'Artificial Intelligence', 'Machine Learning', '计算机视觉', '自然语言处理', '大模型', 'LLM'],
+            '咨询': ['咨询', '战略咨询', '管理咨询', 'Consulting', 'Consultant', '麦肯锡', 'BCG', '贝恩'],
+            '游戏': ['游戏', '游戏开发', 'Game', 'Unity', 'UE', 'Unreal', '游戏策划', '游戏运营', '原画', '3D']
         };
 
         const cityKeywords = [
@@ -469,14 +471,19 @@
         ];
 
         function aiSmartSearch(query) {
-            query = query.toLowerCase();
+            query = query.toLowerCase().replace(/[\r\n]/g, ' ');
             let searchTerms = [];
             let cityFilters = [];
             let categoryHint = null;
 
-            if (query.includes('pta')) {
+            // 分类关键词检测（支持中文和英文）
+            if (query.includes('pta') || query.includes('远程兼职') || query.includes('线上实习')) {
                 categoryHint = 'PTA';
-                query = query.replace(/pta/gi, '').trim();
+                query = query.replace(/pta|远程兼职|线上实习/gi, '').trim();
+            }
+            if (query.includes('科研') && !query.includes('科研所')) {
+                categoryHint = '科研';
+                query = query.replace(/科研/gi, '').trim();
             }
 
             let remainingQuery = query;
@@ -548,20 +555,24 @@
                     if (!job.location) return false;
                     if (!cityFilters.some(city => job.location.includes(city))) return false;
                 }
-                const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`;
+                // 清洗 industry 中的换行符，增加 location 到搜索范围
+                const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
+                const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`;
                 return fuzzyMatch(searchText, searchTerms);
             });
 
             if (searchTerms.length > 0) {
                 results = results.map(job => {
-                    const searchText = `${job.position} ${job.company} ${job.industry} ${job.duty} ${job.requirements} ${job.jd}`.toLowerCase();
+                    const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
+                    const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`.toLowerCase();
                     let matchCount = 0, totalScore = 0;
                     searchTerms.forEach(term => {
                         if (searchText.includes(term.toLowerCase())) {
                             matchCount++;
                             if (job.position && job.position.toLowerCase().includes(term.toLowerCase())) totalScore += 10;
-                            if (job.industry && job.industry.toLowerCase().includes(term.toLowerCase())) totalScore += 5;
+                            if (cleanIndustry && cleanIndustry.toLowerCase().includes(term.toLowerCase())) totalScore += 5;
                             if (job.company && job.company.toLowerCase().includes(term.toLowerCase())) totalScore += 3;
+                            if (job.location && job.location.toLowerCase().includes(term.toLowerCase())) totalScore += 2;
                         }
                     });
                     return { ...job, _matchCount: matchCount, _totalScore: totalScore };
@@ -582,17 +593,39 @@
         }
 
         // ==================== 加载岗位数据 ====================
+        let _dataLoading = false;
         async function loadJobsData() {
             if (_allJobs) return _allJobs;
+            if (_dataLoading) {
+                // 等待正在进行的加载完成
+                return new Promise(function(resolve) {
+                    const check = setInterval(function() {
+                        if (_allJobs) { clearInterval(check); resolve(_allJobs); }
+                    }, 200);
+                });
+            }
+            _dataLoading = true;
             try {
                 const resp = await fetch('jobs_data.json');
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                _allJobs = await resp.json();
+                const rawData = await resp.json();
+                // 清洗数据：去除 industry 换行符，确保字段完整
+                _allJobs = rawData.map(function(job) {
+                    return {
+                        ...job,
+                        industry: (job.industry || '').replace(/[\r\n]/g, '/'),
+                        duty: job.duty || '',
+                        requirements: job.requirements || '',
+                        location: job.location || ''
+                    };
+                });
                 console.log('[xing] 已加载 ' + _allJobs.length + ' 条岗位数据');
+                _dataLoading = false;
                 return _allJobs;
             } catch (err) {
                 console.error('[xing] 加载岗位数据失败:', err);
                 _allJobs = [];
+                _dataLoading = false;
                 return [];
             }
         }
@@ -709,7 +742,19 @@
         // ==================== 客户端搜索 ====================
         function searchJobs(query, category) {
             if (!currentToken) { showLoginScreen(); return; }
-            if (!_allJobs) return;
+            if (!_allJobs || _allJobs.length === 0) {
+                document.getElementById('resultTitle').textContent = '数据加载中...';
+                document.getElementById('resultDesc').textContent = '岗位数据仍在加载，请稍后再试';
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('loading').innerHTML = '<span class="search-spinner"></span>岗位数据加载中，请稍候...';
+                // 等数据加载完自动重新搜索
+                loadJobsData().then(function() {
+                    if (_allJobs && _allJobs.length > 0) {
+                        searchJobs(query, category);
+                    }
+                });
+                return;
+            }
 
             // 检查配额
             if (sessionInfo.searches_used >= sessionInfo.max_searches) {
@@ -767,6 +812,15 @@
             loading.style.display = 'none';
 
             if (filteredJobs.length === 0) {
+                const query = document.getElementById('searchInput').value.trim();
+                let emptyMsg = '没有找到匹配的岗位';
+                if (query) {
+                    const hint = aiSmartSearch(query);
+                    const catName = hint.categoryHint || currentCategory;
+                    emptyMsg = `在「${catName === 'all' ? '全部' : catName}」中未找到「${query}」相关岗位`;
+                }
+                document.getElementById('emptyText').textContent = emptyMsg;
+                document.getElementById('emptyHint').textContent = '试试：减少关键词、去掉分类限制、或换一个同义词搜索';
                 empty.style.display = 'block';
                 jobList.innerHTML = '';
                 topRec.style.display = 'none';
@@ -792,15 +846,15 @@
 
                 let infoTags = '';
                 if (jobType === '国内实地') {
-                    infoTags = `${job.location ? '<span class="job-tag">📍 '+escapeHtml(job.location)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry)+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
+                    infoTags = `${job.location ? '<span class="job-tag">📍 '+escapeHtml(job.location)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry.replace(/[\r\n]/g,'/'))+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
                 } else if (jobType === 'PTA') {
-                    infoTags = `${job.company ? '<span class="job-tag">🏛️ '+escapeHtml(job.company)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry)+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
+                    infoTags = `${job.company ? '<span class="job-tag">🏛️ '+escapeHtml(job.company)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry.replace(/[\r\n]/g,'/'))+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
                 } else if (jobType === '国外实地') {
                     infoTags = `${job.location ? '<span class="job-tag">🌍 '+escapeHtml(job.location)+'</span>' : ''}${job.company ? '<span class="job-tag">🏢 '+escapeHtml(job.company)+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
                 } else if (jobType === '科研') {
                     infoTags = `${job.company ? '<span class="job-tag">🎓 '+escapeHtml(job.company)+'</span>' : ''}${job.location ? '<span class="job-tag">📍 '+escapeHtml(job.location)+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
                 } else {
-                    infoTags = `${job.company ? '<span class="job-tag">🏢 '+escapeHtml(job.company)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry)+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
+                    infoTags = `${job.company ? '<span class="job-tag">🏢 '+escapeHtml(job.company)+'</span>' : ''}${job.industry ? '<span class="job-tag">🎯 '+escapeHtml(job.industry.replace(/[\r\n]/g,'/'))+'</span>' : ''}${job.duration ? '<span class="job-tag">⏰ '+escapeHtml(job.duration)+'</span>' : ''}`;
                 }
 
                 div.innerHTML = `
