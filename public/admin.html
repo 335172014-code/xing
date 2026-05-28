@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理看板 - 实习智能匹配平台</title>
+    <title>【测试版】管理看板 - 实习智能匹配平台</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -179,7 +179,7 @@
     <div class="admin-login" id="adminLogin">
         <div class="admin-login-card">
             <div style="font-size:48px; margin-bottom:16px;">🔐</div>
-            <h2>管理看板</h2>
+            <h2>管理看板 <span style="background:#ff9800;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;vertical-align:middle;">测试版</span></h2>
             <p>请输入管理员密钥</p>
             <input type="password" class="admin-login-input" id="adminKeyInput"
                    placeholder="输入管理员密钥..." autocomplete="off">
@@ -190,7 +190,7 @@
 
     <!-- 主界面 -->
     <div class="header" id="mainHeader" style="display:none;">
-        <h1>🔐 管理看板</h1>
+        <h1>🔐 管理看板 <span style="background:#ff9800;color:#fff;padding:3px 12px;border-radius:12px;font-size:14px;vertical-align:middle;">测试版</span></h1>
         <div class="header-actions">
             <a href="/" class="header-btn">🏠 返回主页</a>
             <button class="header-btn" onclick="adminLogout()">退出</button>
@@ -549,7 +549,8 @@
 
                 if (resp.ok) {
                     const tokenVal = data.token.token;
-                    alert(`✅ Token创建成功！\n\n名称：${name}\nToken：${tokenVal}\n搜索上限：${maxSearches}\n\n请将Token发送给使用者。Token只会显示一次！`);
+                    const persisted = data.persisted;
+                    alert(`✅ Token创建成功！\n\n名称：${name}\nToken：${tokenVal}\n搜索上限：${maxSearches}\n\n${persisted ? '✅ 已持久化，约1分钟后生效' : '⚠️ 持久化失败，请重试'}\n\n请将Token发送给使用者。`);
                     // 清空表单
                     document.getElementById('newTokenName').value = '';
                     document.getElementById('newTokenExpiry').value = '';
