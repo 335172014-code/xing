@@ -5,7 +5,7 @@
  * 功能：
  * - AI智能搜索（自然语言理解、城市提取、同义词展开）
  * - 模糊匹配 + 权重排序
- * - 岗位类型分类（实地/远程/PTA/美国）
+ * - 岗位类型分类（国内实地/远程/PTA/国外实地/科研）
  * - 背景信息过滤
  */
 
@@ -88,44 +88,30 @@ const cityKeywords = [
 // ==================== 岗位类型判断 ====================
 
 /**
- * 获取岗位显示类型（实地/远程/PTA/美国）
+ * 获取岗位显示类型（国内实地/远程/PTA/国外实地/科研）
  * @param {Object} job - 岗位对象
  * @returns {string} 岗位类型
  */
 function getJobType(job) {
-  const sheetName = job.sheet_name || '';
   const category = job.category || '';
-  const projectType = job.project_type || '';
-
-  // 美国实习
-  if (sheetName.includes('美国') || category === '美国实习') {
-    return '美国';
+  
+  // 直接使用数据源的分类标签
+  switch (category) {
+    case '国内实地': return '国内实地';
+    case '远程': return '远程';
+    case 'PTA': return 'PTA';
+    case '国外实地': return '国外实地';
+    case '科研': return '科研';
+    default:
+      // 兼容旧数据
+      const sheetName = job.sheet_name || '';
+      const projectType = job.project_type || '';
+      if (category === '美国实习' || sheetName.includes('美国') || sheetName.includes('香港') || sheetName.includes('澳洲') || sheetName.includes('新加坡') || sheetName.includes('英国')) return '国外实地';
+      if (category === '科研实习' || sheetName.includes('科研') || sheetName.includes('清华') || sheetName.includes('北大')) return '科研';
+      if (category === '实地实习' || sheetName.includes('实地人事') || projectType === '实地') return '国内实地';
+      if (category === '远程实习' || sheetName.includes('远程人事') || sheetName.includes('中科院') || projectType === '远程') return '远程';
+      return '其他';
   }
-
-  // PTA（科研类：北大、清华、中科院等）- 必须优先判断
-  if (category === '科研实习' ||
-      sheetName.includes('科研') ||
-      sheetName.includes('中科院') ||
-      sheetName.includes('清华') ||
-      sheetName.includes('北大')) {
-    return 'PTA';
-  }
-
-  // 实地实习
-  if (sheetName.includes('实地人事') || projectType === '实地') {
-    return '实地';
-  }
-
-  // 远程实习
-  if (sheetName.includes('远程人事') || projectType === '远程') {
-    return '远程';
-  }
-
-  // 默认根据category判断
-  if (category.includes('实地')) return '实地';
-  if (category.includes('远程')) return '远程';
-
-  return '其他';
 }
 
 // ==================== AI智能搜索 ====================
@@ -244,7 +230,7 @@ function sanitizeQuery(query) {
 /**
  * 执行搜索
  * @param {string} query - 搜索查询
- * @param {string} category - 分类筛选（all/实地/远程/PTA/美国）
+ * @param {string} category - 分类筛选（all/国内实地/远程/PTA/国外实地/科研）
  * @returns {Array} 搜索结果数组（已排序，已移除价格字段）
  */
 function search(query, category = 'all') {
@@ -305,7 +291,7 @@ function search(query, category = 'all') {
     }).sort((a, b) => {
       if (b._matchCount !== a._matchCount) return b._matchCount - a._matchCount;
       if (b._totalScore !== a._totalScore) return b._totalScore - a._totalScore;
-      const typeOrder = { '实地': 1, 'PTA': 2, '远程': 3, '美国': 4, '其他': 5 };
+      const typeOrder = { '国内实地': 1, 'PTA': 2, '远程': 3, '国外实地': 4, '科研': 5, '其他': 6 };
       const typeA = typeOrder[getJobType(a)] || 5;
       const typeB = typeOrder[getJobType(b)] || 5;
       if (typeA !== typeB) return typeA - typeB;
