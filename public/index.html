@@ -341,10 +341,11 @@
 
                 <div class="category-tabs" id="categoryTabs">
                     <button class="category-tab active" data-category="all">全部</button>
-                    <button class="category-tab" data-category="实地">实地</button>
+                    <button class="category-tab" data-category="国内实地">国内实地</button>
                     <button class="category-tab" data-category="远程">远程</button>
                     <button class="category-tab" data-category="PTA">PTA</button>
-                    <button class="category-tab" data-category="美国">美国</button>
+                    <button class="category-tab" data-category="国外实地">国外实地</button>
+                    <button class="category-tab" data-category="科研">科研</button>
                 </div>
             </div>
         </div>
@@ -424,25 +425,30 @@
 
         // ==================== 岗位类型判断 ====================
         function getJobType(job) {
-            // 注意：API响应已移除sheet_name字段，使用category和project_type判断
             const category = job.category || '';
-            const projectType = job.project_type || '';
-
-            if (category === '美国实习') return '美国';
-            if (category === '科研实习') return 'PTA';
-            if (projectType === '实地') return '实地';
-            if (projectType === '远程') return '远程';
-            if (category.includes('实地')) return '实地';
-            if (category.includes('远程')) return '远程';
-            return '其他';
+            switch (category) {
+                case '国内实地': return '国内实地';
+                case '远程': return '远程';
+                case 'PTA': return 'PTA';
+                case '国外实地': return '国外实地';
+                case '科研': return '科研';
+                default:
+                    // 兼容旧数据
+                    if (category === '美国实习') return '国外实地';
+                    if (category === '科研实习') return '科研';
+                    if (category === '实地实习') return '国内实地';
+                    if (category === '远程实习') return '远程';
+                    return '其他';
+            }
         }
 
         function getJobTypeBadge(type) {
             const styles = {
-                '实地': { bg: '#e8f5e9', color: '#2e7d32' },
+                '国内实地': { bg: '#e8f5e9', color: '#2e7d32' },
                 '远程': { bg: '#e3f2fd', color: '#1976d2' },
                 'PTA': { bg: '#fff3e0', color: '#e65100' },
-                '美国': { bg: '#fce4ec', color: '#c2185b' },
+                '国外实地': { bg: '#fce4ec', color: '#c2185b' },
+                '科研': { bg: '#f3e5f5', color: '#7b1fa2' },
                 '其他': { bg: '#f5f5f5', color: '#666' }
             };
             return styles[type] || styles['其他'];
@@ -710,7 +716,7 @@
                 const badgeStyle = getJobTypeBadge(jobType);
 
                 let infoTags = '';
-                if (jobType === '实地') {
+                if (jobType === '国内实地') {
                     infoTags = `
                         ${job.location ? `<span class="job-tag">📍 ${escapeHtml(job.location)}</span>` : ''}
                         ${job.industry ? `<span class="job-tag">🎯 ${escapeHtml(job.industry)}</span>` : ''}
@@ -720,6 +726,18 @@
                     infoTags = `
                         ${job.company ? `<span class="job-tag">🏛️ ${escapeHtml(job.company)}</span>` : ''}
                         ${job.industry ? `<span class="job-tag">🎯 ${escapeHtml(job.industry)}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
+                    `;
+                } else if (jobType === '国外实地') {
+                    infoTags = `
+                        ${job.location ? `<span class="job-tag">🌍 ${escapeHtml(job.location)}</span>` : ''}
+                        ${job.company ? `<span class="job-tag">🏢 ${escapeHtml(job.company)}</span>` : ''}
+                        ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
+                    `;
+                } else if (jobType === '科研') {
+                    infoTags = `
+                        ${job.company ? `<span class="job-tag">🎓 ${escapeHtml(job.company)}</span>` : ''}
+                        ${job.location ? `<span class="job-tag">📍 ${escapeHtml(job.location)}</span>` : ''}
                         ${job.duration ? `<span class="job-tag">⏰ ${escapeHtml(job.duration)}</span>` : ''}
                     `;
                 } else {
@@ -784,7 +802,7 @@
                 if (firstLine) summary += firstLine + '\n';
 
                 let secondLine = '';
-                if (job.category === '实地实习' && job.location) {
+                if ((job.category === '国内实地' || job.category === '实地实习' || job.category === '国外实地') && job.location) {
                     secondLine += `${job.location}  `;
                 }
                 secondLine += `${job.company || '未知公司'}：${job.position || '未知岗位'}`;
