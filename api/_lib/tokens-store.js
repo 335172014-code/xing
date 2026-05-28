@@ -12,6 +12,20 @@ const BUILT_IN_TOKENS = [
     "is_active": true,
     "max_searches": 9999,
     "created_at": "2026-05-29"
+  },
+  {
+    "token": "ac25c05e0a27c98e3f1a11cdb53a9554",
+    "name": "test1",
+    "is_active": true,
+    "max_searches": 500,
+    "created_at": "2026-05-28"
+  },
+  {
+    "token": "9d89503e885fa36f61f548ec64029005",
+    "name": "test2",
+    "is_active": true,
+    "max_searches": 500,
+    "created_at": "2026-05-28"
   }
 ];
 
