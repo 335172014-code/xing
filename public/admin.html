@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理看板 - 实习智能匹配平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f0f2f5; min-height: 100vh; color: #333;
+        }
+
+        /* ====== 登录 ====== */
+        .admin-login {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; padding: 20px;
+        }
+        .admin-login.hidden { display: none; }
+        .admin-login-card {
+            background: white; border-radius: 16px; padding: 40px 30px;
+            max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .admin-login-card h2 { font-size: 22px; margin-bottom: 8px; }
+        .admin-login-card p { font-size: 14px; color: #888; margin-bottom: 24px; }
+        .admin-login-input {
+            width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0;
+            border-radius: 10px; font-size: 15px; outline: none; min-height: 48px;
+            text-align: center;
+        }
+        .admin-login-input:focus { border-color: #1a1a2e; }
+        .admin-login-btn {
+            width: 100%; margin-top: 16px; padding: 14px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white; border: none; border-radius: 10px;
+            font-size: 16px; font-weight: bold; cursor: pointer; min-height: 48px;
+        }
+        .admin-login-btn:active { opacity: 0.8; }
+        .admin-login-error { color: #e53935; font-size: 13px; margin-top: 12px; min-height: 20px; }
+
+        /* ====== 顶部导航 ====== */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 15px 20px; color: white;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .header h1 { font-size: 20px; font-weight: bold; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .header-btn {
+            background: rgba(255,255,255,0.15); color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;
+        }
+        .header-btn:active { background: rgba(255,255,255,0.3); }
+
+        /* ====== 主内容 ====== */
+        .main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* 概览卡片 */
+        .overview-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+        .overview-card {
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .overview-card-label { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .overview-card-value { font-size: 28px; font-weight: bold; color: #1a1a2e; }
+        .overview-card-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+        /* 区块 */
+        .section {
+            background: white; border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .section-title {
+            font-size: 16px; font-weight: bold; color: #1a1a2e;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        /* 创建Token表单 */
+        .create-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .form-field { flex: 1; min-width: 150px; }
+        .form-field label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+        .form-field input, .form-field select {
+            width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 14px; outline: none; min-height: 42px;
+        }
+        .form-field input:focus { border-color: #1a1a2e; }
+        .create-btn {
+            padding: 10px 24px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white; border: none; border-radius: 8px; font-size: 14px;
+            font-weight: bold; cursor: pointer; min-height: 42px; white-space: nowrap;
+        }
+        .create-btn:active { opacity: 0.8; }
+
+        /* Token表格 */
+        .token-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .token-table th {
+            background: #f8f9fa; padding: 10px 12px; text-align: left;
+            border-bottom: 2px solid #e0e0e0; color: #666; font-weight: 600;
+        }
+        .token-table td {
+            padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        .token-table tr:hover { background: #fafbfc; }
+        .token-value {
+            font-family: monospace; font-size: 11px; background: #f5f5f5;
+            padding: 3px 8px; border-radius: 4px; cursor: pointer;
+            max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+            display: inline-block; white-space: nowrap;
+        }
+        .token-value:hover { background: #e8e8e8; }
+        .token-value::after { content: ' 📋'; font-size: 10px; }
+        .status-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 600;
+        }
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-inactive { background: #ffebee; color: #c62828; }
+        .status-expired { background: #fff3e0; color: #e65100; }
+        .action-btn {
+            padding: 4px 10px; border: none; border-radius: 4px;
+            font-size: 11px; cursor: pointer; margin-right: 4px;
+        }
+        .action-btn-toggle { background: #e3f2fd; color: #1565c0; }
+        .action-btn-delete { background: #ffebee; color: #c62828; }
+        .action-btn:active { opacity: 0.7; }
+        .quota-bar {
+            width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px;
+            overflow: hidden; margin-top: 4px;
+        }
+        .quota-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .quota-low { background: #e53935; }
+        .quota-mid { background: #ff9800; }
+        .quota-ok { background: #4caf50; }
+
+        /* 关键词列表 */
+        .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .keyword-item {
+            background: #f5f5f5; padding: 6px 14px; border-radius: 20px;
+            font-size: 13px; display: flex; align-items: center; gap: 6px;
+        }
+        .keyword-count {
+            background: #1a1a2e; color: white; padding: 2px 8px;
+            border-radius: 10px; font-size: 11px; font-weight: bold;
+        }
+
+        /* 图表 */
+        .chart-container { max-height: 300px; position: relative; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .main { padding: 10px; }
+            .section { padding: 14px; }
+            .overview-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .overview-card-value { font-size: 22px; }
+            .create-form { flex-direction: column; }
+            .token-table { font-size: 12px; }
+            .token-table th, .token-table td { padding: 8px 6px; }
+        }
+
+        /* 加载状态 */
+        .loading-state {
+            text-align: center; padding: 40px 20px; color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 管理员登录 -->
+    <div class="admin-login" id="adminLogin">
+        <div class="admin-login-card">
+            <div style="font-size:48px; margin-bottom:16px;">🔐</div>
+            <h2>管理看板</h2>
+            <p>请输入管理员密钥</p>
+            <input type="password" class="admin-login-input" id="adminKeyInput"
+                   placeholder="输入管理员密钥..." autocomplete="off">
+            <button class="admin-login-btn" onclick="adminLogin()">进入管理看板</button>
+            <div class="admin-login-error" id="adminLoginError"></div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="header" id="mainHeader" style="display:none;">
+        <h1>🔐 管理看板</h1>
+        <div class="header-actions">
+            <a href="/" class="header-btn">🏠 返回主页</a>
+            <button class="header-btn" onclick="adminLogout()">退出</button>
+        </div>
+    </div>
+
+    <div class="main" id="mainContent" style="display:none;">
+        <!-- 概览卡片 -->
+        <div class="overview-cards" id="overviewCards">
+            <div class="overview-card">
+                <div class="overview-card-label">📊 总搜索次数</div>
+                <div class="overview-card-value" id="ovTotalSearches">--</div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-card-label">📅 今日搜索量</div>
+                <div class="overview-card-value" id="ovTodaySearches">--</div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-card-label">🔑 活跃Token数</div>
+                <div class="overview-card-value" id="ovActiveTokens">--</div>
+                <div class="overview-card-sub" id="ovTotalTokens"></div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-card-label">📈 7日趋势</div>
+                <div class="overview-card-value" id="ov7dayTrend">--</div>
+            </div>
+        </div>
+
+        <!-- 创建Token -->
+        <div class="section">
+            <div class="section-title">➕ 创建新Token</div>
+            <div class="create-form">
+                <div class="form-field">
+                    <label>机构/使用者名称</label>
+                    <input type="text" id="newTokenName" placeholder="如：XX教育机构">
+                </div>
+                <div class="form-field" style="max-width:150px;">
+                    <label>搜索次数上限</label>
+                    <input type="number" id="newTokenMax" value="500" min="1">
+                </div>
+                <div class="form-field" style="max-width:180px;">
+                    <label>过期时间（选填）</label>
+                    <input type="date" id="newTokenExpiry">
+                </div>
+                <button class="create-btn" onclick="createToken()">生成Token</button>
+            </div>
+        </div>
+
+        <!-- Token管理 -->
+        <div class="section">
+            <div class="section-title">🔑 Token管理</div>
+            <div style="overflow-x:auto;">
+                <table class="token-table" id="tokenTable">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>Token</th>
+                            <th>搜索次数</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tokenTableBody">
+                        <tr><td colspan="6" class="loading-state">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 热门关键词 -->
+        <div class="section">
+            <div class="section-title">🔥 热门搜索关键词（近30天）</div>
+            <div class="keyword-list" id="keywordList">
+                <span class="loading-state">加载中...</span>
+            </div>
+        </div>
+
+        <!-- 每日搜索趋势 -->
+        <div class="section">
+            <div class="section-title">📈 每日搜索趋势（近7天）</div>
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全局状态 ====================
+        let adminKey = '';
+        let dailyChartInstance = null;
+
+        // ==================== 管理员登录 ====================
+
+        /** 检查本地保存的管理员密钥 */
+        async function checkAdminAuth() {
+            const saved = sessionStorage.getItem('xing_admin_key');
+            if (!saved) return;
+
+            adminKey = saved;
+            try {
+                const resp = await fetch(`/api/stats?admin_key=${encodeURIComponent(adminKey)}`);
+                if (resp.ok) {
+                    onAdminLoginSuccess();
+                    const data = await resp.json();
+                    renderDashboard(data);
+                } else {
+                    sessionStorage.removeItem('xing_admin_key');
+                    adminKey = '';
+                }
+            } catch (err) {
+                console.error('验证管理员密钥失败:', err);
+            }
+        }
+
+        /** 管理员登录 */
+        async function adminLogin() {
+            const keyInput = document.getElementById('adminKeyInput');
+            const errorDiv = document.getElementById('adminLoginError');
+            const key = keyInput.value.trim();
+
+            if (!key) {
+                errorDiv.textContent = '请输入管理员密钥';
+                return;
+            }
+
+            errorDiv.textContent = '';
+
+            try {
+                const resp = await fetch(`/api/stats?admin_key=${encodeURIComponent(key)}`);
+                if (resp.ok) {
+                    adminKey = key;
+                    sessionStorage.setItem('xing_admin_key', key);
+                    onAdminLoginSuccess();
+                    const data = await resp.json();
+                    renderDashboard(data);
+                } else {
+                    errorDiv.textContent = '管理员密钥无效';
+                }
+            } catch (err) {
+                errorDiv.textContent = '网络错误，请重试';
+            }
+        }
+
+        /** 管理员退出 */
+        function adminLogout() {
+            adminKey = '';
+            sessionStorage.removeItem('xing_admin_key');
+            document.getElementById('adminLogin').classList.remove('hidden');
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        /** 管理员登录成功 */
+        function onAdminLoginSuccess() {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('mainHeader').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        // ==================== 渲染仪表板 ====================
+
+        /** 渲染完整仪表板 */
+        function renderDashboard(data) {
+            // 概览卡片
+            document.getElementById('ovTotalSearches').textContent = data.overview.total_searches.toLocaleString();
+            document.getElementById('ovTodaySearches').textContent = data.overview.today_searches.toLocaleString();
+            document.getElementById('ovActiveTokens').textContent = data.overview.active_tokens;
+            document.getElementById('ovTotalTokens').textContent = `共 ${data.overview.total_tokens} 个Token`;
+
+            // 7日趋势
+            const total7 = data.daily_stats.reduce((sum, d) => sum + d.count, 0);
+            document.getElementById('ov7dayTrend').textContent = total7.toLocaleString();
+
+            // Token表格
+            renderTokenTable(data.tokens);
+
+            // 热门关键词
+            renderKeywords(data.top_keywords);
+
+            // 每日趋势图
+            renderDailyChart(data.daily_stats);
+        }
+
+        /** 刷新数据 */
+        async function refreshData() {
+            try {
+                const resp = await fetch(`/api/stats?admin_key=${encodeURIComponent(adminKey)}`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    renderDashboard(data);
+                } else if (resp.status === 401) {
+                    adminLogout();
+                }
+            } catch (err) {
+                console.error('刷新数据失败:', err);
+            }
+        }
+
+        // ==================== Token表格 ====================
+
+        function renderTokenTable(tokens) {
+            const tbody = document.getElementById('tokenTableBody');
+
+            if (!tokens || tokens.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading-state">暂无Token数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = tokens.map(t => {
+                // 状态判断
+                let statusClass = 'status-active';
+                let statusText = '活跃';
+                if (!t.is_active) {
+                    statusClass = 'status-inactive';
+                    statusText = '禁用';
+                } else if (t.expires_at && new Date(t.expires_at) < new Date()) {
+                    statusClass = 'status-expired';
+                    statusText = '已过期';
+                }
+
+                // 配额条
+                const quotaPercent = t.max_searches > 0 ? Math.round(t.searches_used / t.max_searches * 100) : 0;
+                const quotaClass = quotaPercent > 90 ? 'quota-low' : quotaPercent > 60 ? 'quota-mid' : 'quota-ok';
+
+                // 创建时间
+                const createdDate = t.created_at ? new Date(t.created_at).toLocaleDateString('zh-CN') : '--';
+
+                return `<tr>
+                    <td><strong>${escapeHtml(t.name)}</strong></td>
+                    <td><span class="token-value" onclick="copyToken('${escapeHtml(t.token)}')" title="点击复制">${escapeHtml(t.token)}</span></td>
+                    <td>
+                        ${t.searches_used} / ${t.max_searches}
+                        <div class="quota-bar">
+                            <div class="quota-fill ${quotaClass}" style="width: ${Math.min(quotaPercent, 100)}%"></div>
+                        </div>
+                    </td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <button class="action-btn action-btn-toggle" onclick="toggleToken('${t.id}', ${!t.is_active})">
+                            ${t.is_active ? '禁用' : '启用'}
+                        </button>
+                        <button class="action-btn action-btn-delete" onclick="deleteToken('${t.id}', '${escapeHtml(t.name)}')">
+                            删除
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ==================== 关键词列表 ====================
+
+        function renderKeywords(keywords) {
+            const container = document.getElementById('keywordList');
+
+            if (!keywords || keywords.length === 0) {
+                container.innerHTML = '<span style="color:#999;">暂无搜索数据</span>';
+                return;
+            }
+
+            container.innerHTML = keywords.map(k =>
+                `<div class="keyword-item">
+                    <span>${escapeHtml(k.keyword)}</span>
+                    <span class="keyword-count">${k.count}</span>
+                </div>`
+            ).join('');
+        }
+
+        // ==================== 每日趋势图 ====================
+
+        function renderDailyChart(dailyStats) {
+            const canvas = document.getElementById('dailyChart');
+            const ctx = canvas.getContext('2d');
+
+            if (dailyChartInstance) {
+                dailyChartInstance.destroy();
+            }
+
+            const labels = dailyStats.map(d => {
+                const date = new Date(d.date);
+                return `${date.getMonth() + 1}/${date.getDate()}`;
+            });
+            const data = dailyStats.map(d => d.count);
+
+            // 填充最近7天（没有数据的天补0）
+            const allDays = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const label = `${d.getMonth() + 1}/${d.getDate()}`;
+                const found = dailyStats.find(s => s.date === dateStr);
+                allDays.push({ label, count: found ? found.count : 0 });
+            }
+
+            dailyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allDays.map(d => d.label),
+                    datasets: [{
+                        label: '搜索次数',
+                        data: allDays.map(d => d.count),
+                        backgroundColor: 'rgba(26, 26, 46, 0.8)',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 12 } },
+                            grid: { color: '#f0f0f0' }
+                        },
+                        x: {
+                            ticks: { font: { size: 12 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==================== Token操作 ====================
+
+        /** 创建新Token */
+        async function createToken() {
+            const name = document.getElementById('newTokenName').value.trim();
+            const maxSearches = parseInt(document.getElementById('newTokenMax').value, 10) || 500;
+            const expiresAt = document.getElementById('newTokenExpiry').value || null;
+
+            if (!name) {
+                alert('请输入机构/使用者名称');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/tokens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_key: adminKey,
+                        name: name,
+                        max_searches: maxSearches,
+                        expires_at: expiresAt
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    const tokenVal = data.token.token;
+                    alert(`✅ Token创建成功！\n\n名称：${name}\nToken：${tokenVal}\n搜索上限：${maxSearches}\n\n请将Token发送给使用者。Token只会显示一次！`);
+                    // 清空表单
+                    document.getElementById('newTokenName').value = '';
+                    document.getElementById('newTokenExpiry').value = '';
+                    // 刷新列表
+                    refreshData();
+                } else {
+                    alert('创建失败：' + (data.error || '未知错误'));
+                }
+            } catch (err) {
+                alert('网络错误，请重试');
+            }
+        }
+
+        /** 启用/禁用Token */
+        async function toggleToken(tokenId, setActive) {
+            const action = setActive ? '启用' : '禁用';
+            if (!confirm(`确定要${action}此Token吗？`)) return;
+
+            try {
+                const resp = await fetch('/api/tokens', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_key: adminKey,
+                        token_id: tokenId,
+                        is_active: setActive
+                    })
+                });
+
+                if (resp.ok) {
+                    refreshData();
+                } else {
+                    const data = await resp.json();
+                    alert('操作失败：' + (data.error || '未知错误'));
+                }
+            } catch (err) {
+                alert('网络错误，请重试');
+            }
+        }
+
+        /** 删除Token */
+        async function deleteToken(tokenId, name) {
+            if (!confirm(`确定要删除Token「${name}」吗？此操作不可恢复！`)) return;
+
+            try {
+                const resp = await fetch('/api/tokens', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_key: adminKey,
+                        token_id: tokenId
+                    })
+                });
+
+                if (resp.ok) {
+                    refreshData();
+                } else {
+                    const data = await resp.json();
+                    alert('删除失败：' + (data.error || '未知错误'));
+                }
+            } catch (err) {
+                alert('网络错误，请重试');
+            }
+        }
+
+        /** 复制Token到剪贴板 */
+        function copyToken(token) {
+            navigator.clipboard.writeText(token).then(() => {
+                alert('✅ Token已复制到剪贴板！');
+            }).catch(() => {
+                // 降级方案
+                const input = document.createElement('input');
+                input.value = token;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                alert('✅ Token已复制到剪贴板！');
+            });
+        }
+
+        // ==================== 工具函数 ====================
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            // div.textContent → div.innerHTML 会转义 <, >, &，但不转义单引号
+            // 单引号用于 onclick 属性值包裹，必须额外转义防止属性注入
+            return div.innerHTML.replace(/'/g, '&#39;');
+        }
+
+        // ==================== 初始化 ====================
+
+        // 管理员登录框回车
+        document.getElementById('adminKeyInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') adminLogin();
+        });
+
+        // 检查已保存的管理员密钥
+        checkAdminAuth();
+    </script>
+</body>
+</html>
