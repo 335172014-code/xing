@@ -293,7 +293,8 @@
                     <input type="text" id="searchInput" placeholder="输入需求，如：深圳 计算机 或 深圳计算机实习" disabled>
                 </div>
                 <div style="font-size:12px; color:#999; margin-top:8px; padding-left:4px;">
-                    💡 提示：用空格分隔多个关键词（城市 专业），系统会自动识别
+                    💡 输入关键词即可搜索，如：深圳 计算机、远程 金融、pta 咨询<br>
+                    系统自动过滤姓名/学校/年级，聚焦地区+专业+类型
                 </div>
                 <div class="mode-switch">
                     <button class="mode-btn active" data-mode="search">🔍 AI搜索</button>
@@ -333,6 +334,7 @@
                 <div class="result-title" id="resultTitle">请先登录</div>
                 <div id="resultDesc">使用授权Token登录后即可搜索岗位</div>
             </div>
+            <div id="clarificationHint" style="display:none; background:#fff8e1; border:1px solid #ffe082; border-radius:10px; padding:12px 16px; margin-bottom:10px; font-size:14px; color:#e65100; line-height:1.6;"></div>
             <div id="topRecommendation" class="top-recommendation" style="display:none;">
                 <div class="top-rec-title">🌟 首选推荐</div>
                 <div id="topRecContent"></div>
@@ -351,6 +353,9 @@
                 <div id="emptyHint" style="font-size:13px;margin-top:8px;color:#bbb;">请尝试调整搜索词或筛选条件</div>
             </div>
             <div class="job-grid" id="jobList"></div>
+            <div id="loadMoreWrap" style="display:none; text-align:center; padding:20px;">
+                <button id="loadMoreBtn" onclick="loadMoreResults()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;min-height:44px;">📋 查看更多匹配结果</button>
+            </div>
         </div>
     </div>
 
@@ -380,6 +385,8 @@
         let currentToken = '';
         let sessionInfo = null;
         let filteredJobs = [];
+        let _allMatchedJobs = []; // 保存所有匹配结果（不受10条限制）
+        let _displayCount = 0; // 当前已展示数量
         let currentCategory = 'all';
         let currentDetailJob = null;
         let currentMode = 'search';
@@ -475,17 +482,34 @@
             let searchTerms = [];
             let cityFilters = [];
             let categoryHint = null;
+            let needsClarification = null; // 追问信息
 
-            // 分类关键词检测（支持中文和英文）
-            if (query.includes('pta') || query.includes('远程兼职') || query.includes('线上实习')) {
+            // ====== 1. 分类关键词检测 ======
+            // 远程/线上类
+            if (query.includes('pta') || query.includes('远程兼职') || query.includes('线上实习') || query.includes('线上兼职')) {
                 categoryHint = 'PTA';
-                query = query.replace(/pta|远程兼职|线上实习/gi, '').trim();
+                query = query.replace(/pta|远程兼职|线上实习|线上兼职/gi, '').trim();
+            }
+            if (query.includes('远程') || query.includes('线上') || query.includes('online')) {
+                if (!categoryHint) categoryHint = '远程';
+                query = query.replace(/远程|线上|online/gi, '').trim();
             }
             if (query.includes('科研') && !query.includes('科研所')) {
                 categoryHint = '科研';
                 query = query.replace(/科研/gi, '').trim();
             }
+            // 国外实地
+            if (query.includes('国外') || query.includes('海外') || query.includes('出国')) {
+                if (!categoryHint) categoryHint = '国外实地';
+                query = query.replace(/国外|海外|出国/gi, '').trim();
+            }
+            // 实地（国内实地）如果没有明确分类但有城市，留给城市过滤
+            if (query.includes('实地') || query.includes('线下')) {
+                if (!categoryHint) categoryHint = '国内实地';
+                query = query.replace(/实地|线下/gi, '').trim();
+            }
 
+            // ====== 2. 提取城市 ======
             let remainingQuery = query;
             for (const city of cityKeywords) {
                 if (remainingQuery.includes(city.toLowerCase())) {
@@ -494,27 +518,46 @@
                 }
             }
 
-            const bgPatterns = [
-                /西交利物浦/g, /[\u4e00-\u9fa5]+大学/g,
-                /大[一二三四五六]|研[一二三]/g,
-                /本科|硕士|博士|phd|mba/gi,
-                /我.*就读|我就读|我是.*学生/g
+            // ====== 3. 过滤噪音：人名、学校、年级等（强化版） ======
+            const noisePatterns = [
+                // 学校名
+                /[\u4e00-\u9fa5]+大学/g,
+                /[\u4e00-\u9fa5]*(学院|研究院|专科学校|职业技术学院)/g,
+                /西交利物浦/g, /纽约大学/g, /港中文/g, /港大/g,
+                /清华/g, /北大/g, /复旦/g, /浙大/g, /南大/g, /武大/g, /中山大/g,
+                /人民大学/g, /同济/g, /厦大/g, /天大/g, /南开/g, /华科/g, /北航/g,
+                /北师大/g, /华东师大/g, /上外/g, /北外/g, /对外经贸/g, /中传/g,
+                // 年级
+                /大[一二三四五六]/g, /研[一二三]/g, /博[一二三四五]/g,
+                /大一|大二|大三|大四|研一|研二|研三|博一|博二|博三/g,
+                /freshman|sophomore|junior|senior/gi,
+                // 学历
+                /本科|硕士|博士|phd|mba|研究生|本科生|硕士生|博士生/gi,
+                // 人名模式（如"我叫张三"、"我是李四"）
+                /我[叫叫的]?\s*[\u4e00-\u9fa5]{2,4}/g,
+                /我是[\u4e00-\u9fa5]{2,4}/g,
+                // 自我描述
+                /我.*就读|我就读|我是.*学生|本人.*专业/g,
+                // 无意义助词/虚词
+                /[的吗呢吧啊呀哦哈嗯]/g,
+                // 常见冗余词
+                /有|在|相关|岗位|职位|工作|实习|招聘|吗|呢|吧|啊|的|是|我想找|请问|有没有|帮忙|推荐|可以|能够|适合|想要|希望|寻找/g
             ];
-            for (const p of bgPatterns) remainingQuery = remainingQuery.replace(p, ' ');
+            for (const p of noisePatterns) remainingQuery = remainingQuery.replace(p, ' ');
 
-            remainingQuery = remainingQuery
-                .replace(/[的吗呢吧啊呀]/g, ' ')
-                .replace(/有|在|相关|岗位|职位|工作|实习|招聘|吗|呢|吧|啊|的|是|我想找|请问|有没有/g, ' ')
-                .replace(/\s+/g, ' ').trim();
+            remainingQuery = remainingQuery.replace(/\s+/g, ' ').trim();
 
+            // ====== 4. 拆分搜索词 ======
             if (remainingQuery.length > 0) {
                 searchTerms = remainingQuery.split(/\s+/).filter(t => t.length >= 1);
             }
 
+            // ====== 5. 同义词扩展 ======
             let expandedTerms = [];
             for (const term of searchTerms) {
                 expandedTerms.push(term);
                 for (const [major, synonyms] of Object.entries(smartDict)) {
+                    // 双向匹配：term包含synonym 或 synonym包含term
                     if (synonyms.some(s => term.includes(s.toLowerCase()) || s.toLowerCase().includes(term))) {
                         expandedTerms.push(...synonyms.map(s => s.toLowerCase()));
                         break;
@@ -523,7 +566,21 @@
             }
             searchTerms = [...new Set(expandedTerms)];
             cityFilters = [...new Set(cityFilters)];
-            return { searchTerms, cityFilters, categoryHint };
+
+            // ====== 6. 判断是否需要追问 ======
+            // 场景A：实地但没给城市
+            if (categoryHint === '国内实地' && cityFilters.length === 0) {
+                needsClarification = {
+                    type: 'location',
+                    message: '🏙️ 实地实习需要知道你的城市偏好，想去哪个城市？如：北京、上海、深圳'
+                };
+            }
+            // 场景B：远程/线上但搜索词很泛（只给了大类如"计算机"，没有公司倾向）
+            if ((categoryHint === '远程' || categoryHint === 'PTA') && searchTerms.length <= 3 && !cityFilters.length) {
+                // 不强制追问，但在结果中提示
+            }
+
+            return { searchTerms, cityFilters, categoryHint, needsClarification };
         }
 
         function fuzzyMatch(text, keywords) {
@@ -531,6 +588,29 @@
             text = text.toLowerCase();
             for (const k of keywords) {
                 if (k && text.includes(k.toLowerCase())) return true;
+            }
+            return false;
+        }
+
+        // 模糊包含匹配：检查 keyword 是否在 text 中有"近似的"出现
+        // 支持子串匹配 + 拼音首字母简写（简单版：去非字母数字后子串匹配）
+        function softContains(text, keyword) {
+            if (!text || !keyword) return false;
+            const t = text.toLowerCase();
+            const k = keyword.toLowerCase();
+            // 1. 直接包含
+            if (t.includes(k)) return true;
+            // 2. 去掉空格/特殊字符后包含（如 "计算机科学" 包含 "计算机"）
+            const cleanT = t.replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+            const cleanK = k.replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+            if (cleanT.includes(cleanK)) return true;
+            // 3. 对于2字以上中文词，允许部分匹配（如"金融学"匹配"金融"）
+            if (cleanK.length >= 2 && /[\u4e00-\u9fa5]/.test(cleanK)) {
+                // 滑动窗口：只要text中有连续2字以上和keyword重叠
+                for (let i = 0; i < cleanK.length - 1; i++) {
+                    const sub = cleanK.substring(i, i + Math.max(2, Math.ceil(cleanK.length * 0.6)));
+                    if (sub.length >= 2 && cleanT.includes(sub)) return true;
+                }
             }
             return false;
         }
@@ -543,48 +623,169 @@
                 return _allJobs.filter(job => {
                     if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) return false;
                     return true;
-                }).map(stripPrice);
+                }).map(stripPrice).slice(0, 30); // 无搜索词时也限制显示数量
             }
 
-            const { searchTerms, cityFilters, categoryHint } = aiSmartSearch(query);
+            const { searchTerms, cityFilters, categoryHint, needsClarification } = aiSmartSearch(query);
             if (categoryHint) effectiveCategory = categoryHint;
 
-            let results = _allJobs.filter(job => {
-                if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) return false;
+            // ====== 筛选 + 评分 ======
+            let scoredResults = [];
+            for (const job of _allJobs) {
+                // 分类过滤
+                if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) continue;
+                // 城市过滤
                 if (cityFilters.length > 0) {
-                    if (!job.location) return false;
-                    if (!cityFilters.some(city => job.location.includes(city))) return false;
+                    if (!job.location) continue;
+                    if (!cityFilters.some(city => job.location.includes(city))) continue;
                 }
-                // 清洗 industry 中的换行符，增加 location 到搜索范围
+
+                // 构建搜索文本（排除价格纯数字）
                 const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
                 const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`;
-                return fuzzyMatch(searchText, searchTerms);
-            });
 
-            if (searchTerms.length > 0) {
-                results = results.map(job => {
-                    const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
-                    const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`.toLowerCase();
-                    let matchCount = 0, totalScore = 0;
-                    searchTerms.forEach(term => {
-                        if (searchText.includes(term.toLowerCase())) {
-                            matchCount++;
-                            if (job.position && job.position.toLowerCase().includes(term.toLowerCase())) totalScore += 10;
-                            if (cleanIndustry && cleanIndustry.toLowerCase().includes(term.toLowerCase())) totalScore += 5;
-                            if (job.company && job.company.toLowerCase().includes(term.toLowerCase())) totalScore += 3;
-                            if (job.location && job.location.toLowerCase().includes(term.toLowerCase())) totalScore += 2;
+                // 用 softContains 做模糊匹配，计算匹配度和得分
+                let matchCount = 0;
+                let totalScore = 0;
+                let positionMatch = false;
+                let industryMatch = false;
+                let companyMatch = false;
+
+                for (const term of searchTerms) {
+                    if (softContains(searchText, term)) {
+                        matchCount++;
+                        // 加权得分：岗位名 > 行业 > 公司 > 其他
+                        if (job.position && softContains(job.position, term)) {
+                            totalScore += 10;
+                            positionMatch = true;
                         }
+                        if (cleanIndustry && softContains(cleanIndustry, term)) {
+                            totalScore += 6;
+                            industryMatch = true;
+                        }
+                        if (job.company && softContains(job.company, term)) {
+                            totalScore += 4;
+                            companyMatch = true;
+                        }
+                        if (job.duty && softContains(job.duty, term)) totalScore += 2;
+                        if (job.requirements && softContains(job.requirements, term)) totalScore += 2;
+                        if (job.location && softContains(job.location, term)) totalScore += 3;
+                    }
+                }
+
+                // 至少匹配1个搜索词才入选
+                if (matchCount > 0) {
+                    // 额外加分：岗位名+行业同时匹配（说明高度相关）
+                    if (positionMatch && industryMatch) totalScore += 15;
+                    scoredResults.push({
+                        ...job,
+                        _matchCount: matchCount,
+                        _totalScore: totalScore,
+                        _positionMatch: positionMatch,
+                        _industryMatch: industryMatch
                     });
-                    return { ...job, _matchCount: matchCount, _totalScore: totalScore };
-                }).sort((a, b) => {
-                    if (b._matchCount !== a._matchCount) return b._matchCount - a._matchCount;
-                    if (b._totalScore !== a._totalScore) return b._totalScore - a._totalScore;
-                    const typeOrder = { '国内实地': 1, 'PTA': 2, '远程': 3, '国外实地': 4, '科研': 5, '其他': 6 };
-                    return (typeOrder[getJobType(a)] || 5) - (typeOrder[getJobType(b)] || 5);
-                });
+                }
             }
 
-            return results.map(stripPrice);
+            // ====== 排序：匹配度 > 得分 > 分类优先级 ======
+            scoredResults.sort((a, b) => {
+                if (b._matchCount !== a._matchCount) return b._matchCount - a._matchCount;
+                if (b._totalScore !== a._totalScore) return b._totalScore - a._totalScore;
+                const typeOrder = { '国内实地': 1, 'PTA': 2, '远程': 3, '国外实地': 4, '科研': 5, '其他': 6 };
+                return (typeOrder[getJobType(a)] || 5) - (typeOrder[getJobType(b)] || 5);
+            });
+
+            // ====== 限制结果数量：最多10条 ======
+            const MAX_RESULTS = 10;
+            const trimmedResults = scoredResults.slice(0, MAX_RESULTS);
+
+            // 通过全局变量传递追问信息和总匹配数
+            window._searchMeta = {
+                needsClarification: needsClarification,
+                totalMatched: scoredResults.length
+            };
+
+            return trimmedResults.map(stripPrice);
+        }
+
+        // 全量搜索（不限制结果数量，用于"查看更多"）
+        function clientSideSearchFull(query, category) {
+            if (!_allJobs) return [];
+            let effectiveCategory = category;
+
+            if (!query || !query.trim()) {
+                return _allJobs.filter(job => {
+                    if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) return false;
+                    return true;
+                }).map(stripPrice).slice(0, 30);
+            }
+
+            const { searchTerms, cityFilters, categoryHint, needsClarification } = aiSmartSearch(query);
+            if (categoryHint) effectiveCategory = categoryHint;
+
+            let scoredResults = [];
+            for (const job of _allJobs) {
+                if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) continue;
+                if (cityFilters.length > 0) {
+                    if (!job.location) continue;
+                    if (!cityFilters.some(city => job.location.includes(city))) continue;
+                }
+                const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
+                const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`;
+
+                let matchCount = 0, totalScore = 0;
+                let positionMatch = false, industryMatch = false;
+
+                for (const term of searchTerms) {
+                    if (softContains(searchText, term)) {
+                        matchCount++;
+                        if (job.position && softContains(job.position, term)) { totalScore += 10; positionMatch = true; }
+                        if (cleanIndustry && softContains(cleanIndustry, term)) { totalScore += 6; industryMatch = true; }
+                        if (job.company && softContains(job.company, term)) totalScore += 4;
+                        if (job.duty && softContains(job.duty, term)) totalScore += 2;
+                        if (job.requirements && softContains(job.requirements, term)) totalScore += 2;
+                        if (job.location && softContains(job.location, term)) totalScore += 3;
+                    }
+                }
+                if (matchCount > 0) {
+                    if (positionMatch && industryMatch) totalScore += 15;
+                    scoredResults.push({ ...job, _matchCount: matchCount, _totalScore: totalScore });
+                }
+            }
+
+            scoredResults.sort((a, b) => {
+                if (b._matchCount !== a._matchCount) return b._matchCount - a._matchCount;
+                if (b._totalScore !== a._totalScore) return b._totalScore - a._totalScore;
+                const typeOrder = { '国内实地': 1, 'PTA': 2, '远程': 3, '国外实地': 4, '科研': 5, '其他': 6 };
+                return (typeOrder[getJobType(a)] || 5) - (typeOrder[getJobType(b)] || 5);
+            });
+
+            // 保存追问信息
+            window._searchMeta = { needsClarification: needsClarification, totalMatched: scoredResults.length };
+
+            return scoredResults.map(stripPrice);
+        }
+
+        // "查看更多"按钮：每次加载10条
+        function loadMoreResults() {
+            const MORE_COUNT = 10;
+            const newItems = _allMatchedJobs.slice(_displayCount, _displayCount + MORE_COUNT);
+            if (newItems.length === 0) return;
+
+            filteredJobs = _allMatchedJobs.slice(0, _displayCount + MORE_COUNT);
+            _displayCount = filteredJobs.length;
+
+            // 更新标题
+            const totalMatched = (window._searchMeta || {}).totalMatched || _allMatchedJobs.length;
+            if (totalMatched > _displayCount) {
+                document.getElementById('resultTitle').textContent = '最匹配的岗位（Top ' + _displayCount + '）';
+                document.getElementById('resultDesc').textContent = `共匹配 ${totalMatched} 个，已展示 ${_displayCount} 个`;
+            } else {
+                document.getElementById('resultTitle').textContent = '全部匹配结果';
+                document.getElementById('resultDesc').textContent = `共 ${_displayCount} 个匹配岗位`;
+            }
+
+            displayJobs();
         }
 
         function stripPrice(job) {
@@ -769,10 +970,23 @@
             document.getElementById('topRecommendation').style.display = 'none';
             document.getElementById('copyableSummary').style.display = 'none';
             document.getElementById('jobList').innerHTML = '';
+            document.getElementById('loadMoreWrap').style.display = 'none';
 
             // 用 setTimeout 让 UI 先更新
             setTimeout(function() {
-                filteredJobs = clientSideSearch(query, category);
+                // 先做一次全量搜索保存所有结果
+                const allResults = clientSideSearchFull(query, category);
+                _allMatchedJobs = allResults;
+
+                // 取前10条作为初始展示
+                const MAX_INIT = 10;
+                filteredJobs = allResults.slice(0, MAX_INIT);
+                _displayCount = filteredJobs.length;
+
+                // 获取追问信息和总匹配数
+                const meta = window._searchMeta || {};
+                const needsClarification = meta.needsClarification || null;
+                const totalMatched = meta.totalMatched || allResults.length;
 
                 // 更新搜索计数
                 sessionInfo.searches_used++;
@@ -781,11 +995,28 @@
                     `(${sessionInfo.searches_used}/${sessionInfo.max_searches})`;
 
                 if (query && query.trim()) {
-                    document.getElementById('resultTitle').textContent = '最匹配的岗位';
-                    document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位`;
+                    const shownCount = filteredJobs.length;
+                    if (totalMatched > shownCount) {
+                        document.getElementById('resultTitle').textContent = '最匹配的岗位（Top ' + shownCount + '）';
+                        document.getElementById('resultDesc').textContent = `共匹配 ${totalMatched} 个，展示最相关的 ${shownCount} 个`;
+                    } else {
+                        document.getElementById('resultTitle').textContent = '最匹配的岗位';
+                        document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位`;
+                    }
                 } else {
                     document.getElementById('resultTitle').textContent = `全部岗位 (${filteredJobs.length})`;
                     document.getElementById('resultDesc').textContent = '显示所有可用岗位';
+                }
+
+                // 显示追问提示
+                const clarificationDiv = document.getElementById('clarificationHint');
+                if (clarificationDiv) {
+                    if (needsClarification) {
+                        clarificationDiv.style.display = 'block';
+                        clarificationDiv.innerHTML = needsClarification.message + '<br><span style="font-size:12px;color:#aaa;">补充关键词后重新搜索即可精确筛选</span>';
+                    } else {
+                        clarificationDiv.style.display = 'none';
+                    }
                 }
 
                 displayJobs();
@@ -866,6 +1097,18 @@
                     <div class="job-tags">${infoTags}</div>
                 `;
                 jobList.appendChild(div);
+            }
+
+            // "查看更多"按钮：如果还有更多结果
+            const loadMoreWrap = document.getElementById('loadMoreWrap');
+            const totalMatched = (window._searchMeta || {}).totalMatched || _allMatchedJobs.length;
+            if (loadMoreWrap) {
+                if (_displayCount < totalMatched && totalMatched > 10) {
+                    loadMoreWrap.style.display = 'block';
+                    document.getElementById('loadMoreBtn').textContent = `📋 查看更多（还有 ${totalMatched - _displayCount} 条）`;
+                } else {
+                    loadMoreWrap.style.display = 'none';
+                }
             }
         }
 
