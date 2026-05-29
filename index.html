@@ -978,7 +978,18 @@
             // 用 setTimeout 让 UI 先更新
             setTimeout(function() {
                 // 先做一次全量搜索保存所有结果
-                const allResults = clientSideSearchFull(query, category);
+                let allResults = clientSideSearchFull(query, category);
+                let usedCategory = category;
+                let isFallback = false;
+
+                // Fallback：如果选定分类搜不到结果（且不是全部分类），自动扩展到全部
+                if (allResults.length === 0 && category !== 'all') {
+                    allResults = clientSideSearchFull(query, 'all');
+                    if (allResults.length > 0) {
+                        usedCategory = 'all';
+                        isFallback = true;
+                    }
+                }
                 _allMatchedJobs = allResults;
 
                 // 取前10条作为初始展示
@@ -997,15 +1008,20 @@
                 document.getElementById('userQuota').textContent =
                     `(${sessionInfo.searches_used}/${sessionInfo.max_searches})`;
 
-                const catLabel = category === 'all' ? '全部' : category;
+                const catLabel = usedCategory === 'all' ? '全部' : usedCategory;
+                const origCatLabel = category === 'all' ? '全部' : category;
                 const shownCount = filteredJobs.length;
                 if (query && query.trim()) {
                     if (totalMatched > shownCount) {
                         document.getElementById('resultTitle').textContent = '最匹配的岗位（Top ' + shownCount + '）';
-                        document.getElementById('resultDesc').textContent = `共匹配 ${totalMatched} 个，展示最相关的 ${shownCount} 个`;
+                        let descText = `共匹配 ${totalMatched} 个，展示最相关的 ${shownCount} 个`;
+                        if (isFallback) descText += `（「${origCatLabel}」中无结果，已扩展至全部分类）`;
+                        document.getElementById('resultDesc').textContent = descText;
                     } else {
                         document.getElementById('resultTitle').textContent = '最匹配的岗位';
-                        document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位`;
+                        let descText = `共找到 ${filteredJobs.length} 个匹配岗位`;
+                        if (isFallback) descText += `（「${origCatLabel}」中无结果，已扩展至全部分类）`;
+                        document.getElementById('resultDesc').textContent = descText;
                     }
                 } else {
                     // 仅分类浏览（无搜索词）
