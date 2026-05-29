@@ -714,10 +714,13 @@
             let effectiveCategory = category;
 
             if (!query || !query.trim()) {
-                return _allJobs.filter(job => {
+                const results = _allJobs.filter(job => {
                     if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) return false;
                     return true;
-                }).map(stripPrice).slice(0, 30);
+                }).map(stripPrice);
+                // 设置 _searchMeta，让 searchJobs 能获取 totalMatched
+                window._searchMeta = { needsClarification: null, totalMatched: results.length };
+                return results;
             }
 
             const { searchTerms, cityFilters, categoryHint, needsClarification } = aiSmartSearch(query);
@@ -994,8 +997,9 @@
                 document.getElementById('userQuota').textContent =
                     `(${sessionInfo.searches_used}/${sessionInfo.max_searches})`;
 
+                const catLabel = category === 'all' ? '全部' : category;
+                const shownCount = filteredJobs.length;
                 if (query && query.trim()) {
-                    const shownCount = filteredJobs.length;
                     if (totalMatched > shownCount) {
                         document.getElementById('resultTitle').textContent = '最匹配的岗位（Top ' + shownCount + '）';
                         document.getElementById('resultDesc').textContent = `共匹配 ${totalMatched} 个，展示最相关的 ${shownCount} 个`;
@@ -1004,8 +1008,14 @@
                         document.getElementById('resultDesc').textContent = `共找到 ${filteredJobs.length} 个匹配岗位`;
                     }
                 } else {
-                    document.getElementById('resultTitle').textContent = `全部岗位 (${filteredJobs.length})`;
-                    document.getElementById('resultDesc').textContent = '显示所有可用岗位';
+                    // 仅分类浏览（无搜索词）
+                    if (totalMatched > shownCount) {
+                        document.getElementById('resultTitle').textContent = `${catLabel}岗位（Top ${shownCount}）`;
+                        document.getElementById('resultDesc').textContent = `${catLabel}共 ${totalMatched} 个岗位，展示前 ${shownCount} 个`;
+                    } else {
+                        document.getElementById('resultTitle').textContent = `${catLabel}岗位 (${totalMatched})`;
+                        document.getElementById('resultDesc').textContent = `共 ${totalMatched} 个岗位`;
+                    }
                 }
 
                 // 显示追问提示
