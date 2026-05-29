@@ -33,6 +33,13 @@ const BUILT_IN_TOKENS = [
     "is_active": true,
     "max_searches": 1000,
     "created_at": "2026-05-29"
+  },
+  {
+    "token": "07fb75cb224c1950e1febf5ec6da1eee",
+    "name": "未来",
+    "is_active": true,
+    "max_searches": 1000,
+    "created_at": "2026-05-29"
   }
 ];
 
