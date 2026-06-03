@@ -7,7 +7,7 @@
 const { getTokens } = require('./_lib/tokens-store');
 const { readFile } = require('./_lib/github');
 
-const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY || 'admin-xing-test-2026';
+const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY || 'admin-xing-2026';
 
 // 日志缓存（5分钟过期）
 let _logsCache = null;

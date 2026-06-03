@@ -10,7 +10,7 @@ const _p2 = process.env.GH_P2 || 'z1Z8MfBq2XB12J4csViYzmHYgIgBx8mWADL7BPDYya7N7R
 const GITHUB_PAT = _p1 + _p2;
 const GITHUB_OWNER = '335172014-code';
 const GITHUB_REPO = 'xing';
-const GITHUB_BRANCH = 'dev';
+const GITHUB_BRANCH = 'main';
 
 /**
  * 推送文件到GitHub

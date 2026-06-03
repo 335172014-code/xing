@@ -12,7 +12,7 @@ const { getTokens, setTokens } = require('./_lib/tokens-store');
 const { pushTokens } = require('./_lib/github');
 const crypto = require('crypto');
 
-const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY || 'admin-xing-test-2026';
+const ADMIN_KEY = process.env.ADMIN_TOKEN || process.env.ADMIN_KEY || 'admin-xing-2026';
 
 function verifyAdmin(adminKey) {
   return adminKey === ADMIN_KEY;

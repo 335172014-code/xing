@@ -26,6 +26,27 @@ const BUILT_IN_TOKENS = [
     "is_active": true,
     "max_searches": 500,
     "created_at": "2026-05-28"
+  },
+  {
+    "token": "3eb54754e3e8bcce3742bcbc9156a5b6",
+    "name": "新东方",
+    "is_active": true,
+    "max_searches": 1000,
+    "created_at": "2026-05-29"
+  },
+  {
+    "token": "07fb75cb224c1950e1febf5ec6da1eee",
+    "name": "未来",
+    "is_active": true,
+    "max_searches": 1000,
+    "created_at": "2026-05-29"
+  },
+  {
+    "token": "b8c3a7a1db22d85af36afa8b79aa33bd",
+    "name": "混用",
+    "is_active": true,
+    "max_searches": 10000,
+    "created_at": "2026-05-29"
   }
 ];
 
