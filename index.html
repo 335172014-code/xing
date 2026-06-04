@@ -329,6 +329,147 @@
             text-align: center; padding: 30px; color: #999; font-size: 13px;
         }
 
+        /* ====== 管理面板 ====== */
+        #adminPanel { padding: 10px 0; }
+        #adminPanel h2 { font-size: 20px; color: #333; margin-bottom: 16px; }
+        #adminPanel h3 { font-size: 16px; color: #333; margin-bottom: 12px; }
+        .admin-cards {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            margin-bottom: 20px;
+        }
+        .admin-card {
+            background: white; border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;
+        }
+        .admin-card-value {
+            font-size: 28px; font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .admin-card-label { font-size: 12px; color: #888; margin-top: 4px; }
+        .admin-section {
+            background: white; border-radius: 12px; padding: 16px;
+            margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .admin-section h3 { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+        .admin-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 10px 20px; border-radius: 8px;
+            font-size: 14px; cursor: pointer; margin-bottom: 12px; min-height: 44px;
+        }
+        .admin-btn:active { opacity: 0.8; }
+        .admin-btn-danger {
+            background: #e53935; color: white; border: none; padding: 4px 12px;
+            border-radius: 4px; font-size: 12px; cursor: pointer;
+        }
+        .admin-btn-danger:active { opacity: 0.8; }
+        .admin-btn-sm {
+            background: #f5f5f5; color: #666; border: 1px solid #e0e0e0;
+            padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;
+        }
+        .admin-btn-sm:active { background: #e0e0e0; }
+        .token-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        .token-table th {
+            text-align: left; padding: 10px 8px; border-bottom: 2px solid #f0f0f0;
+            color: #888; font-weight: 500; white-space: nowrap;
+        }
+        .token-table td {
+            padding: 10px 8px; border-bottom: 1px solid #f5f5f5; vertical-align: middle;
+        }
+        .token-masked { font-family: monospace; color: #999; font-size: 12px; }
+        .token-quota-bar {
+            width: 100%; height: 8px; background: #f0f0f0; border-radius: 4px;
+            overflow: hidden; margin-top: 4px;
+        }
+        .token-quota-fill {
+            height: 100%; border-radius: 4px; transition: width 0.3s;
+        }
+        .token-status-active { color: #2e7d32; font-weight: 500; }
+        .token-status-inactive { color: #e53935; font-weight: 500; }
+        .toggle-switch {
+            position: relative; width: 40px; height: 22px; display: inline-block;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc; border-radius: 22px; transition: 0.3s;
+        }
+        .toggle-slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background: #667eea; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .hot-keywords { display: flex; flex-wrap: wrap; gap: 8px; }
+        .hot-keyword-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #f5f5f5; padding: 6px 12px; border-radius: 20px; font-size: 13px;
+            color: #555; border: 1px solid #e8e8e8;
+        }
+        .hot-keyword-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border-radius: 10px; padding: 1px 8px; font-size: 11px;
+        }
+        .bar-chart {
+            display: flex; align-items: flex-end; gap: 8px;
+            height: 180px; padding: 10px 0; border-bottom: 2px solid #f0f0f0;
+        }
+        .bar-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            height: 100%; justify-content: flex-end;
+        }
+        .bar-fill {
+            width: 100%; max-width: 40px; border-radius: 4px 4px 0 0;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            transition: height 0.5s ease; min-height: 2px;
+        }
+        .bar-value { font-size: 11px; color: #667eea; margin-bottom: 4px; font-weight: 500; }
+        .bar-label { font-size: 11px; color: #999; margin-top: 6px; }
+        .admin-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1001; align-items: center;
+            justify-content: center; padding: 20px;
+        }
+        .admin-modal-overlay.show { display: flex; }
+        .admin-modal {
+            background: white; border-radius: 16px; padding: 24px;
+            max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .admin-modal h3 { font-size: 18px; margin-bottom: 16px; color: #333; }
+        .admin-modal-input {
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 14px; outline: none; min-height: 44px; margin-bottom: 12px;
+        }
+        .admin-modal-input:focus { border-color: #667eea; }
+        .admin-modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+        .admin-modal-btns button { flex: 1; min-height: 44px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; }
+        .admin-modal-cancel { background: #f5f5f5; color: #666; }
+        .admin-modal-confirm { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; }
+        #adminBtn {
+            background: rgba(255,255,255,0.2); color: white; border: none;
+            padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+            display: none;
+        }
+        #adminBtn:active { background: rgba(255,255,255,0.4); }
+        .token-created-value {
+            background: #f5f5f5; padding: 10px; border-radius: 8px; font-family: monospace;
+            font-size: 14px; word-break: break-all; color: #667eea; margin: 12px 0;
+            border: 2px dashed #667eea; text-align: center;
+        }
+        @media (max-width: 360px) {
+            .admin-cards { grid-template-columns: 1fr; }
+            .token-table th, .token-table td { padding: 8px 4px; font-size: 11px; }
+            .admin-section { padding: 12px; }
+        }
+        @media (min-width: 768px) {
+            .admin-cards { grid-template-columns: repeat(4, 1fr); }
+            #adminPanel h2 { font-size: 24px; }
+            .admin-section { padding: 20px; }
+        }
+
         /* ====== AI 推荐面板 ====== */
         .rec-section-title {
             font-size: 15px; font-weight: bold; color: #333;
@@ -404,6 +545,7 @@
             <div class="user-info" id="userInfo" style="display:none;">
                 <span id="userName">--</span>
                 <span id="userQuota" style="opacity:0.8;">(0/500)</span>
+                <button id="adminBtn" onclick="toggleAdminPanel()">🔧 管理</button>
                 <button class="logout-btn" onclick="logout()">退出</button>
             </div>
         </div>
@@ -501,6 +643,43 @@
                     <div id="statsTopCompanies"></div>
                 </div>
             </div>
+
+            <!-- 管理面板（默认隐藏） -->
+            <div id="adminPanel" class="admin-mode" style="display:none;">
+                <h2>📊 管理后台</h2>
+
+                <!-- 概览卡片 -->
+                <div class="admin-cards" id="adminCards">
+                    <div class="admin-card"><div class="admin-card-value" id="adminTotalSearches">0</div><div class="admin-card-label">总搜索次数</div></div>
+                    <div class="admin-card"><div class="admin-card-value" id="adminTodaySearches">0</div><div class="admin-card-label">今日搜索量</div></div>
+                    <div class="admin-card"><div class="admin-card-value" id="adminActiveTokens">0</div><div class="admin-card-label">活跃 Token</div></div>
+                    <div class="admin-card"><div class="admin-card-value" id="adminWeekTrend">--</div><div class="admin-card-label">7日趋势</div></div>
+                </div>
+
+                <!-- Token 管理 -->
+                <div class="admin-section">
+                    <h3>🪙 Token 管理</h3>
+                    <button class="admin-btn" onclick="showCreateTokenModal()">+ 创建 Token</button>
+                    <div style="overflow-x:auto;">
+                    <table class="token-table">
+                        <thead><tr><th>名称</th><th>Token</th><th>配额</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="tokenTableBody"></tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <!-- 热门关键词 -->
+                <div class="admin-section">
+                    <h3>🔥 热门搜索 TOP10</h3>
+                    <div class="hot-keywords" id="hotKeywords"></div>
+                </div>
+
+                <!-- 搜索趋势 -->
+                <div class="admin-section">
+                    <h3>📈 搜索趋势（近7天）</h3>
+                    <div class="bar-chart" id="searchTrendChart"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -521,6 +700,32 @@
             <div id="posterPreviewBody" style="text-align: center; padding: 20px;"></div>
             <div style="text-align: center; padding: 20px;">
                 <button class="poster-btn" onclick="downloadPoster()">📥 下载海报</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建 Token 弹窗 -->
+    <div class="admin-modal-overlay" id="createTokenModal">
+        <div class="admin-modal">
+            <h3 id="createTokenModalTitle">创建 Token</h3>
+            <div id="createTokenForm">
+                <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">用户名称</label>
+                <input type="text" class="admin-modal-input" id="newTokenName" placeholder="输入用户名称">
+                <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">搜索配额</label>
+                <input type="number" class="admin-modal-input" id="newTokenQuota" placeholder="100" value="100" min="1">
+                <div class="admin-modal-btns">
+                    <button class="admin-modal-cancel" onclick="closeCreateTokenModal()">取消</button>
+                    <button class="admin-modal-confirm" onclick="createToken()">创建</button>
+                </div>
+            </div>
+            <div id="createTokenResult" style="display:none;">
+                <p style="font-size:14px;color:#555;">Token 已创建，请妥善保管：</p>
+                <div class="token-created-value" id="createdTokenValue"></div>
+                <p style="font-size:12px;color:#e53935;">⚠️ 此 Token 仅显示一次，请立即复制</p>
+                <div class="admin-modal-btns">
+                    <button class="admin-modal-confirm" onclick="copyCreatedToken()">📋 复制 Token</button>
+                    <button class="admin-modal-cancel" onclick="closeCreateTokenModal()">关闭</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1010,6 +1215,16 @@
             sessionInfo = null;
             localStorage.removeItem('xing_token');
             filteredJobs = [];
+            // 重置管理面板状态
+            if (_adminPanelVisible) {
+                _adminPanelVisible = false;
+                var adminPanel = document.getElementById('adminPanel');
+                if (adminPanel) adminPanel.style.display = 'none';
+                var searchPanel = document.querySelector('.sidebar');
+                if (searchPanel) searchPanel.style.display = '';
+            }
+            var adminBtn = document.getElementById('adminBtn');
+            if (adminBtn) adminBtn.style.display = 'none';
             showLoginScreen();
         }
 
@@ -1047,6 +1262,10 @@
 
             document.getElementById('resultTitle').textContent = '欢迎使用';
             document.getElementById('resultDesc').textContent = '输入关键词搜索岗位，或选择分类浏览';
+
+            // 管理员显示管理按钮
+            var adminBtn = document.getElementById('adminBtn');
+            if (adminBtn) adminBtn.style.display = isAdmin() ? 'inline-block' : 'none';
 
             if (window.innerWidth > 768) {
                 document.getElementById('searchInput').focus();
@@ -1172,6 +1391,10 @@
 
                 if (query && query.trim() && filteredJobs.length > 0) {
                     _saveSearchToHistory(query);
+                }
+                // 记录搜索日志（管理员模式下）
+                if (query && query.trim()) {
+                    logSearch(query, sessionInfo ? sessionInfo.name : 'unknown');
                 }
                 displayJobs();
                 _isSearching = false;
@@ -1385,6 +1608,8 @@
                 document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
                 this.classList.add('active');
                 currentMode = this.dataset.mode;
+                // 如果管理面板可见，先切回搜索界面
+                if (_adminPanelVisible) toggleAdminPanel();
                 var matchForm = document.getElementById('matchForm');
                 var statsPanel = document.getElementById('statsPanel');
                 var aiPanel = document.getElementById('aiRecommendPanel');
@@ -1838,7 +2063,371 @@
             });
         }
 
+        // ==================== 管理面板 ====================
+        let _adminPanelVisible = false;
+
+        function isAdmin() {
+            return currentToken === 'admin-xing-2026' || (sessionInfo && sessionInfo.name === '管理员');
+        }
+
+        function toggleAdminPanel() {
+            if (!isAdmin()) return;
+            var adminPanel = document.getElementById('adminPanel');
+            var adminBtn = document.getElementById('adminBtn');
+            var searchPanel = document.querySelector('.sidebar');
+            var resultHeader = document.querySelector('.result-header');
+            var clarificationHint = document.getElementById('clarificationHint');
+            var topRec = document.getElementById('topRecommendation');
+            var copySummary = document.getElementById('copyableSummary');
+            var loadingEl = document.getElementById('loading');
+            var emptyEl = document.getElementById('empty');
+            var jobList = document.getElementById('jobList');
+            var loadMoreWrap = document.getElementById('loadMoreWrap');
+            var statsPanel = document.getElementById('statsPanel');
+            var aiPanel = document.getElementById('aiRecommendPanel');
+
+            if (_adminPanelVisible) {
+                // 返回搜索界面
+                adminPanel.style.display = 'none';
+                adminBtn.textContent = '🔧 管理';
+                if (searchPanel) searchPanel.style.display = '';
+                if (clarificationHint) clarificationHint.style.display = '';
+                if (topRec) topRec.style.display = '';
+                if (copySummary) copySummary.style.display = '';
+                if (loadingEl) loadingEl.style.display = '';
+                if (emptyEl) emptyEl.style.display = '';
+                if (jobList) jobList.style.display = '';
+                if (loadMoreWrap) loadMoreWrap.style.display = '';
+                // 根据当前模式恢复结果区域
+                if (currentMode === 'stats') {
+                    if (resultHeader) resultHeader.style.display = 'none';
+                    if (statsPanel) statsPanel.style.display = 'block';
+                } else {
+                    if (resultHeader) resultHeader.style.display = '';
+                    if (statsPanel) statsPanel.style.display = 'none';
+                }
+                _adminPanelVisible = false;
+            } else {
+                // 进入管理面板
+                adminPanel.style.display = 'block';
+                adminBtn.textContent = '返回搜索';
+                if (searchPanel) searchPanel.style.display = 'none';
+                if (resultHeader) resultHeader.style.display = 'none';
+                if (clarificationHint) clarificationHint.style.display = 'none';
+                if (topRec) topRec.style.display = 'none';
+                if (copySummary) copySummary.style.display = 'none';
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'none';
+                if (jobList) jobList.style.display = 'none';
+                if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+                if (statsPanel) statsPanel.style.display = 'none';
+                if (aiPanel) aiPanel.style.display = 'none';
+                _adminPanelVisible = true;
+                renderAdminPanel();
+            }
+        }
+
+        // ====== Token 存储 (localStorage) ======
+        function getTokensStore() {
+            try { return JSON.parse(localStorage.getItem('xing_tokens_store') || '[]'); } catch(e) { return []; }
+        }
+        function saveTokensStore(tokens) {
+            try { localStorage.setItem('xing_tokens_store', JSON.stringify(tokens)); } catch(e) {}
+        }
+        function syncTokensToValidTokens() {
+            var store = getTokensStore();
+            store.forEach(function(t) {
+                var exists = VALID_TOKENS.find(function(v) { return v.token === t.token; });
+                if (!exists) {
+                    if (t.is_active) {
+                        VALID_TOKENS.push({ token: t.token, name: t.name, max_searches: t.max_searches });
+                    }
+                } else {
+                    exists.name = t.name;
+                    exists.max_searches = t.max_searches;
+                    // 如果禁用则从 VALID_TOKENS 移除
+                    if (!t.is_active) {
+                        var idx = VALID_TOKENS.indexOf(exists);
+                        if (idx > -1) VALID_TOKENS.splice(idx, 1);
+                    }
+                }
+            });
+        }
+
+        // ====== 搜索日志 (localStorage) ======
+        function getSearchLogs() {
+            try { return JSON.parse(localStorage.getItem('xing_search_logs') || '[]'); } catch(e) { return []; }
+        }
+        function saveSearchLogs(logs) {
+            // 最多 500 条
+            if (logs.length > 500) logs = logs.slice(logs.length - 500);
+            try { localStorage.setItem('xing_search_logs', JSON.stringify(logs)); } catch(e) {}
+        }
+        function logSearch(keyword, tokenName) {
+            if (!isAdmin()) return; // 仅管理员登录时记录
+            var logs = getSearchLogs();
+            logs.push({ keyword: keyword, token_name: tokenName, timestamp: new Date().toISOString() });
+            saveSearchLogs(logs);
+        }
+
+        // ====== 创建 Token ======
+        function generateHexToken() {
+            var chars = '0123456789abcdef';
+            var token = '';
+            for (var i = 0; i < 32; i++) {
+                token += chars.charAt(Math.floor(Math.random() * 16));
+            }
+            return token;
+        }
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+        var _lastCreatedToken = '';
+        function showCreateTokenModal() {
+            document.getElementById('createTokenForm').style.display = 'block';
+            document.getElementById('createTokenResult').style.display = 'none';
+            document.getElementById('createTokenModalTitle').textContent = '创建 Token';
+            document.getElementById('newTokenName').value = '';
+            document.getElementById('newTokenQuota').value = '100';
+            document.getElementById('createTokenModal').classList.add('show');
+        }
+        function closeCreateTokenModal() {
+            document.getElementById('createTokenModal').classList.remove('show');
+            _lastCreatedToken = '';
+        }
+        function createToken() {
+            var name = document.getElementById('newTokenName').value.trim();
+            var quota = parseInt(document.getElementById('newTokenQuota').value) || 100;
+            if (!name) { alert('请输入用户名称'); return; }
+            if (quota < 1) quota = 1;
+
+            var token = generateHexToken();
+            var tokenObj = {
+                id: generateId(),
+                name: name,
+                token: token,
+                max_searches: quota,
+                searches_used: 0,
+                is_active: true,
+                created_at: new Date().toISOString(),
+                expires_at: null
+            };
+
+            var store = getTokensStore();
+            store.push(tokenObj);
+            saveTokensStore(store);
+            syncTokensToValidTokens();
+
+            _lastCreatedToken = token;
+            document.getElementById('createTokenForm').style.display = 'none';
+            document.getElementById('createTokenResult').style.display = 'block';
+            document.getElementById('createdTokenValue').textContent = token;
+            document.getElementById('createTokenModalTitle').textContent = 'Token 创建成功';
+
+            renderTokenTable();
+            renderAdminStats();
+        }
+        function copyCreatedToken() {
+            if (_lastCreatedToken) {
+                var ta = document.createElement('textarea');
+                ta.value = _lastCreatedToken;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                alert('✅ Token 已复制到剪贴板');
+            }
+        }
+
+        // ====== Token 操作 ======
+        function toggleTokenActive(id) {
+            var store = getTokensStore();
+            var t = store.find(function(t) { return t.id === id; });
+            if (t) {
+                t.is_active = !t.is_active;
+                saveTokensStore(store);
+                syncTokensToValidTokens();
+                renderTokenTable();
+                renderAdminStats();
+            }
+        }
+        function deleteToken(id) {
+            if (!confirm('确定删除此 Token？删除后不可恢复。')) return;
+            var store = getTokensStore();
+            var idx = store.findIndex(function(t) { return t.id === id; });
+            if (idx > -1) {
+                var removed = store.splice(idx, 1)[0];
+                saveTokensStore(store);
+                // 从 VALID_TOKENS 中移除
+                var vIdx = VALID_TOKENS.findIndex(function(v) { return v.token === removed.token; });
+                if (vIdx > -1) VALID_TOKENS.splice(vIdx, 1);
+                renderTokenTable();
+                renderAdminStats();
+            }
+        }
+
+        // ====== 渲染管理面板 ======
+        function renderAdminPanel() {
+            renderAdminStats();
+            renderTokenTable();
+            renderHotKeywords();
+            renderSearchTrend();
+        }
+
+        function renderAdminStats() {
+            var logs = getSearchLogs();
+            var store = getTokensStore();
+            var now = new Date();
+            var todayStr = now.toISOString().slice(0, 10);
+
+            // 总搜索
+            document.getElementById('adminTotalSearches').textContent = logs.length;
+
+            // 今日搜索
+            var todayCount = logs.filter(function(l) { return l.timestamp && l.timestamp.slice(0, 10) === todayStr; }).length;
+            document.getElementById('adminTodaySearches').textContent = todayCount;
+
+            // 活跃 Token
+            var activeCount = store.filter(function(t) { return t.is_active; }).length;
+            document.getElementById('adminActiveTokens').textContent = activeCount;
+
+            // 7日趋势概览
+            var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            var weekCount = logs.filter(function(l) { return l.timestamp && new Date(l.timestamp) >= weekAgo; }).length;
+            var prevWeekAgo = new Date(weekAgo.getTime() - 7 * 24 * 60 * 60 * 1000);
+            var prevWeekCount = logs.filter(function(l) { return l.timestamp && new Date(l.timestamp) >= prevWeekAgo && new Date(l.timestamp) < weekAgo; }).length;
+            var trend = '→ 持平';
+            if (prevWeekCount > 0 && weekCount > prevWeekCount) {
+                trend = '↑ ' + Math.round((weekCount - prevWeekCount) / prevWeekCount * 100) + '%';
+            } else if (prevWeekCount > 0 && weekCount < prevWeekCount) {
+                trend = '↓ ' + Math.round((prevWeekCount - weekCount) / prevWeekCount * 100) + '%';
+            } else if (weekCount > 0 && prevWeekCount === 0) {
+                trend = '↑ 新增';
+            }
+            document.getElementById('adminWeekTrend').textContent = trend;
+        }
+
+        function renderTokenTable() {
+            var store = getTokensStore();
+            var tbody = document.getElementById('tokenTableBody');
+            if (!tbody) return;
+
+            if (store.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px;">暂无 Token，点击上方按钮创建</td></tr>';
+                return;
+            }
+
+            var html = '';
+            store.forEach(function(t) {
+                var masked = t.token.substring(0, 6) + '...' + t.token.substring(t.token.length - 4);
+                var used = t.searches_used || parseInt(localStorage.getItem('xing_searches_' + t.token) || '0');
+                var pct = t.max_searches > 0 ? Math.min((used / t.max_searches) * 100, 100) : 0;
+                var barColor = pct > 80 ? '#e53935' : pct > 50 ? '#ff9800' : '#667eea';
+                var statusClass = t.is_active ? 'token-status-active' : 'token-status-inactive';
+                var statusText = t.is_active ? '启用' : '禁用';
+
+                html += '<tr>' +
+                    '<td>' + escapeHtml(t.name) + '</td>' +
+                    '<td><span class="token-masked">' + masked + '</span></td>' +
+                    '<td style="min-width:100px;">' +
+                        '<div style="font-size:12px;color:#666;">' + used + ' / ' + t.max_searches + '</div>' +
+                        '<div class="token-quota-bar"><div class="token-quota-fill" style="width:' + pct + '%;background:' + barColor + ';"></div></div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<label class="toggle-switch">' +
+                            '<input type="checkbox"' + (t.is_active ? ' checked' : '') + ' onchange="toggleTokenActive(\'' + t.id + '\')">' +
+                            '<span class="toggle-slider"></span>' +
+                        '</label>' +
+                        '<span class="' + statusClass + '" style="margin-left:6px;font-size:12px;">' + statusText + '</span>' +
+                    '</td>' +
+                    '<td><button class="admin-btn-danger" onclick="deleteToken(\'' + t.id + '\')">删除</button></td>' +
+                '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderHotKeywords() {
+            var logs = getSearchLogs();
+            var container = document.getElementById('hotKeywords');
+            if (!container) return;
+
+            if (logs.length === 0) {
+                container.innerHTML = '<div style="color:#999;font-size:13px;padding:10px;">暂无搜索记录</div>';
+                return;
+            }
+
+            var kwCounts = {};
+            logs.forEach(function(l) {
+                if (l.keyword) {
+                    var kw = l.keyword.trim().toLowerCase();
+                    if (kw) kwCounts[kw] = (kwCounts[kw] || 0) + 1;
+                }
+            });
+
+            var sorted = Object.keys(kwCounts).map(function(k) { return [k, kwCounts[k]]; }).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10);
+
+            if (sorted.length === 0) {
+                container.innerHTML = '<div style="color:#999;font-size:13px;padding:10px;">暂无搜索记录</div>';
+                return;
+            }
+
+            container.innerHTML = sorted.map(function(item) {
+                return '<span class="hot-keyword-tag">' + escapeHtml(item[0]) + ' <span class="hot-keyword-count">' + item[1] + '</span></span>';
+            }).join('');
+        }
+
+        function renderSearchTrend() {
+            var logs = getSearchLogs();
+            var container = document.getElementById('searchTrendChart');
+            if (!container) return;
+
+            var now = new Date();
+            var days = [];
+            var counts = [];
+            for (var i = 6; i >= 0; i--) {
+                var d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                var dateStr = d.toISOString().slice(0, 10);
+                days.push(d.getMonth() + 1 + '/' + d.getDate());
+                var count = logs.filter(function(l) { return l.timestamp && l.timestamp.slice(0, 10) === dateStr; }).length;
+                counts.push(count);
+            }
+
+            var maxCount = Math.max.apply(null, counts) || 1;
+
+            container.innerHTML = days.map(function(day, idx) {
+                var heightPct = Math.max((counts[idx] / maxCount) * 100, 1);
+                return '<div class="bar-item">' +
+                    '<div class="bar-value">' + counts[idx] + '</div>' +
+                    '<div class="bar-fill" style="height:' + heightPct + '%;"></div>' +
+                    '<div class="bar-label">' + day + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
         // ==================== 初始化 ====================
+        // 将硬编码的 VALID_TOKENS 同步到 localStorage store
+        (function() {
+            var store = getTokensStore();
+            var storeTokenSet = {};
+            store.forEach(function(t) { storeTokenSet[t.token] = true; });
+            VALID_TOKENS.forEach(function(vt) {
+                if (!storeTokenSet[vt.token]) {
+                    var used = parseInt(localStorage.getItem('xing_searches_' + vt.token) || '0');
+                    store.push({
+                        id: generateId(),
+                        name: vt.name,
+                        token: vt.token,
+                        max_searches: vt.max_searches,
+                        searches_used: used,
+                        is_active: true,
+                        created_at: new Date().toISOString(),
+                        expires_at: null
+                    });
+                }
+            });
+            saveTokensStore(store);
+        })();
+
         updateHistoryTags();
         checkAuth();
     </script>
