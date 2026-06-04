@@ -980,6 +980,11 @@
                     if (!job.location) continue;
                     if (!cityFilters.some(city => job.location.includes(city))) continue;
                 }
+                // 无搜索词但有分类/城市过滤：返回所有匹配岗位（如仅搜"PTA""远程""深圳"等）
+                if (searchTerms.length === 0) {
+                    scoredResults.push({ ...job, _matchCount: 1, _totalScore: 1 });
+                    continue;
+                }
                 const cleanIndustry = (job.industry || '').replace(/[\r\n]/g, ' ');
                 const searchText = `${job.position} ${job.company} ${cleanIndustry} ${job.duty || ''} ${job.requirements || ''} ${job.location || ''} ${(job.jd || '').replace(/^\d+$/, '')}`;
                 let matchCount = 0, totalScore = 0, positionMatch = false, industryMatch = false;
@@ -1034,6 +1039,13 @@
             if (categoryHint) effectiveCategory = categoryHint;
 
             let scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+
+            // PTA 分类无数据 → 回退到远程（PTA 类岗位实际归在"远程实习"下）
+            if (scoredResults.length === 0 && effectiveCategory === 'PTA') {
+                effectiveCategory = '远程';
+                scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+            }
+
             let isFallbackSearch = false;
             let fallbackMajor = '';
 
@@ -1076,6 +1088,13 @@
             if (categoryHint) effectiveCategory = categoryHint;
 
             let scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+
+            // PTA 分类无数据 → 回退到远程（PTA 类岗位实际归在"远程实习"下）
+            if (scoredResults.length === 0 && effectiveCategory === 'PTA') {
+                effectiveCategory = '远程';
+                scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+            }
+
             let isFallbackSearch = false, fallbackMajor = '';
 
             // 精准词无结果时，用 fallbackDict 扩展词重搜（不跨分类）
