@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Xing 实习">
     <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="manifest.json">
     <title>实习智能匹配平台 - AI智能岗位匹配</title>
     <style>
         /* ====== 基础重置 ====== */
@@ -253,6 +255,119 @@
             .modal-close:hover { color: #333; }
             .poster-btn:hover { transform: translateY(-2px); }
             .category-tab:hover { background: #e8e8e8; }
+            .history-tag:hover { background: #e0e0e0; }
+        }
+
+        /* ====== 历史搜索标签 ====== */
+        .history-tag {
+            display: inline-block; padding: 4px 10px; background: #f0f0f0;
+            color: #667eea; border-radius: 14px; font-size: 12px;
+            cursor: pointer; margin-right: 6px; margin-bottom: 4px;
+            transition: background 0.2s; border: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+        .history-tag:active { background: #e0e0e0; }
+
+        /* ====== 统计面板 ====== */
+        .stats-section {
+            background: white; border-radius: 12px; padding: 16px;
+            margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stats-section-title {
+            font-size: 15px; font-weight: bold; color: #333;
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .stats-bar-row {
+            display: flex; align-items: center; margin-bottom: 10px;
+            padding: 4px 0;
+        }
+        .stats-bar-label {
+            flex: 0 0 80px; font-size: 13px; color: #555;
+            text-align: right; padding-right: 10px; white-space: nowrap;
+        }
+        .stats-bar-outer {
+            flex: 1; height: 22px; background: #f0f0f0;
+            border-radius: 10px; overflow: hidden; position: relative;
+            min-width: 60px;
+        }
+        .stats-bar-inner {
+            height: 100%; border-radius: 10px; transition: width 0.6s ease;
+            min-width: 2px; display: flex; align-items: center;
+            padding-left: 8px;
+        }
+        .stats-bar-count {
+            flex: 0 0 60px; font-size: 12px; color: #888;
+            padding-left: 8px; white-space: nowrap; text-align: right;
+        }
+        .stats-bar-percent {
+            font-size: 12px; color: #666;
+            margin-left: auto; padding-right: 8px;
+        }
+        .stats-ranking {
+            font-size: 13px; color: #555; line-height: 2.2;
+        }
+        .stats-rank-item {
+            display: flex; align-items: center; padding: 6px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .stats-rank-num {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #667eea; color: white; font-size: 11px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 10px; flex-shrink: 0;
+        }
+        .stats-rank-num.top3 { background: #e53935; }
+        .stats-rank-label {
+            flex: 1; font-size: 13px; color: #333; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .stats-rank-count {
+            font-size: 12px; color: #888; margin-left: 8px; white-space: nowrap;
+        }
+        .stats-empty {
+            text-align: center; padding: 30px; color: #999; font-size: 13px;
+        }
+
+        /* ====== AI 推荐面板 ====== */
+        .rec-section-title {
+            font-size: 15px; font-weight: bold; color: #333;
+            margin-bottom: 10px; padding: 12px 0 8px 0;
+        }
+        .rec-grid {
+            display: grid; grid-template-columns: 1fr; gap: 8px;
+        }
+        .rec-card {
+            background: white; border-radius: 10px; padding: 12px;
+            cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #f0f0f0; transition: transform 0.2s;
+        }
+        .rec-card:active { transform: scale(0.98); }
+        .rec-card-title {
+            font-size: 13px; font-weight: bold; color: #333; margin-bottom: 6px;
+        }
+        .rec-card-meta {
+            font-size: 11px; color: #999; display: flex; gap: 6px;
+            flex-wrap: wrap;
+        }
+        .rec-card-type {
+            font-size: 10px; padding: 2px 6px; border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 360px) {
+            .stats-bar-label { flex: 0 0 60px; font-size: 11px; }
+            .stats-bar-count { flex: 0 0 45px; font-size: 10px; }
+            .stats-rank-label { font-size: 12px; }
+        }
+        @media (min-width: 768px) {
+            .stats-section { padding: 20px; }
+            .stats-section-title { font-size: 16px; }
+            .rec-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .rec-card { padding: 14px; }
+            .rec-card-title { font-size: 14px; }
+            .rec-card-meta { font-size: 12px; }
         }
     </style>
 </head>
@@ -306,9 +421,11 @@
                     💡 输入关键词即可搜索，如：深圳 计算机、远程 金融、pta 咨询<br>
                     系统自动过滤姓名/学校/年级，聚焦地区+专业+类型
                 </div>
+                <div id="historyTags" style="display:none; margin-top:8px;"></div>
                 <div class="mode-switch">
                     <button class="mode-btn active" data-mode="search">🔍 AI搜索</button>
                     <button class="mode-btn" data-mode="match">🎯 精准匹配</button>
+                    <button class="mode-btn" data-mode="stats">📊 统计</button>
                 </div>
                 <div class="match-form" id="matchForm">
                     <div class="form-group">
@@ -365,6 +482,24 @@
             <div class="job-grid" id="jobList"></div>
             <div id="loadMoreWrap" style="display:none; text-align:center; padding:20px;">
                 <button id="loadMoreBtn" onclick="loadMoreResults()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;min-height:44px;">📋 查看更多匹配结果</button>
+            </div>
+            <div id="aiRecommendPanel" style="display:none;">
+                <div class="rec-section-title">🤖 相关推荐</div>
+                <div class="rec-grid" id="recGrid"></div>
+            </div>
+            <div id="statsPanel" style="display:none;">
+                <div class="stats-section">
+                    <div class="stats-section-title">📊 分类分布</div>
+                    <div id="statsCategoryDist"></div>
+                </div>
+                <div class="stats-section">
+                    <div class="stats-section-title">🏙️ 热门城市 TOP10</div>
+                    <div id="statsTopCities"></div>
+                </div>
+                <div class="stats-section">
+                    <div class="stats-section-title">🏢 热门公司 TOP10</div>
+                    <div id="statsTopCompanies"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1035,6 +1170,9 @@
                     }
                 }
 
+                if (query && query.trim() && filteredJobs.length > 0) {
+                    _saveSearchToHistory(query);
+                }
                 displayJobs();
                 _isSearching = false;
             }, 50);
@@ -1136,6 +1274,7 @@
                     loadMoreWrap.style.display = 'none';
                 }
             }
+            renderRecommendations(filteredJobs);
         }
 
         // ==================== 首选推荐 ====================
@@ -1247,8 +1386,40 @@
                 this.classList.add('active');
                 currentMode = this.dataset.mode;
                 var matchForm = document.getElementById('matchForm');
-                if (currentMode === 'match') matchForm.classList.add('show');
-                else matchForm.classList.remove('show');
+                var statsPanel = document.getElementById('statsPanel');
+                var aiPanel = document.getElementById('aiRecommendPanel');
+                if (currentMode === 'match') {
+                    matchForm.classList.add('show');
+                    if (statsPanel) statsPanel.style.display = 'none';
+                    if (aiPanel) aiPanel.style.display = 'none';
+                    var resultHeader = document.querySelector('.result-header');
+                    if (resultHeader) resultHeader.style.display = 'block';
+                } else if (currentMode === 'stats') {
+                    matchForm.classList.remove('show');
+                    if (statsPanel) statsPanel.style.display = 'block';
+                    if (aiPanel) aiPanel.style.display = 'none';
+                    // Hide search result elements when in stats mode
+                    var resultHeader = document.querySelector('.result-header');
+                    if (resultHeader) resultHeader.style.display = 'none';
+                    var topRec = document.getElementById('topRecommendation');
+                    var copySummary = document.getElementById('copyableSummary');
+                    var loading = document.getElementById('loading');
+                    var empty = document.getElementById('empty');
+                    var jobList = document.getElementById('jobList');
+                    var loadMoreWrap = document.getElementById('loadMoreWrap');
+                    if (topRec) topRec.style.display = 'none';
+                    if (copySummary) copySummary.style.display = 'none';
+                    if (loading) loading.style.display = 'none';
+                    if (empty) empty.style.display = 'none';
+                    if (jobList) jobList.innerHTML = '';
+                    if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+                    renderStatsPanel();
+                } else {
+                    matchForm.classList.remove('show');
+                    if (statsPanel) statsPanel.style.display = 'none';
+                    var resultHeader = document.querySelector('.result-header');
+                    if (resultHeader) resultHeader.style.display = 'block';
+                }
             });
         });
         document.querySelectorAll('.category-tab').forEach(function(tab) {
@@ -1256,7 +1427,7 @@
                 document.querySelectorAll('.category-tab').forEach(function(t) { t.classList.remove('active'); });
                 this.classList.add('active');
                 currentCategory = this.dataset.category;
-                triggerSearch();
+                if (currentMode !== 'stats') triggerSearch();
             });
         });
         document.getElementById('jobModal').addEventListener('click', function(e) {
@@ -1438,7 +1609,237 @@
             link.click();
         }
 
+        // ==================== 搜索历史 ====================
+        let _searchHistory = JSON.parse(localStorage.getItem('xing_search_history') || '[]');
+
+        function _saveSearchToHistory(query) {
+            if (!query || !query.trim()) return;
+            query = query.trim();
+            _searchHistory = _searchHistory.filter(function(h) { return h !== query; });
+            _searchHistory.push(query);
+            if (_searchHistory.length > 5) _searchHistory = _searchHistory.slice(-5);
+            try { localStorage.setItem('xing_search_history', JSON.stringify(_searchHistory)); } catch(e) {}
+            updateHistoryTags();
+        }
+
+        function updateHistoryTags() {
+            var container = document.getElementById('historyTags');
+            if (!container) return;
+            var recent = _searchHistory.slice(-3).reverse();
+            if (recent.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'block';
+            container.innerHTML = recent.map(function(term) {
+                return '<span class="history-tag" onclick="quickSearch(\'' + escapeHtml(term).replace(/'/g, "\\'") + '\')">🔍 ' + escapeHtml(term) + '</span>';
+            }).join('');
+        }
+
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            if (currentMode !== 'search') {
+                currentMode = 'search';
+                document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+                var searchBtn = document.querySelector('.mode-btn[data-mode="search"]');
+                if (searchBtn) searchBtn.classList.add('active');
+            }
+            hideStatsAndRec();
+            searchJobs(term, currentCategory);
+        }
+
+        // ==================== 统计面板 ====================
+        function renderStatsPanel() {
+            if (!_allJobs || _allJobs.length === 0) {
+                var catEl = document.getElementById('statsCategoryDist');
+                var cityEl = document.getElementById('statsTopCities');
+                var compEl = document.getElementById('statsTopCompanies');
+                if (catEl) catEl.innerHTML = '<div class="stats-empty">数据加载中，请稍候...</div>';
+                if (cityEl) cityEl.innerHTML = '';
+                if (compEl) compEl.innerHTML = '';
+                return;
+            }
+            var total = _allJobs.length;
+
+            // 1. Category distribution
+            var categories = ['国内实地', '远程', 'PTA', '国外实地', '科研'];
+            var catCounts = {};
+            var catBarColors = { '国内实地': '#c8e6c9', '远程': '#bbdefb', 'PTA': '#ffe0b2', '国外实地': '#f8bbd0', '科研': '#e1bee7' };
+            var catTextColors = { '国内实地': '#2e7d32', '远程': '#1976d2', 'PTA': '#e65100', '国外实地': '#c2185b', '科研': '#7b1fa2' };
+            categories.forEach(function(cat) { catCounts[cat] = 0; });
+            _allJobs.forEach(function(job) {
+                var type = getJobType(job);
+                if (catCounts[type] !== undefined) catCounts[type]++;
+            });
+
+            var catHTML = '';
+            categories.forEach(function(cat) {
+                var count = catCounts[cat] || 0;
+                var pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+                var barColor = catBarColors[cat] || '#f5f5f5';
+                var textColor = catTextColors[cat] || '#666';
+                catHTML += '<div class="stats-bar-row">' +
+                    '<div class="stats-bar-label">' + escapeHtml(cat) + '</div>' +
+                    '<div class="stats-bar-outer">' +
+                        '<div class="stats-bar-inner" style="width:' + pct + '%; background:' + barColor + '; color:' + textColor + ';">' +
+                            (parseFloat(pct) > 15 ? '<span class="stats-bar-percent">' + pct + '%</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="stats-bar-count">' + count + ' 个</div>' +
+                '</div>';
+            });
+            document.getElementById('statsCategoryDist').innerHTML = catHTML;
+
+            // 2. Top 10 cities (only from 国内实地)
+            var cityCounts = {};
+            _allJobs.forEach(function(job) {
+                var type = getJobType(job);
+                if (type !== '国内实地') return;
+                var loc = job.location || '';
+                for (var i = 0; i < cityKeywords.length; i++) {
+                    if (loc.includes(cityKeywords[i])) {
+                        cityCounts[cityKeywords[i]] = (cityCounts[cityKeywords[i]] || 0) + 1;
+                        break;
+                    }
+                }
+            });
+            var sortedCities = Object.keys(cityCounts).map(function(k) { return [k, cityCounts[k]]; }).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10);
+            var cityHTML = '';
+            if (sortedCities.length === 0) {
+                cityHTML = '<div class="stats-empty">暂无城市数据</div>';
+            } else {
+                sortedCities.forEach(function(entry, idx) {
+                    cityHTML += '<div class="stats-rank-item">' +
+                        '<div class="stats-rank-num' + (idx < 3 ? ' top3' : '') + '">' + (idx + 1) + '</div>' +
+                        '<div class="stats-rank-label">' + escapeHtml(entry[0]) + '</div>' +
+                        '<div class="stats-rank-count">' + entry[1] + ' 个</div>' +
+                    '</div>';
+                });
+            }
+            document.getElementById('statsTopCities').innerHTML = cityHTML;
+
+            // 3. Top 10 companies
+            var companyCounts = {};
+            _allJobs.forEach(function(job) {
+                var comp = job.company || '未知公司';
+                companyCounts[comp] = (companyCounts[comp] || 0) + 1;
+            });
+            var sortedCompanies = Object.keys(companyCounts).map(function(k) { return [k, companyCounts[k]]; }).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10);
+            var compHTML = '';
+            if (sortedCompanies.length === 0) {
+                compHTML = '<div class="stats-empty">暂无公司数据</div>';
+            } else {
+                sortedCompanies.forEach(function(entry, idx) {
+                    compHTML += '<div class="stats-rank-item">' +
+                        '<div class="stats-rank-num' + (idx < 3 ? ' top3' : '') + '">' + (idx + 1) + '</div>' +
+                        '<div class="stats-rank-label">' + escapeHtml(entry[0]) + '</div>' +
+                        '<div class="stats-rank-count">' + entry[1] + ' 个</div>' +
+                    '</div>';
+                });
+            }
+            document.getElementById('statsTopCompanies').innerHTML = compHTML;
+        }
+
+        // ==================== AI 相关推荐 ====================
+        function renderRecommendations(currentResults) {
+            var panel = document.getElementById('aiRecommendPanel');
+            var recGrid = document.getElementById('recGrid');
+            var query = document.getElementById('searchInput').value.trim();
+
+            if (!query || !currentResults || currentResults.length === 0 || !_allJobs) {
+                if (panel) panel.style.display = 'none';
+                return;
+            }
+
+            var recent = _searchHistory.slice(-3);
+            var recKeywords = [];
+            recent.forEach(function(term) {
+                var termLower = term.toLowerCase();
+                for (var major in smartDict) {
+                    if (smartDict.hasOwnProperty(major)) {
+                        var syns = smartDict[major];
+                        if (syns.some(function(s) { return termLower.indexOf(s.toLowerCase()) >= 0 || s.toLowerCase().indexOf(termLower) >= 0; })) {
+                            recKeywords = recKeywords.concat(syns.map(function(s) { return s.toLowerCase(); }));
+                        }
+                    }
+                }
+            });
+            recKeywords = recKeywords.filter(function(v, i, a) { return a.indexOf(v) === i; });
+            if (recKeywords.length === 0) {
+                if (panel) panel.style.display = 'none';
+                return;
+            }
+
+            var currentKeySet = {};
+            currentResults.forEach(function(job) {
+                currentKeySet[(job.position || '') + '|' + (job.company || '')] = true;
+            });
+
+            var recJobs = [];
+            for (var i = 0; i < _allJobs.length; i++) {
+                var job = _allJobs[i];
+                var key = (job.position || '') + '|' + (job.company || '');
+                if (currentKeySet[key]) continue;
+                var searchText = ((job.position || '') + ' ' + (job.company || '') + ' ' + (job.industry || '') + ' ' + (job.duty || '') + ' ' + (job.requirements || '')).toLowerCase();
+                var matchCount = 0;
+                for (var k = 0; k < recKeywords.length; k++) {
+                    if (searchText.indexOf(recKeywords[k]) >= 0) matchCount++;
+                    if (matchCount >= 2) break;
+                }
+                if (matchCount >= 2) recJobs.push({ job: job, score: matchCount });
+            }
+
+            recJobs.sort(function(a, b) { return b.score - a.score; });
+            recJobs = recJobs.slice(0, 5);
+
+            if (recJobs.length === 0) {
+                if (panel) panel.style.display = 'none';
+                return;
+            }
+
+            if (panel) panel.style.display = 'block';
+            if (recGrid) recGrid.innerHTML = '';
+
+            recJobs.forEach(function(item) {
+                var job = item.job;
+                var type = getJobType(job);
+                var badge = getJobTypeBadge(type);
+                var card = document.createElement('div');
+                card.className = 'rec-card';
+                card.onclick = function() {
+                    filteredJobs = [job];
+                    showJobDetail(0);
+                };
+                card.innerHTML = '<div class="rec-card-title">' + escapeHtml(job.position || '未知岗位') + '</div>' +
+                    '<div class="rec-card-meta">' +
+                        '<span>' + escapeHtml(job.company || '') + '</span>' +
+                        '<span class="rec-card-type" style="background:' + badge.bg + ';color:' + badge.color + ';">' + escapeHtml(type) + '</span>' +
+                        (job.location ? '<span>📍 ' + escapeHtml(job.location) + '</span>' : '') +
+                    '</div>';
+                if (recGrid) recGrid.appendChild(card);
+            });
+        }
+
+        function hideStatsAndRec() {
+            var sp = document.getElementById('statsPanel');
+            var ap = document.getElementById('aiRecommendPanel');
+            if (sp) sp.style.display = 'none';
+            if (ap) ap.style.display = 'none';
+        }
+
+        // ==================== Service Worker 注册 ====================
+        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js', { scope: '/xing/' }).then(function(reg) {
+                    console.log('[xing] SW registered:', reg.scope);
+                }).catch(function(err) {
+                    console.log('[xing] SW registration failed:', err);
+                });
+            });
+        }
+
         // ==================== 初始化 ====================
+        updateHistoryTags();
         checkAuth();
     </script>
 </body>
