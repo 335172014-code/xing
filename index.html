@@ -2164,7 +2164,6 @@
             try { localStorage.setItem('xing_search_logs', JSON.stringify(logs)); } catch(e) {}
         }
         function logSearch(keyword, tokenName) {
-            if (!isAdmin()) return; // 仅管理员登录时记录
             var logs = getSearchLogs();
             logs.push({ keyword: keyword, token_name: tokenName, timestamp: new Date().toISOString() });
             saveSearchLogs(logs);
@@ -2184,6 +2183,7 @@
         }
         var _lastCreatedToken = '';
         function showCreateTokenModal() {
+            if (!isAdmin()) return;
             document.getElementById('createTokenForm').style.display = 'block';
             document.getElementById('createTokenResult').style.display = 'none';
             document.getElementById('createTokenModalTitle').textContent = '创建 Token';
@@ -2196,6 +2196,7 @@
             _lastCreatedToken = '';
         }
         function createToken() {
+            if (!isAdmin()) return;
             var name = document.getElementById('newTokenName').value.trim();
             var quota = parseInt(document.getElementById('newTokenQuota').value) || 100;
             if (!name) { alert('请输入用户名称'); return; }
@@ -2241,6 +2242,7 @@
 
         // ====== Token 操作 ======
         function toggleTokenActive(id) {
+            if (!isAdmin()) return;
             var store = getTokensStore();
             var t = store.find(function(t) { return t.id === id; });
             if (t) {
@@ -2252,6 +2254,7 @@
             }
         }
         function deleteToken(id) {
+            if (!isAdmin()) return;
             if (!confirm('确定删除此 Token？删除后不可恢复。')) return;
             var store = getTokensStore();
             var idx = store.findIndex(function(t) { return t.id === id; });
@@ -2268,6 +2271,7 @@
 
         // ====== 渲染管理面板 ======
         function renderAdminPanel() {
+            if (!isAdmin()) return;
             renderAdminStats();
             renderTokenTable();
             renderHotKeywords();
