@@ -1473,7 +1473,8 @@
                 }
                 // 记录搜索日志（含结果数量，用于零结果追踪）
                 if (query && query.trim()) {
-                    logSearch(query, sessionInfo ? sessionInfo.name : 'unknown', totalMatched);
+                    var topResultsForLog = (_allMatchedJobs && _allMatchedJobs.length > 0) ? _allMatchedJobs.slice(0, 3) : [];
+                    logSearch(query, sessionInfo ? sessionInfo.name : 'unknown', totalMatched, category, topResultsForLog);
                 }
                 displayJobs();
                 _isSearching = false;
@@ -2248,9 +2249,19 @@
             if (logs.length > 500) logs = logs.slice(logs.length - 500);
             try { localStorage.setItem('xing_search_logs', JSON.stringify(logs)); } catch(e) {}
         }
-        function logSearch(keyword, tokenName, resultCount) {
+        function logSearch(keyword, tokenName, resultCount, category, topResults) {
             var logs = getSearchLogs();
-            logs.push({ keyword: keyword, token_name: tokenName, timestamp: new Date().toISOString(), result_count: (typeof resultCount === 'number' ? resultCount : -1) });
+            var top3 = (topResults && topResults.length > 0) ? topResults.slice(0, 3) : [];
+            logs.push({
+                keyword: keyword,
+                token_name: tokenName,
+                timestamp: new Date().toISOString(),
+                result_count: (typeof resultCount === 'number' ? resultCount : -1),
+                category: category || 'all',
+                is_zero_result: (typeof resultCount === 'number' && resultCount === 0) ? '是' : '否',
+                top3_positions: top3.map(function(j) { return j.position || j.title || ''; }).join(' | '),
+                top3_companies: top3.map(function(j) { return j.company || ''; }).join(' | ')
+            });
             saveSearchLogs(logs);
         }
 
@@ -2671,13 +2682,17 @@
             }
 
             // CSV header with BOM for Excel Chinese support
-            var csv = '\uFEFF搜索关键词,Token名称,搜索时间,结果数量\n';
+            var csv = '\uFEFF搜索关键词,搜索分类,搜索时间,结果数量,是否零结果,Token名称,前3结果岗位,前3结果公司\n';
             logs.forEach(function(log) {
                 var row = [
                     log.keyword || '',
-                    log.token_name || '',
+                    log.category || 'all',
                     log.timestamp || '',
-                    typeof log.result_count === 'number' ? String(log.result_count) : ''
+                    typeof log.result_count === 'number' ? String(log.result_count) : '',
+                    log.is_zero_result || '',
+                    log.token_name || '',
+                    log.top3_positions || '',
+                    log.top3_companies || ''
                 ];
                 csv += row.map(function(cell) {
                     var s = String(cell).replace(/"/g, '""');
