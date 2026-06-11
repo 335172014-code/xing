@@ -459,6 +459,12 @@
             font-size: 14px; cursor: pointer; margin-bottom: 12px; margin-left: 8px; min-height: 44px;
         }
         .admin-btn-export:active { opacity: 0.8; }
+        .export-search-btn {
+            background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 8px;
+            font-size: 13px; cursor: pointer; margin-left: 16px; min-height: 36px;
+            transition: background 0.2s;
+        }
+        .export-search-btn:active { opacity: 0.8; }
         .admin-btn-copy {
             background: #f5f5f5; color: #667eea; border: 1px solid #e0e0e0;
             padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 4px;
@@ -635,6 +641,7 @@
             <div class="result-header">
                 <div class="result-title" id="resultTitle">请先登录</div>
                 <div id="resultDesc">使用授权Token登录后即可搜索岗位</div>
+                <button id="exportSearchBtn" class="export-search-btn" onclick="exportData()" style="display:none;" title="导出搜索结果">📥 导出搜索结果 (CSV)</button>
             </div>
             <div id="clarificationHint" style="display:none; background:#fff8e1; border:1px solid #ffe082; border-radius:10px; padding:12px 16px; margin-bottom:10px; font-size:14px; color:#e65100; line-height:1.6;"></div>
             <div id="topRecommendation" class="top-recommendation" style="display:none;">
@@ -1382,6 +1389,8 @@
             document.getElementById('copyableSummary').style.display = 'none';
             document.getElementById('jobList').innerHTML = '';
             document.getElementById('loadMoreWrap').style.display = 'none';
+            var exportBtn = document.getElementById('exportSearchBtn');
+            if (exportBtn) exportBtn.style.display = 'none';
 
             // 用 setTimeout 让 UI 先更新
             setTimeout(function() {
@@ -1503,6 +1512,8 @@
                 jobList.innerHTML = '';
                 topRec.style.display = 'none';
                 copySummary.style.display = 'none';
+                var exportBtn = document.getElementById('exportSearchBtn');
+                if (exportBtn) exportBtn.style.display = 'none';
                 return;
             }
 
@@ -1511,6 +1522,10 @@
             topRec.style.display = 'block';
             generateCopyableSummary(filteredJobs);
             copySummary.style.display = 'block';
+
+            // Show export button when search results exist
+            var exportBtn = document.getElementById('exportSearchBtn');
+            if (exportBtn) exportBtn.style.display = 'inline-block';
 
             jobList.innerHTML = '';
             for (let i = 0; i < filteredJobs.length; i++) {
@@ -2598,14 +2613,17 @@
 
         // ====== 数据导出 (CSV) ======
         function exportData() {
-            if (!_allJobs || _allJobs.length === 0) {
+            // 优先使用搜索结果，否则使用全部数据
+            var sourceData = (_allMatchedJobs && _allMatchedJobs.length > 0) ? _allMatchedJobs : _allJobs;
+            if (!sourceData || sourceData.length === 0) {
                 alert('暂无数据可导出');
                 return;
             }
+            var isSearchExport = (_allMatchedJobs && _allMatchedJobs.length > 0);
 
             // CSV header with BOM for Excel Chinese support
             var csv = '\uFEFF分类,公司名称,岗位名称,地点,行业,状态,项目类型,时长,福利,要求,薪资(1-2月),薪资(3月+),备注,发布时间\n';
-            _allJobs.forEach(function(job) {
+            sourceData.forEach(function(job) {
                 var row = [
                     job.category || '',
                     job.company || '',
@@ -2637,7 +2655,7 @@
             var a = document.createElement('a');
             a.href = url;
             var today = new Date().toISOString().slice(0, 10);
-            a.download = 'xing_jobs_export_' + today + '.csv';
+            a.download = (isSearchExport ? 'xing_search_export_' : 'xing_all_export_') + today + '.csv';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
