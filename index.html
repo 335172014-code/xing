@@ -701,7 +701,7 @@
                     <h3>🪙 Token 管理</h3>
                     <div>
                         <button class="admin-btn" onclick="showCreateTokenModal()">+ 创建 Token</button>
-                        <button class="admin-btn-export" onclick="exportData()">📥 导出数据 (CSV)</button>
+                        <button class="admin-btn-export" onclick="exportSearchLogs()">📥 导出搜索日志 (CSV)</button>
                     </div>
                     <div style="overflow-x:auto;">
                     <table class="token-table">
@@ -2656,6 +2656,44 @@
             a.href = url;
             var today = new Date().toISOString().slice(0, 10);
             a.download = (isSearchExport ? 'xing_search_export_' : 'xing_all_export_') + today + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ====== 搜索日志导出 (CSV) ======
+        function exportSearchLogs() {
+            var logs = getSearchLogs();
+            if (!logs || logs.length === 0) {
+                alert('暂无搜索日志可导出');
+                return;
+            }
+
+            // CSV header with BOM for Excel Chinese support
+            var csv = '\uFEFF搜索关键词,Token名称,搜索时间,结果数量\n';
+            logs.forEach(function(log) {
+                var row = [
+                    log.keyword || '',
+                    log.token_name || '',
+                    log.timestamp || '',
+                    typeof log.result_count === 'number' ? String(log.result_count) : ''
+                ];
+                csv += row.map(function(cell) {
+                    var s = String(cell).replace(/"/g, '""');
+                    if (s.indexOf(',') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('"') !== -1) {
+                        return '"' + s + '"';
+                    }
+                    return s;
+                }).join(',') + '\n';
+            });
+
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            var today = new Date().toISOString().slice(0, 10);
+            a.download = 'xing_search_logs_' + today + '.csv';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
