@@ -2688,11 +2688,11 @@
                     log.keyword || '',
                     log.category || 'all',
                     log.timestamp || '',
-                    typeof log.result_count === 'number' ? String(log.result_count) : '',
-                    log.is_zero_result || '',
+                    log.result_count !== undefined ? String(log.result_count) : 'N/A（旧数据）',
+                    log.is_zero_result !== undefined ? log.is_zero_result : 'N/A（旧数据）',
                     log.token_name || '',
-                    log.top3_positions || '',
-                    log.top3_companies || ''
+                    log.top3_positions !== undefined ? log.top3_positions : 'N/A（旧数据）',
+                    log.top3_companies !== undefined ? log.top3_companies : 'N/A（旧数据）'
                 ];
                 csv += row.map(function(cell) {
                     var s = String(cell).replace(/"/g, '""');
