@@ -1087,6 +1087,29 @@
             return scoredResults;
         }
 
+        // 同单位聚合：让同一 company 的岗位靠近显示，保持得分排序
+        // 原理：按首次出现顺序排列 company 分组，组内保持原有得分顺序
+        function _groupByCompany(results) {
+            if (!results || results.length <= 1) return results;
+            const groups = {};
+            const order = [];  // company 首次出现顺序
+            for (const job of results) {
+                const company = (job.company || '').trim();
+                if (!groups[company]) {
+                    groups[company] = [];
+                    order.push(company);
+                }
+                groups[company].push(job);
+            }
+            const grouped = [];
+            for (const company of order) {
+                for (const job of groups[company]) {
+                    grouped.push(job);
+                }
+            }
+            return grouped;
+        }
+
         // 从 searchTerms 推断原始查询专业，找 fallbackDict 中对应的扩展词
         function _getFallbackTerms(searchTerms) {
             for (const [major, fbTerms] of Object.entries(fallbackDict)) {
@@ -1180,7 +1203,9 @@
                 }
             }
 
-            // 保存追问信息
+            // 保存追问信息前先做同单位聚合：同一 company 的岗位聚在一起显示
+            scoredResults = _groupByCompany(scoredResults);
+
             window._searchMeta = { needsClarification, totalMatched: scoredResults.length, isFallbackSearch, fallbackMajor };
 
             return scoredResults.map(stripPrice);
