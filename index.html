@@ -877,7 +877,8 @@
             '数据': ['数据', '大数据', '数据科学', '数据分析', '数据挖掘', '数据可视化', 'Data', 'Data Science', 'Big Data'],
             'AI': ['AI', '人工智能', '机器学习', '深度学习', 'NLP', 'CV', 'Artificial Intelligence', 'Machine Learning', '计算机视觉', '自然语言处理', '大模型', 'LLM'],
             '咨询': ['咨询', '战略咨询', '管理咨询', 'Consulting', 'Consultant', '麦肯锡', 'BCG', '贝恩'],
-            '游戏': ['游戏', '游戏开发', 'Game', 'Unity', 'UE', 'Unreal', '游戏策划', '游戏运营', '原画', '3D']
+            '游戏': ['游戏', '游戏开发', 'Game', 'Unity', 'UE', 'Unreal', '游戏策划', '游戏运营', '原画', '3D'],
+            '新能源电池': ['电池', '锂电', '锂电池', '锂离子', '钠电', '钠离子', '新能源', '储能', '涉锂', '固态电池', '正极材料', '负极材料', '电解液', '动力电池', '电池研发']
         };
 
         // 当精准词搜不到时，计算机→数据分析/量化/AI/战略 等相关方向的 fallback 推荐词
@@ -975,6 +976,7 @@
             if (remainingQuery.length > 0) {
                 searchTerms = remainingQuery.split(/\s+/).filter(t => t.length >= 1);
             }
+            const originalTermCount = searchTerms.length; // 记录扩展前的原始词数，用于 AND 匹配
 
             // ====== 5. 同义词扩展 ======
             let expandedTerms = [];
@@ -1004,7 +1006,7 @@
                 // 不强制追问，但在结果中提示
             }
 
-            return { searchTerms, cityFilters, categoryHint, needsClarification };
+            return { searchTerms, cityFilters, categoryHint, needsClarification, originalTermCount };
         }
 
         function fuzzyMatch(text, keywords) {
@@ -1040,7 +1042,9 @@
         }
 
         // 核心评分搜索，供 clientSideSearch 和 clientSideSearchFull 共用
-        function _scoreSearch(searchTerms, cityFilters, effectiveCategory, allJobs) {
+        function _scoreSearch(searchTerms, cityFilters, effectiveCategory, allJobs, originalTermCount) {
+            // 原始词 ≥ 2 时启用 AND 逻辑：必须命中全部原始词（防止「研发」等通用词污染结果）
+            const requireAll = (typeof originalTermCount === 'number' && originalTermCount >= 2);
             let scoredResults = [];
             for (const job of allJobs) {
                 if (effectiveCategory !== 'all' && getJobType(job) !== effectiveCategory) continue;
@@ -1067,6 +1071,8 @@
                         if (job.location && softContains(job.location, term)) totalScore += 3;
                     }
                 }
+                // AND 逻辑：原始词 ≥ 2 时，必须命中 ≥ 原始词数（防止「研发」等通用词污染）
+                if (requireAll && matchCount < originalTermCount) continue;
                 if (matchCount > 0) {
                     if (positionMatch && industryMatch) totalScore += 15;
                     scoredResults.push({ ...job, _matchCount: matchCount, _totalScore: totalScore });
@@ -1152,15 +1158,15 @@
                 return results;
             }
 
-            const { searchTerms, cityFilters, categoryHint, needsClarification } = aiSmartSearch(query);
+            const { searchTerms, cityFilters, categoryHint, needsClarification, originalTermCount } = aiSmartSearch(query);
             if (categoryHint) effectiveCategory = categoryHint;
 
-            let scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+            let scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs, originalTermCount);
 
             // PTA 分类无数据 → 回退到远程（PTA 类岗位实际归在"远程实习"下）
             if (scoredResults.length === 0 && effectiveCategory === 'PTA') {
                 effectiveCategory = '远程';
-                scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs);
+                scoredResults = _scoreSearch(searchTerms, cityFilters, effectiveCategory, _allJobs, originalTermCount);
             }
 
             let isFallbackSearch = false, fallbackMajor = '';
@@ -1169,7 +1175,7 @@
             if (scoredResults.length === 0) {
                 const fb = _getFallbackTerms(searchTerms);
                 if (fb) {
-                    scoredResults = _scoreSearch(fb.fbTerms, cityFilters, effectiveCategory, _allJobs);
+                    scoredResults = _scoreSearch(fb.fbTerms, cityFilters, effectiveCategory, _allJobs, 0); // fallback 不启用 AND 逻辑
                     if (scoredResults.length > 0) { isFallbackSearch = true; fallbackMajor = fb.major; }
                 }
             }
