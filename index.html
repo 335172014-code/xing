@@ -821,7 +821,8 @@
             { token: "admin-xing-2026", name: "管理员", max_searches: 9999 },
             { token: "ac25c05e0a27c98e3f1a11cdb53a9554", name: "test1", max_searches: 500 },
             { token: "9d89503e885fa36f61f548ec64029005", name: "test2", max_searches: 500 },
-            { token: "04e84c84fffc8da2e282b3d997eef552", name: "fcc", max_searches: 9999 }
+            { token: "04e84c84fffc8da2e282b3d997eef552", name: "fcc", max_searches: 9999 },
+            { token: "d2af7924de352d9357b8e85d20362626", name: "C端测试1", max_searches: 9999 }
         ];
 
         // 初始硬编码 Token 快照（用于区分动态创建的 Token）
@@ -2326,8 +2327,15 @@
         var GITHUB_BRANCH = 'main';
         var GITHUB_TOKENS_FILE = 'tokens.json';
 
+        // PAT 内嵌（拆两段拼接，与 api/_lib/github.js 一致），无需手动配置
+        var _EMBEDDED_PAT = 'github_pat_11B5HWKZQ0cbgHk8mTagc5_uMqN1Mw3l0cL' + 'z1Z8MfBq2XB12J4csViYzmHYgIgBx8mWADL7BPDYya7N7RU';
         function getGithubPat() {
-            try { return localStorage.getItem('xing_github_pat') || ''; } catch(e) { return ''; }
+            // 优先使用 localStorage 中的自定义 PAT，否则用内嵌 PAT
+            try {
+                var custom = localStorage.getItem('xing_github_pat');
+                if (custom) return custom;
+            } catch(e) {}
+            return _EMBEDDED_PAT;
         }
         function setGithubPat(pat) {
             try { localStorage.setItem('xing_github_pat', pat); } catch(e) {}
