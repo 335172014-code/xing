@@ -711,6 +711,20 @@
                     </div>
                 </div>
 
+                <!-- GitHub 同步配置 -->
+                <div class="admin-section">
+                    <h3>⚙️ GitHub Token 同步配置</h3>
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                        <input type="password" id="githubPatInput" placeholder="GitHub Personal Access Token (需要 repo 权限)"
+                               style="flex:1;padding:8px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">
+                        <button class="admin-btn" onclick="saveGithubPat()">保存 PAT</button>
+                    </div>
+                    <div id="githubPatStatus" style="font-size:12px;color:#999;">未设置</div>
+                    <div style="font-size:11px;color:#aaa;margin-top:4px;">
+                        设置后，管理后台创建/删除/禁用 Token 将自动同步到 GitHub 仓库的 tokens.json，所有用户刷新页面后即可使用新 Token。
+                    </div>
+                </div>
+
                 <!-- 热门关键词 -->
                 <div class="admin-section">
                     <h3>🔥 热门搜索 TOP10</h3>
@@ -809,6 +823,31 @@
             { token: "9d89503e885fa36f61f548ec64029005", name: "test2", max_searches: 500 },
             { token: "04e84c84fffc8da2e282b3d997eef552", name: "fcc", max_searches: 9999 }
         ];
+
+        // 初始硬编码 Token 快照（用于区分动态创建的 Token）
+        var INITIAL_TOKEN_HASHES = {};
+        VALID_TOKENS.forEach(function(t) { INITIAL_TOKEN_HASHES[t.token] = true; });
+
+        // ==================== 动态 Token 拉取（从 tokens.json） ====================
+        async function fetchDynamicTokens() {
+            try {
+                var resp = await fetch('tokens.json?v=' + Date.now());
+                if (!resp.ok) return;
+                var data = await resp.json();
+                if (data && data.tokens) {
+                    data.tokens.forEach(function(t) {
+                        if (t.is_active !== false) {
+                            var exists = VALID_TOKENS.find(function(v) { return v.token === t.token; });
+                            if (!exists) {
+                                VALID_TOKENS.push({ token: t.token, name: t.name, max_searches: t.max_searches });
+                            }
+                        }
+                    });
+                }
+            } catch(e) {
+                console.log('No dynamic tokens file:', e.message);
+            }
+        }
 
         function validateTokenClient(tokenStr) {
             const t = VALID_TOKENS.find(t => t.token === String(tokenStr).trim());
@@ -2282,6 +2321,110 @@
             });
         }
 
+        // ====== GitHub API Token 同步 ======
+        var GITHUB_REPO = '335172014-code/xing';
+        var GITHUB_BRANCH = 'main';
+        var GITHUB_TOKENS_FILE = 'tokens.json';
+
+        function getGithubPat() {
+            try { return localStorage.getItem('xing_github_pat') || ''; } catch(e) { return ''; }
+        }
+        function setGithubPat(pat) {
+            try { localStorage.setItem('xing_github_pat', pat); } catch(e) {}
+        }
+
+        async function syncTokensToGitHub() {
+            var pat = getGithubPat();
+            if (!pat) {
+                console.warn('GitHub PAT 未设置，Token 不会同步到远程');
+                return { success: false, message: 'GitHub PAT 未设置，请在管理后台配置' };
+            }
+
+            try {
+                // 1. 获取当前 tokens.json 的 sha（用于更新）
+                var getUrl = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + GITHUB_TOKENS_FILE + '?ref=' + GITHUB_BRANCH;
+                var getResp = await fetch(getUrl, {
+                    headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                var sha = null;
+                if (getResp.ok) {
+                    var fileData = await getResp.json();
+                    sha = fileData.sha;
+                }
+
+                // 2. 构建要推送的 tokens 数据（只同步非硬编码的动态 Token）
+                var store = getTokensStore();
+                var tokensToSync = store.filter(function(t) {
+                    return !INITIAL_TOKEN_HASHES[t.token];
+                }).map(function(t) {
+                    return {
+                        token: t.token,
+                        name: t.name,
+                        max_searches: t.max_searches,
+                        is_active: t.is_active !== false,
+                        created_at: t.created_at || new Date().toISOString()
+                    };
+                });
+
+                var content = JSON.stringify({ version: 1, tokens: tokensToSync }, null, 2);
+                var base64Content = btoa(unescape(encodeURIComponent(content)));
+
+                // 3. PUT 更新文件
+                var putUrl = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/' + GITHUB_TOKENS_FILE;
+                var putBody = {
+                    message: 'chore: sync tokens via admin panel',
+                    content: base64Content,
+                    branch: GITHUB_BRANCH
+                };
+                if (sha) putBody.sha = sha;
+
+                var putResp = await fetch(putUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + pat,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(putBody)
+                });
+
+                if (putResp.ok) {
+                    console.log('[Token Sync] 同步到 GitHub 成功');
+                    return { success: true, message: '同步成功' };
+                } else {
+                    var err = await putResp.json();
+                    console.error('Token 同步失败:', err);
+                    return { success: false, message: err.message || '同步失败' };
+                }
+            } catch(e) {
+                console.error('Token 同步异常:', e);
+                return { success: false, message: e.message };
+            }
+        }
+
+        function saveGithubPat() {
+            var pat = document.getElementById('githubPatInput').value.trim();
+            if (!pat) { alert('请输入 GitHub PAT'); return; }
+            setGithubPat(pat);
+            updateGithubPatStatus();
+            alert('GitHub PAT 已保存');
+        }
+
+        function updateGithubPatStatus() {
+            var pat = getGithubPat();
+            var status = document.getElementById('githubPatStatus');
+            if (status) {
+                if (pat) {
+                    status.textContent = '已设置 (' + pat.slice(0, 4) + '****' + pat.slice(-4) + ')';
+                    status.style.color = '#52c41a';
+                } else {
+                    status.textContent = '未设置';
+                    status.style.color = '#999';
+                }
+            }
+        }
+
         // ====== 搜索日志 (localStorage) ======
         function getSearchLogs() {
             try { return JSON.parse(localStorage.getItem('xing_search_logs') || '[]'); } catch(e) { return []; }
@@ -2357,6 +2500,15 @@
             saveTokensStore(store);
             syncTokensToValidTokens();
 
+            // 同步到 GitHub（异步，不阻塞 UI）
+            syncTokensToGitHub().then(function(result) {
+                if (result.success) {
+                    console.log('新 Token 已同步到 GitHub');
+                } else {
+                    console.warn('Token 未同步到远程:', result.message);
+                }
+            });
+
             _lastCreatedToken = token;
             document.getElementById('createTokenForm').style.display = 'none';
             document.getElementById('createTokenResult').style.display = 'block';
@@ -2387,6 +2539,9 @@
                 t.is_active = !t.is_active;
                 saveTokensStore(store);
                 syncTokensToValidTokens();
+                syncTokensToGitHub().then(function(result) {
+                    if (!result.success) console.warn('状态变更未同步到远程:', result.message);
+                });
                 renderTokenTable();
                 renderAdminStats();
             }
@@ -2402,6 +2557,10 @@
                 // 从 VALID_TOKENS 中移除
                 var vIdx = VALID_TOKENS.findIndex(function(v) { return v.token === removed.token; });
                 if (vIdx > -1) VALID_TOKENS.splice(vIdx, 1);
+                // 同步到 GitHub
+                syncTokensToGitHub().then(function(result) {
+                    if (!result.success) console.warn('删除未同步到远程:', result.message);
+                });
                 renderTokenTable();
                 renderAdminStats();
             }
@@ -2416,6 +2575,7 @@
             renderSearchTrend();
             renderSearchPieChart();
             renderZeroResultSearches();
+            updateGithubPatStatus();
         }
 
         function renderAdminStats() {
@@ -2825,7 +2985,11 @@
         })();
 
         updateHistoryTags();
-        checkAuth();
+        // 先拉取远程动态 Token，再验证登录（确保新创建的 Token 能被识别）
+        fetchDynamicTokens().finally(function() {
+            syncTokensToValidTokens();
+            checkAuth();
+        });
     </script>
 </body>
 </html>

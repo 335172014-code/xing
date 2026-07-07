@@ -27,6 +27,15 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // tokens.json 始终走网络，不使用缓存（确保动态 Token 实时同步）
+  if (event.request.url.indexOf('tokens.json') !== -1) {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(function(cachedResponse) {
       if (cachedResponse) return cachedResponse;
