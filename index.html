@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,9 +14,10 @@
         /* ====== 基础重置 ====== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: #f0f2f5; min-height: 100vh; color: #333;
-            -webkit-overflow-scrolling: touch;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans SC", sans-serif;
+            background: #f0f2f5; min-height: 100vh; min-height: 100dvh; color: #333;
+            -webkit-overflow-scrolling: touch; overscroll-behavior-y: none;
+            -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
         }
 
         /* ====== 登录覆盖层 ====== */
@@ -25,6 +26,10 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex; align-items: center; justify-content: center;
             z-index: 9999; padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
         }
         .login-overlay.hidden { display: none; }
         .login-card {
@@ -66,6 +71,9 @@
             padding: 15px 20px; color: white;
             display: flex; flex-direction: column; gap: 10px; align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding-top: max(15px, env(safe-area-inset-top));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
         }
         .header-left { text-align: center; }
         .header-left h1 { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
@@ -194,10 +202,10 @@
         .copy-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; min-height: 36px; }
         .copy-btn:active { transform: translateY(-1px); }
         #summaryText { width: 100%; min-height: 100px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 13px; line-height: 1.6; resize: vertical; font-family: monospace; background: #f9f9f9; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         .modal-overlay.show { display: block; }
-        .modal-content { background: white; max-width: 800px; margin: 10px auto; border-radius: 16px; padding: 20px 15px; max-height: 90vh; overflow-y: auto; }
-        .modal-close { float: right; font-size: 28px; cursor: pointer; color: #999; line-height: 1; padding: 4px 10px; min-height: 44px; min-width: 44px; }
+        .modal-content { background: white; max-width: 800px; margin: 10px auto; border-radius: 16px; padding: 20px 15px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .modal-close { float: right; font-size: 28px; cursor: pointer; color: #999; line-height: 1; padding: 8px 12px; min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; -webkit-tap-highlight-color: transparent; }
         .modal-close:active { color: #333; }
         .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-right: 40px; color: #333; line-height: 1.4; }
         .modal-section { margin-bottom: 20px; }
@@ -215,6 +223,11 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        @media (max-width: 767px) {
+            .search-box input, .form-input, .admin-modal-input {
+                font-size: 16px !important;
+            }
+        }
         @media (min-width: 768px) {
             .header { flex-direction: row; padding: 20px 40px; justify-content: space-between; gap: 20px; }
             .header-left { text-align: left; }
@@ -342,10 +355,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;
         }
         .admin-card-value {
-            font-size: 28px; font-weight: bold;
+            font-size: 28px; font-weight: bold; color: #667eea;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        @supports not (-webkit-background-clip: text) {
+            .admin-card-value { background: none; -webkit-text-fill-color: currentColor; }
         }
         .admin-card-label { font-size: 12px; color: #888; margin-top: 4px; }
         .admin-section {
@@ -432,6 +448,9 @@
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5); z-index: 1001; align-items: center;
             justify-content: center; padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            overscroll-behavior: contain;
         }
         .admin-modal-overlay.show { display: flex; }
         .admin-modal {
@@ -550,6 +569,36 @@
             .rec-card { padding: 14px; }
             .rec-card-title { font-size: 14px; }
             .rec-card-meta { font-size: 12px; }
+        }
+
+        /* ====== 移动端浏览器兼容性增强 ====== */
+        @media (max-width: 767px) {
+            /* 触摸目标 ≥44px (Apple HIG) */
+            .category-tab { min-height: 40px; padding: 8px 14px; }
+            .admin-btn-copy { min-height: 36px; padding: 6px 12px; }
+            .toggle-switch { width: 44px; height: 26px; }
+            .toggle-slider:before { height: 20px; width: 20px; }
+            .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+            /* 防止长文本溢出 */
+            .job-title { word-break: break-word; overflow-wrap: break-word; }
+            .token-masked { word-break: break-all; overflow-wrap: break-word; }
+            /* 主容器留出安全区域 */
+            .main-container {
+                padding-left: max(10px, env(safe-area-inset-left));
+                padding-right: max(10px, env(safe-area-inset-right));
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+            /* 搜索框输入防 iOS 缩放 */
+            .search-box input { font-size: 16px; }
+            .form-input { font-size: 16px; }
+            .admin-modal-input { font-size: 16px; }
+            /* 模态框移动端优化 */
+            .modal-content { margin: 0 auto; border-radius: 12px; max-width: calc(100% - 16px); }
+            .admin-modal { max-width: calc(100% - 16px); padding: 20px; }
+            /* 防止 select 元素样式继承问题 (Android) */
+            select { -webkit-appearance: menulist; appearance: menulist; }
+            /* 固定底栏安全区域 */
+            .login-card { margin-bottom: env(safe-area-inset-bottom); }
         }
     </style>
 </head>
