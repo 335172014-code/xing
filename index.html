@@ -1401,6 +1401,10 @@
             document.getElementById('userName').textContent = sessionInfo.name;
             document.getElementById('userQuota').textContent =
                 `(${sessionInfo.searches_used}/${sessionInfo.max_searches})`;
+            // 非管理员隐藏用户名和剩余次数
+            var _isAdmin = isAdmin();
+            document.getElementById('userName').style.display = _isAdmin ? '' : 'none';
+            document.getElementById('userQuota').style.display = _isAdmin ? '' : 'none';
 
             document.getElementById('statTotal').textContent = '📊 加载岗位数据...';
             document.getElementById('statCompany').textContent = '🏢 --';
